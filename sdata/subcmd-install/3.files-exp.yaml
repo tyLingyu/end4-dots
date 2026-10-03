@@ -8,8 +8,8 @@
 # - `skip-if-exists`: Skip this step if target exists
 version: "1.0"
 user_preferences:
-  shell: "fish" # fish | zsh
-  terminal: "foot" # kitty | foot
+  shell: "zsh" # fish | zsh
+  terminal: "kitty" # kitty | foot
   keybindings: "default" # default | vim
 patterns:
   # Always install these files
@@ -27,6 +27,12 @@ patterns:
   - from: "dots/.config/zshrc.d"
     to: "$XDG_CONFIG_HOME/zshrc.d"
     mode: "sync"
+    condition:
+      type: "shell"
+      value: "zsh"
+  - from: "dots/.zshrc"
+    to: "$HOME/.zshrc"
+    mode: "hard-backup"
     condition:
       type: "shell"
       value: "zsh"
@@ -68,6 +74,9 @@ patterns:
     to: "$XDG_CONFIG_HOME/fontconfig"
     mode: "sync"
   # MISC config directories (other .config directories)
+  - from: "dots/.config/fastfetch"
+    to: "$XDG_CONFIG_HOME/fastfetch"
+    mode: "sync"
   - from: "dots/.config/fuzzel"
     to: "$XDG_CONFIG_HOME/fuzzel"
     mode: "sync"

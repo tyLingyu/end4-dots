@@ -557,7 +557,7 @@
   "Use old sine wave cookie implementation": "Usar implementación antigua de cookie en onda sinusoidal",
   "Darken screen": "Oscurecer pantalla",
   "Border": "Borde",
-  "This is usually safe and needed for your browser and AI sidebar anyway\nMostly useful for those who use lock on startup instead of a display manager that does it (GDM, SDDM, etc.)": "Esto generalmente es seguro y necesario para tu navegador y la barra lateral de IA de todas formas\nPrincipalmente útil para quienes usan bloqueo al inicio en lugar de un gestor de pantalla que lo hace (GDM, SDDM, etc.)",
+  "This is usually safe and needed for your browser anyway\nMostly useful for those who use lock on startup instead of a display manager that does it (GDM, SDDM, etc.)": "Esto generalmente es seguro y necesario para tu navegador y la barra lateral de IA de todas formas\nPrincipalmente útil para quienes usan bloqueo al inicio en lugar de un gestor de pantalla que lo hace (GDM, SDDM, etc.)",
   "Shell conflicts killer": "Eliminador de conflictos del shell",
   "End session": "Terminar sesión",
   "Best match": "Mejor coincidencia",

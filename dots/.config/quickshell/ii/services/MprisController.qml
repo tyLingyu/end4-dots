@@ -19,6 +19,7 @@ Singleton {
 	property list<MprisPlayer> players: Mpris.players.values.filter(player => isRealPlayer(player));
 	property MprisPlayer trackedPlayer: null;
 	property MprisPlayer activePlayer: trackedPlayer ?? Mpris.players.values[0] ?? null;
+	readonly property bool hasMedia: (activePlayer?.trackTitle?.length ?? 0) > 0;
 	signal trackChanged(reverse: bool);
 
 	property bool __reverse: false;

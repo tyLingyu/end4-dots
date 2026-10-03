@@ -118,6 +118,17 @@ function install_file__auto_backup(){
     v cp_file $s $t
   fi
 }
+function install_file__backup_if_changed(){
+  # NOTE: Do not add prefix `v` or `x` when using this function
+  # Always install, but keep a differing existing target as "$t.old"
+  local s=$1
+  local t=$2
+  if [ -f $t ] && ! cmp -s $s $t;then
+    echo -e "${STY_YELLOW}[$0]: \"$t\" differs, backing it up to \"$t.old\".${STY_RST}"
+    v mv $t $t.old
+  fi
+  v cp_file $s $t
+}
 function install_dir(){
   # NOTE: Do not add prefix `v` or `x` when using this function
   local s=$1
@@ -190,6 +201,19 @@ function install_google_sans_flex(){
   x mkdir -p "$(dirname ${INSTALLED_LISTFILE})"
   realpath -se "$target_dir" >> "${INSTALLED_LISTFILE}"
 }
+function install_fzf_tab(){
+  # Sourced by dots/.zshrc from this exact path; not packaged in the Arch repos
+  local src_url="https://github.com/Aloxaf/fzf-tab"
+  local target_dir="$HOME/.local/share/fzf-tab"
+  if [ -d "$target_dir/.git" ]; then
+    try git -C "$target_dir" pull --ff-only
+  else
+    x mkdir -p "$(dirname $target_dir)"
+    x git clone --depth 1 $src_url "$target_dir"
+  fi
+  x mkdir -p "$(dirname ${INSTALLED_LISTFILE})"
+  realpath -se "$target_dir" >> "${INSTALLED_LISTFILE}"
+}
 
 #####################################################################################
 # In case some dirs does not exists
@@ -226,6 +250,11 @@ esac
 if [[ ! "$OS_GROUP_ID" == "fedora" ]]; then
   showfun install_google_sans_flex
   v install_google_sans_flex
+fi
+
+if [[ ! "${SKIP_ZSH}" == true ]]; then
+  showfun install_fzf_tab
+  v install_fzf_tab
 fi
 
 #####################################################################################

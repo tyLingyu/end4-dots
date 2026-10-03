@@ -81,32 +81,12 @@ Singleton {
             property string panelFamily: "ii" // "ii", "waffle"
 
             property JsonObject policies: JsonObject {
-                property int ai: 1 // 0: No | 1: Yes | 2: Local
-                property int weeb: 1 // 0: No | 1: Open | 2: Closet
-            }
-
-            property JsonObject ai: JsonObject {
-                property string systemPrompt: "## Style\n- Use casual tone, don't be formal!\n- Always be brief and to the point, unless asked otherwise\n- Don't repeat the user's question\n- Be approachable: Avoid using overly complicated, domain-specific terms and provide analogies when asked to explain a concept\n\n## Context (ignore when irrelevant)\n- You are a helpful and inspiring sidebar assistant on a {DISTRO} Linux system\n- Desktop environment: {DE}\n- Current date & time: {DATETIME}\n- Focused app: {WINDOWCLASS}\n\n## Presentation\n- Use Markdown features in your response: \n  - **Bold** text to **highlight keywords** in your response\n  - **Split long information into small sections** with h2 headers and a relevant emoji at the start of it (for example `## 🐧 Linux`). Bullet points are preferred over long paragraphs, unless you're offering writing support or instructed otherwise by the user.\n- Asked to compare different options? You should firstly use a table to compare the main aspects, then elaborate or include relevant comments from online forums *after* the table. Make sure to provide a final recommendation for the user's use case!\n- Use LaTeX formatting for mathematical and scientific notations whenever appropriate. Enclose all LaTeX '$$' delimiters. NEVER generate LaTeX code in a latex block unless the user explicitly asks for it. DO NOT use LaTeX for regular documents (resumes, letters, essays, CVs, etc.).\n\nThanks!\n"
-                property string tool: "functions" // search, functions, or none
-                property list<var> extraModels: [
-                    {
-                        "api_format": "openai", // Most of the time you want "openai". Use "gemini" for Google's models
-                        "description": "This is a custom model. Edit the config to add more! | Anyway, this is DeepSeek R1 Distill LLaMA 70B",
-                        "endpoint": "https://openrouter.ai/api/v1/chat/completions",
-                        "homepage": "https://openrouter.ai/deepseek/deepseek-r1-distill-llama-70b:free", // Not mandatory
-                        "icon": "spark-symbolic", // Not mandatory
-                        "key_get_link": "https://openrouter.ai/settings/keys", // Not mandatory
-                        "key_id": "openrouter",
-                        "model": "deepseek/deepseek-r1-distill-llama-70b:free",
-                        "name": "Custom: DS R1 Dstl. LLaMA 70B",
-                        "requires_key": true
-                    }
-                ]
+                property int weeb: 0 // 0: No | 1: Yes
             }
 
             property JsonObject appearance: JsonObject {
                 property bool extraBackgroundTint: true
-                property int fakeScreenRounding: 2 // 0: None | 1: Always | 2: When not fullscreen
+                property int fakeScreenRounding: 1 // 0: None | 1: Always | 2: When not fullscreen
                 property JsonObject fonts: JsonObject {
                     property string main: "Google Sans Flex"
                     property string numbers: "Google Sans Flex"
@@ -134,7 +114,7 @@ Singleton {
                     }
                 }
                 property JsonObject palette: JsonObject {
-                    property string type: "auto" // Allowed: auto, scheme-content, scheme-expressive, scheme-fidelity, scheme-fruit-salad, scheme-monochrome, scheme-neutral, scheme-rainbow, scheme-tonal-spot
+                    property string type: "scheme-fruit-salad" // Allowed: auto, scheme-content, scheme-expressive, scheme-fidelity, scheme-fruit-salad, scheme-monochrome, scheme-neutral, scheme-rainbow, scheme-tonal-spot
                     property string accentColor: ""
                 }
             }
@@ -143,7 +123,7 @@ Singleton {
                 // Values in %
                 property JsonObject protection: JsonObject {
                     // Prevent sudden bangs
-                    property bool enable: false
+                    property bool enable: true
                     property real maxAllowedIncrease: 10
                     property real maxAllowed: 99
                 }
@@ -173,17 +153,17 @@ Singleton {
                         property string styleLocked: "cookie"  // Options: "cookie", "digital"
                         property JsonObject cookie: JsonObject {
                             property bool aiStyling: false
-                            property int sides: 14
-                            property string dialNumberStyle: "full"   // Options: "dots" , "numbers", "full" , "none"
-                            property string hourHandStyle: "fill"     // Options: "classic", "fill", "hollow", "hide"
+                            property int sides: 12
+                            property string dialNumberStyle: "dots"   // Options: "dots" , "numbers", "full" , "none"
+                            property string hourHandStyle: "hollow"   // Options: "classic", "fill", "hollow", "hide"
                             property string minuteHandStyle: "medium" // Options "classic", "thin", "medium", "bold", "hide"
                             property string secondHandStyle: "dot"    // Options: "dot", "line", "classic", "hide"
-                            property string dateStyle: "bubble"       // Options: "border", "rect", "bubble" , "hide"
-                            property bool timeIndicators: true
+                            property string dateStyle: "rect"         // Options: "border", "rect", "bubble" , "hide"
+                            property bool timeIndicators: false
                             property bool hourMarks: false
                             property bool dateInClock: true
-                            property bool constantlyRotate: false
-                            property bool useSineCookie: false
+                            property bool constantlyRotate: true
+                            property bool useSineCookie: true
                         }
                         property JsonObject digital: JsonObject {
                             property bool adaptiveAlignment: true
@@ -204,7 +184,7 @@ Singleton {
                         }
                     }
                     property JsonObject weather: JsonObject {
-                        property bool enable: false
+                        property bool enable: true
                         property string placementStrategy: "free" // "free", "leastBusy", "mostBusy"
                         property real x: 400
                         property real y: 100
@@ -234,10 +214,9 @@ Singleton {
                     }
                 }
                 property bool bottom: false // Instead of top
-                property int cornerStyle: 0 // 0: Hug | 1: Float | 2: Plain rectangle
+                property int cornerStyle: 1 // 0: Hug | 1: Float | 2: Plain rectangle
                 property bool floatStyleShadow: true // Show shadow behind bar when cornerStyle == 1 (Float)
-                property bool borderless: false // true for no grouping of items
-                property string topLeftIcon: "spark" // Options: "distro" or any icon name in ~/.config/quickshell/ii/assets/icons
+                property bool borderless: true // true for no grouping of items
                 property bool showBackground: true
                 property bool verbose: true
                 property bool vertical: false
@@ -254,23 +233,23 @@ Singleton {
                     property bool showColorPicker: false
                     property bool showMicToggle: false
                     property bool showKeyboardToggle: true
-                    property bool showDarkModeToggle: true
+                    property bool showDarkModeToggle: false
                     property bool showPerformanceProfileToggle: false
                     property bool showScreenRecord: false
                 }
                 property JsonObject workspaces: JsonObject {
                     property bool monochromeIcons: true
                     property int shown: 10
-                    property bool showAppIcons: true
+                    property bool showAppIcons: false
                     property bool alwaysShowNumbers: false
                     property int showNumberDelay: 300 // milliseconds
-                    property list<string> numberMap: ["1", "2"] // Characters to show instead of numbers on workspace indicator
+                    property list<string> numberMap: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX"] // Characters to show instead of numbers on workspace indicator
                     property bool useNerdFont: false
                 }
                 property JsonObject weather: JsonObject {
                     property bool enable: false
-                    property bool enableGPS: true // gps based location
-                    property string city: "" // When 'enableGPS' is false
+                    property bool enableGPS: false // gps based location
+                    property string city: "Shanghai" // When 'enableGPS' is false
                     property bool useUSCS: false // Instead of metric (SI) units
                     property int fetchInterval: 10 // minutes
                 }
@@ -301,7 +280,7 @@ Singleton {
                 // 0: 󰖳  | 1: 󰌽 | 2: 󰘳 | 3:  | 4: 󰨡
                 // 5:  | 6:  | 7: 󰣇 | 8:  | 9: 
                 // 10:  | 11:  | 12:  | 13:  | 14: 󱄛
-                property string superKey: ""
+                property string superKey: "󰣇"
                 property bool useMacSymbol: false
                 property bool splitButtons: false
                 property bool useMouseSymbol: false
@@ -314,7 +293,7 @@ Singleton {
 
             property JsonObject conflictKiller: JsonObject {
                 property bool autoKillNotificationDaemons: false
-                property bool autoKillTrays: false
+                property bool autoKillTrays: true
             }
 
             property JsonObject crosshair: JsonObject {
@@ -347,12 +326,7 @@ Singleton {
             }
 
             property JsonObject language: JsonObject {
-                property string ui: "auto" // UI language. "auto" for system locale, or specific language code like "zh_CN", "en_US"
-                property JsonObject translator: JsonObject {
-                    property string engine: "auto" // Run `trans -list-engines` for available engines. auto should use google
-                    property string targetLanguage: "auto" // Run `trans -list-all` for available languages
-                    property string sourceLanguage: "auto"
-                }
+                property string ui: "zh_CN" // UI language. "auto" for system locale, or specific language code like "zh_CN", "en_US"
             }
 
             property JsonObject launcher: JsonObject {
@@ -361,10 +335,10 @@ Singleton {
 
             property JsonObject light: JsonObject {
                 property JsonObject night: JsonObject {
-                    property bool automatic: true
+                    property bool automatic: false
                     property string from: "19:00" // Format: "HH:mm", 24-hour time
                     property string to: "06:30"   // Format: "HH:mm", 24-hour time
-                    property int colorTemperature: 5000
+                    property int colorTemperature: 6500
                 }
                 property JsonObject antiFlashbang: JsonObject {
                     property bool enable: false
@@ -377,7 +351,7 @@ Singleton {
                 property JsonObject blur: JsonObject {
                     property bool enable: true
                     property real radius: 100
-                    property real extraZoom: 1.1
+                    property real extraZoom: 1
                 }
                 property bool centerClock: true
                 property bool showLockedText: true
@@ -497,21 +471,6 @@ Singleton {
 
             property JsonObject sidebar: JsonObject {
                 property bool keepRightSidebarLoaded: true
-                property JsonObject translator: JsonObject {
-                    property bool enable: false
-                    property int delay: 300 // Delay before sending request. Reduces (potential) rate limits and lag.
-                }
-                property JsonObject ai: JsonObject {
-                    property bool textFadeIn: false
-                }
-                property JsonObject booru: JsonObject {
-                    property bool allowNsfw: false
-                    property string defaultProvider: "yandere"
-                    property int limit: 20
-                    property JsonObject zerochan: JsonObject {
-                        property string username: "[unset]"
-                    }
-                }
                 property JsonObject cornerOpen: JsonObject {
                     property bool enable: true
                     property bool bottom: false
@@ -530,11 +489,16 @@ Singleton {
                         property int columns: 5
                         property list<var> toggles: [
                             { "size": 2, "type": "network" },
-                            { "size": 2, "type": "bluetooth"  },
+                            { "size": 2, "type": "bluetooth" },
                             { "size": 1, "type": "idleInhibitor" },
                             { "size": 1, "type": "mic" },
                             { "size": 2, "type": "audio" },
-                            { "size": 2, "type": "nightLight" }
+                            { "size": 2, "type": "nightLight" },
+                            { "size": 1, "type": "powerProfile" },
+                            { "size": 1, "type": "cloudflareWarp" },
+                            { "size": 1, "type": "screenSnip" },
+                            { "size": 1, "type": "colorPicker" },
+                            { "size": 1, "type": "musicRecognition" }
                         ]
                     }
                 }
@@ -563,7 +527,7 @@ Singleton {
 
             property JsonObject time: JsonObject {
                 // https://doc.qt.io/qt-6/qtime.html#toString
-                property string format: "hh:mm"
+                property string format: "h:mm ap"
                 property string shortDateFormat: "dd/MM"
                 property string dateWithYearFormat: "dd/MM/yyyy"
                 property string dateFormat: "ddd, dd/MM"
@@ -573,7 +537,7 @@ Singleton {
                     property int focus: 1500
                     property int longBreak: 900
                 }
-                property bool secondPrecision: false
+                property bool secondPrecision: true
             }
 
             property JsonObject updates: JsonObject {
