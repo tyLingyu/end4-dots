@@ -94,9 +94,11 @@ Widget system: Quickshell | Support: Yes
  - [@clsty](https://github.com/clsty) for making the dotfiles accessible by taking care of the install script and many other things
  - [@midn8hustlr](https://github.com/midn8hustlr) for greatly improving the color generation system
  - [@outfoxxed](https://github.com/outfoxxed/) for being extremely supportive in my Quickshell journey
+ - [@end-4](https://github.com/end-4) for the wonderful dots file
  - Quickshell: [Soramane](https://github.com/caelestia-dots/shell/), [FridayFaerie](https://github.com/FridayFaerie/quickshell), [nydragon](https://github.com/nydragon/nysh)
  - AGS: [Aylur](https://github.com/Aylur/dotfiles/tree/ags-pre-ts), [kotontrion](https://github.com/kotontrion/dotfiles)
  - EWW: [fufexan](https://github.com/fufexan/dotfiles)
+
 
 <div align="center">
     <h2>• stonks •</h2>
