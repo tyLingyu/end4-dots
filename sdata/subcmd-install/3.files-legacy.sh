@@ -34,6 +34,13 @@ case "${SKIP_FISH}" in
     ;;
 esac
 
+case "${SKIP_ZSH}" in
+  true) true;;
+  *)
+    install_file__backup_if_changed dots/.zshrc "$HOME/.zshrc"
+    ;;
+esac
+
 case "${SKIP_FONTCONFIG}" in
   true) true;;
   *)
