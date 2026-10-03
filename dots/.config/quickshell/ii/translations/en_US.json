@@ -111,7 +111,7 @@
   "Delete": "Delete",
   "OK": "OK",
   "Settings": "Settings",
-  "This is usually safe and needed for your browser and AI sidebar anyway\nMostly useful for those who use lock on startup instead of a display manager that does it (GDM, SDDM, etc.)": "This is usually safe and needed for your browser and AI sidebar anyway\nMostly useful for those who use lock on startup instead of a display manager that does it (GDM, SDDM, etc.)",
+  "This is usually safe and needed for your browser anyway\nMostly useful for those who use lock on startup instead of a display manager that does it (GDM, SDDM, etc.)": "This is usually safe and needed for your browser anyway\nMostly useful for those who use lock on startup instead of a display manager that does it (GDM, SDDM, etc.)",
   "Use Hyprlock (instead of Quickshell)": "Use Hyprlock (instead of Quickshell)",
   "Crosshair code (in Valorant's format)": "Crosshair code (in Valorant's format)",
   "Silent": "Silent",

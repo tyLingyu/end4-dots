@@ -386,7 +386,7 @@
   "Screen snip": "Captura de tela",
   "Search": "Buscar",
   "Connect to Wi-Fi": "Conectar ao Wi-Fi",
-  "This is usually safe and needed for your browser and AI sidebar anyway\nMostly useful for those who use lock on startup instead of a display manager that does it (GDM, SDDM, etc.)": "Geralmente seguro e necessário para navegador e IA\nÚtil principalmente para quem usa bloqueio na inicialização em vez de um gerenciador de display (GDM, SDDM, etc.)",
+  "This is usually safe and needed for your browser anyway\nMostly useful for those who use lock on startup instead of a display manager that does it (GDM, SDDM, etc.)": "Geralmente seguro e necessário para navegador e IA\nÚtil principalmente para quem usa bloqueio na inicialização em vez de um gerenciador de display (GDM, SDDM, etc.)",
   "Darken screen": "Escurecer tela",
   "Anti-flashbang (experimental)": "Anti-clarão (experimental)",
   "Sign out": "Sair",
