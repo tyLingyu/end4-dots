@@ -43,6 +43,23 @@ Singleton {
         obj[keys[keys.length - 1]] = convertedValue;
     }
 
+    // Carry values of renamed options over from an existing config file.
+    // The old keys aren't in the adapter anymore, so they get dropped on the next write.
+    function migrateRenamedOptions(fileText) {
+        let json;
+        try {
+            json = JSON.parse(fileText);
+        } catch (e) {
+            return;
+        }
+        // notifications.monitor -> notifications.forceMonitor
+        const oldMonitor = json?.notifications?.monitor;
+        if (oldMonitor && !json.notifications.forceMonitor) {
+            root.options.notifications.forceMonitor.enable = oldMonitor.enable ?? false;
+            root.options.notifications.forceMonitor.name = oldMonitor.name ?? "";
+        }
+    }
+
     Timer {
         id: fileReloadTimer
         interval: root.readWriteDelay
@@ -68,7 +85,10 @@ Singleton {
         blockWrites: root.blockWrites
         onFileChanged: fileReloadTimer.restart()
         onAdapterUpdated: fileWriteTimer.restart()
-        onLoaded: root.ready = true
+        onLoaded: {
+            root.migrateRenamedOptions(text());
+            root.ready = true;
+        }
         onLoadFailed: error => {
             if (error == FileViewError.FileNotFound) {
                 writeAdapter();
@@ -399,7 +419,7 @@ Singleton {
 
             property JsonObject notifications: JsonObject {
                 property int timeout: 7000
-                property JsonObject monitor: JsonObject {
+                property JsonObject forceMonitor: JsonObject {
                     property bool enable: false
                     property string name: "" // Name of the monitor to show notifications on, like "eDP-1". Find out with 'hyprctl monitors' command
                 }
