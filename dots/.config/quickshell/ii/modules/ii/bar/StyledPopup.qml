@@ -35,10 +35,16 @@ LazyLoader {
         exclusiveZone: 0
         margins {
             left: {
-                if (!Config.options.bar.vertical) return root.QsWindow?.mapFromItem(
-                    root.hoverTarget, 
-                    (root.hoverTarget.width - popupBackground.implicitWidth) / 2, 0
-                ).x;
+                if (!Config.options.bar.vertical) {
+                    const centered = root.QsWindow?.mapFromItem(
+                        root.hoverTarget,
+                        (root.hoverTarget.width - popupBackground.implicitWidth) / 2, 0
+                    ).x;
+                    // Keep it on screen for triggers near the edges, lined up with the bar's edge
+                    const screenWidth = root.QsWindow?.window?.width ?? 0;
+                    const edge = Appearance.sizes.hyprlandGapsOut - Appearance.sizes.elevationMargin;
+                    return Math.max(edge, Math.min(centered, screenWidth - popupWindow.implicitWidth - edge));
+                }
                 return Appearance.sizes.verticalBarWidth
             }
             top: {

@@ -12,9 +12,8 @@ import Quickshell.Hyprland
 Scope {
     id: screenCorners
     readonly property Toplevel activeWindow: ToplevelManager.activeToplevel
+    // Left corners have no action since the left sidebar was removed
     property var actionForCorner: ({
-        [RoundCorner.CornerEnum.TopLeft]: () => GlobalStates.sidebarLeftOpen = !GlobalStates.sidebarLeftOpen,
-        [RoundCorner.CornerEnum.BottomLeft]: () => GlobalStates.sidebarLeftOpen = !GlobalStates.sidebarLeftOpen,
         [RoundCorner.CornerEnum.TopRight]: () => GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen,
         [RoundCorner.CornerEnum.BottomRight]: () => GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen
     })
@@ -63,6 +62,7 @@ Scope {
                 id: sidebarCornerOpenInteractionLoader
                 active: {
                     if (!Config.options.sidebar.cornerOpen.enable) return false;
+                    if (!screenCorners.actionForCorner[cornerPanelWindow.corner]) return false;
                     if (cornerPanelWindow.fullscreen) return false;
                     return (Config.options.sidebar.cornerOpen.bottom == cornerWidget.isBottom);
                 }

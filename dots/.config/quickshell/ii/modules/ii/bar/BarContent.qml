@@ -15,15 +15,8 @@ Item { // Bar content region
     property var screen: root.QsWindow.window?.screen
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
     property real useShortenedForm: (Appearance.sizes.barHellaShortenScreenWidthThreshold >= screen?.width) ? 2 : (Appearance.sizes.barShortenScreenWidthThreshold >= screen?.width) ? 1 : 0
-    readonly property int centerSideModuleWidth: (useShortenedForm == 2) ? Appearance.sizes.barCenterSideModuleWidthHellaShortened : (useShortenedForm == 1) ? Appearance.sizes.barCenterSideModuleWidthShortened : Appearance.sizes.barCenterSideModuleWidth
-
-    component VerticalBarSeparator: Rectangle {
-        Layout.topMargin: Appearance.sizes.baseBarHeight / 3
-        Layout.bottomMargin: Appearance.sizes.baseBarHeight / 3
-        Layout.fillHeight: true
-        implicitWidth: 1
-        color: Appearance.colors.colOutlineVariant
-    }
+    readonly property int activeWindowMaxWidth: 400
+    readonly property int mediaMaxWidth: 280
 
     // Background shadow
     Loader {
@@ -62,10 +55,6 @@ Item { // Bar content region
         onScrollDown: Brightness.decreaseBrightness()
         onScrollUp: Brightness.increaseBrightness()
         onMovedAway: GlobalStates.osdBrightnessOpen = false
-        onPressed: event => {
-            if (event.button === Qt.LeftButton)
-                GlobalStates.sidebarLeftOpen = !GlobalStates.sidebarLeftOpen;
-        }
 
         // Visual content
         ScrollHint {
@@ -82,19 +71,32 @@ Item { // Bar content region
             anchors.fill: parent
             spacing: 0
 
-            LeftSidebarButton { // Left sidebar button
-                id: leftSidebarButton
-                Layout.alignment: Qt.AlignVCenter
-                Layout.leftMargin: Appearance.rounding.screenRounding
-                colBackground: barLeftSideMouseArea.hovered ? Appearance.colors.colLayer1Hover : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 1)
-            }
-
             ActiveWindow {
-                Layout.leftMargin: 10 + (leftSidebarButton.visible ? 0 : Appearance.rounding.screenRounding)
-                Layout.rightMargin: Appearance.rounding.screenRounding
-                Layout.fillWidth: true
+                Layout.leftMargin: Appearance.rounding.screenRounding
+                Layout.rightMargin: 12
+                // Sized to the title (capped) so resources sit right next to it
+                Layout.preferredWidth: Math.min(implicitWidth, root.activeWindowMaxWidth)
                 Layout.fillHeight: true
                 visible: root.useShortenedForm === 0
+            }
+
+            BarGroup {
+                Layout.leftMargin: root.useShortenedForm === 0 ? 0 : Appearance.rounding.screenRounding
+                Layout.alignment: Qt.AlignVCenter
+
+                Resources {
+                    alwaysShowAllResources: root.useShortenedForm === 2
+                }
+
+                Media {
+                    visible: root.useShortenedForm < 2 && MprisController.hasMedia
+                    Layout.fillWidth: true
+                    Layout.maximumWidth: root.mediaMaxWidth
+                }
+            }
+
+            Item {
+                Layout.fillWidth: true
             }
         }
     }
@@ -105,27 +107,6 @@ Item { // Bar content region
             top: parent.top
             bottom: parent.bottom
             horizontalCenter: parent.horizontalCenter
-        }
-        spacing: 4
-
-        BarGroup {
-            id: leftCenterGroup
-            anchors.verticalCenter: parent.verticalCenter
-            implicitWidth: root.centerSideModuleWidth
-
-            Resources {
-                alwaysShowAllResources: root.useShortenedForm === 2
-                Layout.fillWidth: root.useShortenedForm === 2
-            }
-
-            Media {
-                visible: root.useShortenedForm < 2
-                Layout.fillWidth: true
-            }
-        }
-
-        VerticalBarSeparator {
-            visible: Config.options?.bar.borderless
         }
 
         BarGroup {
@@ -146,42 +127,6 @@ Item { // Bar content region
                             GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
                         }
                     }
-                }
-            }
-        }
-
-        VerticalBarSeparator {
-            visible: Config.options?.bar.borderless
-        }
-
-        MouseArea {
-            id: rightCenterGroup
-            anchors.verticalCenter: parent.verticalCenter
-            implicitWidth: root.centerSideModuleWidth
-            implicitHeight: rightCenterGroupContent.implicitHeight
-
-            onPressed: {
-                GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen;
-            }
-
-            BarGroup {
-                id: rightCenterGroupContent
-                anchors.fill: parent
-
-                ClockWidget {
-                    showDate: (Config.options.bar.verbose && root.useShortenedForm < 2)
-                    Layout.alignment: Qt.AlignVCenter
-                    Layout.fillWidth: true
-                }
-
-                UtilButtons {
-                    visible: (Config.options.bar.verbose && root.useShortenedForm === 0)
-                    Layout.alignment: Qt.AlignVCenter
-                }
-
-                BatteryIndicator {
-                    visible: (root.useShortenedForm < 2 && Battery.available)
-                    Layout.alignment: Qt.AlignVCenter
                 }
             }
         }
@@ -224,11 +169,20 @@ Item { // Bar content region
             spacing: 5
             layoutDirection: Qt.RightToLeft
 
+            BarGroup {
+                Layout.alignment: Qt.AlignVCenter
+                Layout.rightMargin: Appearance.rounding.screenRounding
+
+                ClockWidget {
+                    showDate: (Config.options.bar.verbose && root.useShortenedForm < 2)
+                    Layout.alignment: Qt.AlignVCenter
+                }
+            }
+
             RippleButton { // Right sidebar button
                 id: rightSidebarButton
 
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                Layout.rightMargin: Appearance.rounding.screenRounding
                 Layout.fillWidth: false
 
                 implicitWidth: indicatorsRowLayout.implicitWidth + 10 * 2
@@ -322,6 +276,25 @@ Item { // Bar content region
                 Layout.fillWidth: false
                 Layout.fillHeight: true
                 invertSide: Config?.options.bar.bottom
+            }
+
+            BarGroup {
+                id: utilGroup
+                Layout.alignment: Qt.AlignVCenter
+                Layout.rightMargin: 6
+                readonly property bool showUtilButtons: Config.options.bar.verbose && root.useShortenedForm === 0
+                readonly property bool showBattery: root.useShortenedForm < 2 && Battery.available
+                visible: showUtilButtons || showBattery
+
+                UtilButtons {
+                    visible: utilGroup.showUtilButtons
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
+                BatteryIndicator {
+                    visible: utilGroup.showBattery
+                    Layout.alignment: Qt.AlignVCenter
+                }
             }
 
             Item {

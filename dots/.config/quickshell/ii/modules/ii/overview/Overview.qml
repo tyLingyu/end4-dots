@@ -20,7 +20,8 @@ Scope {
         property string searchingText: ""
         readonly property HyprlandMonitor monitor: Hyprland.monitorFor(panelWindow.screen)
         property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor?.id)
-        visible: GlobalStates.overviewOpen
+        // Always mapped (click-through while closed) so the reveal animation plays from its first frame
+        visible: true
 
         WlrLayershell.namespace: "quickshell:overview"
         WlrLayershell.layer: WlrLayer.Top
@@ -70,12 +71,27 @@ Scope {
 
         Column {
             id: columnLayout
-            visible: GlobalStates.overviewOpen
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 top: parent.top
             }
             spacing: -8
+
+            // Slides down from under the bar while fading in, and back up on close.
+            // The window starts below the bar's exclusive zone, so anything above it stays hidden.
+            property real revealProgress: GlobalStates.overviewOpen ? 1 : 0
+            Behavior on revealProgress {
+                NumberAnimation {
+                    duration: GlobalStates.overviewOpen ? Appearance.animation.elementMoveEnter.duration : Appearance.animation.elementMoveExit.duration
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: GlobalStates.overviewOpen ? Appearance.animation.elementMoveEnter.bezierCurve : Appearance.animation.elementMoveExit.bezierCurve
+                }
+            }
+            visible: revealProgress > 0
+            opacity: revealProgress
+            transform: Translate {
+                y: -(1 - columnLayout.revealProgress) * columnLayout.height
+            }
 
             Keys.onPressed: event => {
                 if (event.key === Qt.Key_Escape) {
@@ -88,16 +104,6 @@ Scope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 Synchronizer on searchingText {
                     property alias source: panelWindow.searchingText
-                }
-            }
-
-            Loader {
-                id: overviewLoader
-                anchors.horizontalCenter: parent.horizontalCenter
-                active: GlobalStates.overviewOpen && (Config?.options.overview.enable ?? true)
-                sourceComponent: OverviewWidget {
-                    screen: panelWindow.screen
-                    visible: (panelWindow.searchingText == "")
                 }
             }
         }
