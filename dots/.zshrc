@@ -34,7 +34,7 @@ bindkey '^[[3~' delete-char
 
 # ── Plugins & tools ────────────────────────────────────────
 # fzf-tab: must come after compinit and before autosuggestions / syntax-highlighting
-source ~/.local/share/fzf-tab/fzf-tab.plugin.zsh
+[[ -r ~/.local/share/fzf-tab/fzf-tab.plugin.zsh ]] && source ~/.local/share/fzf-tab/fzf-tab.plugin.zsh
 zstyle ':fzf-tab:*' switch-group '<' '>'
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons $realpath'
 zstyle ':fzf-tab:complete:*:*' fzf-preview 'bat -n --color=always --line-range :100 $realpath 2>/dev/null || eza -1 --color=always --icons $realpath'
@@ -75,7 +75,8 @@ export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
 # window title: cwd at the prompt, command while running
 precmd()  { print -Pn '\e]0;%~\a' }
-preexec() { print -Pn "\e]0;${1[1,60]}\a" }
+# (no -P here: a `%` in the command would be expanded as a prompt escape)
+preexec() { print -rn -- $'\e]0;'"${1[1,60]}"$'\a' }
 
 # ── Aliases ────────────────────────────────────────────────
 alias ls='eza --icons=auto --group-directories-first'

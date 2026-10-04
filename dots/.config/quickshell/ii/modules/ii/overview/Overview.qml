@@ -1,11 +1,8 @@
 import qs
 import qs.services
 import qs.modules.common
-import qs.modules.common.widgets
 import Qt.labs.synchronizer
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -18,8 +15,6 @@ Scope {
     PanelWindow {
         id: panelWindow
         property string searchingText: ""
-        readonly property HyprlandMonitor monitor: Hyprland.monitorFor(panelWindow.screen)
-        property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor?.id)
         // Always mapped (click-through while closed) so the reveal animation plays from its first frame
         visible: true
 
