@@ -99,11 +99,6 @@ hl.bind("CTRL + Print", hl.dsp.exec_cmd(
     grimhyprctl .. " $(xdg-user-dir PICTURES)/Screenshots/Screenshot_\"$(date '+%Y-%m-%d_%H.%M.%S')\".png"
 ), { locked = true, non_consuming = true, description = "Utilities: Screenshot >> clipboard & file" })
 hl.bind("CTRL + Print", hl.dsp.exec_cmd(grimhyprctl .. " - | wl-copy"), { locked = true, non_consuming = true })
---# AI
-hl.bind("SUPER + SHIFT + ALT + mouse:273", hl.dsp.exec_cmd(hyprScripts .. "/ai/primary-buffer-query.sh"),
-    { description = "Utilities: Generate AI summary for selected text" })
--- (requires a running ollama model)
-
 --##! Screen
 --# Zoom
 local function zoomfunction(value)
