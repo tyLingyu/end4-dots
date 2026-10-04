@@ -177,6 +177,8 @@ ii_sources = files(
   'src/runtime/positioner.cpp',
   'src/runtime/property.cpp',
   'src/runtime/rectangle.cpp',
+  'src/runtime/text.cpp',
+  'src/runtime/text_layout.cpp',
   'src/system/app_identity.cpp',
   'src/system/desktop_entry.cpp',
   'src/system/internal_app_metadata.cpp',
@@ -228,8 +230,11 @@ ii_core_dep = declare_dependency(
   dependencies: ii_dependencies,
 )
 
+# LSan suppressions must be linked into each executable (see the file).
+ii_exe_sources = get_option('b_sanitize').contains('address') ? files('src/core/lsan_suppressions.cpp') : []
+
 executable('ii-shell',
-  'src/main.cpp',
+  ['src/main.cpp'] + ii_exe_sources,
   dependencies: ii_core_dep,
   cpp_args: ii_cpp_args,
   install: true,
@@ -242,7 +247,7 @@ foreach _t : [
   ['item', 'tests/runtime/item_test.cpp'],
   ['diff', 'tests/diff/diff_test.cpp'],
 ]
-  test(_t[0], executable(_t[0] + '_test', _t[1],
+  test(_t[0], executable(_t[0] + '_test', [_t[1]] + ii_exe_sources,
     dependencies: [ii_core_dep, nlohmann_dep],
     cpp_args: ii_cpp_args + ['-DII_DIFF_EXPECTED_DIR="' + meson.current_source_dir() / 'tests/diff/expected' + '"'],
   ))

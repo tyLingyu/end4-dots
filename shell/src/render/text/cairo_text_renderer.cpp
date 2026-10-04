@@ -280,8 +280,12 @@ void CairoTextRenderer::initialize(RenderBackend* backend, TextureManager* textu
   // option value.
   cairo_font_options_t* fontOptions = cairo_font_options_create();
   cairo_font_options_set_antialias(fontOptions, CAIRO_ANTIALIAS_GRAY);
+  // ii-shell: unhinted metrics and fractional glyph positions, matching Qt's text layout and
+  // ii::measureText (runtime/text_layout.cpp), which Text items use for their implicit size.
+  cairo_font_options_set_hint_metrics(fontOptions, CAIRO_HINT_METRICS_OFF);
   pango_cairo_context_set_font_options(m_pangoContext, fontOptions);
   cairo_font_options_destroy(fontOptions);
+  pango_context_set_round_glyph_positions(m_pangoContext, FALSE);
 
   // Reserve bucket count up front so CacheMap iterators remain stable for the
   // lifetime of every entry — we rely on that stability to keep LRU list
@@ -408,9 +412,19 @@ PangoLayout* CairoTextRenderer::buildLayout(
   if (!fontFamily.empty()) {
     fontFamilyStr.assign(fontFamily);
   }
+  // ii-shell: "Family@axis=value,..." carries font variations (QML font.variableAxes) through
+  // the existing string-keyed API and caches.
+  std::string variations;
+  if (const auto at = fontFamilyStr.find('@'); at != std::string::npos) {
+    variations = fontFamilyStr.substr(at + 1);
+    fontFamilyStr.resize(at);
+  }
   pango_font_description_set_family(desc, fontFamilyStr.empty() ? m_fontFamily.c_str() : fontFamilyStr.c_str());
   pango_font_description_set_weight(desc, static_cast<PangoWeight>(fontWeight));
   pango_font_description_set_absolute_size(desc, static_cast<double>(rasterSize) * PANGO_SCALE);
+  if (!variations.empty()) {
+    pango_font_description_set_variations(desc, variations.c_str());
+  }
   pango_layout_set_font_description(layout, desc);
   pango_font_description_free(desc);
 

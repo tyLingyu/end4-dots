@@ -1,0 +1,102 @@
+{
+ "elided": {
+  "height": 19,
+  "implicitHeight": 19,
+  "implicitWidth": 237.766,
+  "opacity": 1,
+  "visible": true,
+  "width": 80,
+  "x": 0,
+  "y": 290
+ },
+ "empty": {
+  "height": 19,
+  "implicitHeight": 19,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 0,
+  "x": 0,
+  "y": 320
+ },
+ "icon": {
+  "height": 29,
+  "implicitHeight": 29,
+  "implicitWidth": 24,
+  "opacity": 1,
+  "visible": true,
+  "width": 24,
+  "x": 0,
+  "y": 90
+ },
+ "main15": {
+  "height": 22,
+  "implicitHeight": 22,
+  "implicitWidth": 119.438,
+  "opacity": 1,
+  "visible": true,
+  "width": 119.438,
+  "x": 0,
+  "y": 0
+ },
+ "main16axes": {
+  "height": 21,
+  "implicitHeight": 21,
+  "implicitWidth": 89.719,
+  "opacity": 1,
+  "visible": true,
+  "width": 89.719,
+  "x": 0,
+  "y": 30
+ },
+ "mono": {
+  "height": 19,
+  "implicitHeight": 19,
+  "implicitWidth": 83.906,
+  "opacity": 1,
+  "visible": true,
+  "width": 83.906,
+  "x": 0,
+  "y": 130
+ },
+ "native": {
+  "height": 19,
+  "implicitHeight": 19,
+  "implicitWidth": 115.75,
+  "opacity": 1,
+  "visible": true,
+  "width": 115.75,
+  "x": 0,
+  "y": 160
+ },
+ "rubik13": {
+  "height": 16,
+  "implicitHeight": 16,
+  "implicitWidth": 68.5,
+  "opacity": 1,
+  "visible": true,
+  "width": 68.5,
+  "x": 0,
+  "y": 60
+ },
+ "vcenter": {
+  "height": 40,
+  "implicitHeight": 19,
+  "implicitWidth": 26.297,
+  "opacity": 1,
+  "visible": true,
+  "width": 26.297,
+  "x": 0,
+  "y": 340
+ },
+ "wrapped": {
+  "height": 76,
+  "implicitHeight": 76,
+  "implicitWidth": 365.109,
+  "opacity": 1,
+  "visible": true,
+  "width": 120,
+  "x": 0,
+  "y": 190
+ }
+}
