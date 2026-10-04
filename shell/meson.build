@@ -122,7 +122,6 @@ ii_sources = files(
   'src/core/timer_manager.cpp',
   'src/core/ui_phase.cpp',
   'src/i18n/language_tag.cpp',
-  'src/main.cpp',
   'src/render/animation/animation.cpp',
   'src/render/animation/animation_manager.cpp',
   'src/render/animation/motion_service.cpp',
@@ -170,6 +169,7 @@ ii_sources = files(
   'src/render/text/font_registry.cpp',
   'src/render/text/font_weight_catalog.cpp',
   'src/render/wallpaper_renderer.cpp',
+  'src/runtime/property.cpp',
   'src/system/app_identity.cpp',
   'src/system/desktop_entry.cpp',
   'src/system/internal_app_metadata.cpp',
@@ -190,23 +190,47 @@ ii_sources = files(
   'src/wayland/wayland_toplevels.cpp',
 )
 
-executable('ii-shell',
+ii_include = [
+  include_directories('src'),
+  include_directories('third_party/wuffs', is_system: true),
+]
+ii_dependencies = [
+  wayland_client_dep, wayland_egl_dep, egl_dep, gles2_dep, xkbcommon_dep,
+  freetype2_dep, fontconfig_dep, cairo_dep, cairo_ft_dep,
+  pango_dep, pangocairo_dep, pangoft2_dep, harfbuzz_dep, librsvg_dep,
+  glib_dep, gobject_dep, libwebp_dep, libwebpdemux_dep, libjxl_dep, libjxl_threads_dep,
+]
+ii_cpp_args = [
+  '-Wall', '-Wextra', '-Wno-missing-field-initializers', '-Wpedantic', '-Wconversion', '-Wshadow',
+  # Vendored Noctalia code still reads these; ii-shell keeps Noctalia's defaults for now.
+  '-DNOCTALIA_INSTALL_PREFIX="' + get_option('prefix') + '"',
+  '-DNOCTALIA_INSTALL_DATADIR="' + get_option('datadir') + '"',
+]
+
+# Everything but main.cpp, so tests link the same code the shell runs.
+ii_core = static_library('ii-core',
   ii_sources + _protocol_sources + _protocol_headers,
-  include_directories: [
-    include_directories('src'),
-    include_directories('third_party/wuffs', is_system: true),
-  ],
-  dependencies: [
-    wayland_client_dep, wayland_egl_dep, egl_dep, gles2_dep, xkbcommon_dep,
-    freetype2_dep, fontconfig_dep, cairo_dep, cairo_ft_dep,
-    pango_dep, pangocairo_dep, pangoft2_dep, harfbuzz_dep, librsvg_dep,
-    glib_dep, gobject_dep, libwebp_dep, libwebpdemux_dep, libjxl_dep, libjxl_threads_dep,
-  ],
-  cpp_args: [
-    '-Wall', '-Wextra', '-Wno-missing-field-initializers', '-Wpedantic', '-Wconversion', '-Wshadow',
-    # Vendored Noctalia code still reads these; ii-shell keeps Noctalia's defaults for now.
-    '-DNOCTALIA_INSTALL_PREFIX="' + get_option('prefix') + '"',
-    '-DNOCTALIA_INSTALL_DATADIR="' + get_option('datadir') + '"',
-  ],
+  include_directories: ii_include,
+  dependencies: ii_dependencies,
+  cpp_args: ii_cpp_args,
+)
+ii_core_dep = declare_dependency(
+  link_with: ii_core,
+  sources: _protocol_headers,
+  include_directories: ii_include,
+  dependencies: ii_dependencies,
+)
+
+executable('ii-shell',
+  'src/main.cpp',
+  dependencies: ii_core_dep,
+  cpp_args: ii_cpp_args,
   install: true,
 )
+
+# ── Tests ─────────────────────────────────────────────────────────────────────
+foreach _t : [
+  ['property', 'tests/runtime/property_test.cpp'],
+]
+  test(_t[0], executable(_t[0] + '_test', _t[1], dependencies: ii_core_dep, cpp_args: ii_cpp_args))
+endforeach
