@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numbers>
 #include <utility>
 
 namespace ii {
@@ -47,6 +48,8 @@ namespace ii {
     visible.setHook(&syncVisible, this);
     opacity.setHook(&syncOpacity, this);
     clip.setHook(&syncClip, this);
+    rotation.setHook(&syncRotation, this);
+    scale.setHook(&syncScale, this);
     parent.setHook(&onParentChanged, this);
   }
 
@@ -152,6 +155,16 @@ namespace ii {
   void Item::syncClip(void* self) {
     auto* item = static_cast<Item*>(self);
     item->m_node->setClipChildren(item->clip.peek());
+  }
+
+  void Item::syncRotation(void* self) {
+    auto* item = static_cast<Item*>(self);
+    item->m_node->setRotation(static_cast<float>(item->rotation.peek() * std::numbers::pi / 180.0));
+  }
+
+  void Item::syncScale(void* self) {
+    auto* item = static_cast<Item*>(self);
+    item->m_node->setScale(static_cast<float>(item->scale.peek()));
   }
 
   void Item::onParentChanged(void* self) {

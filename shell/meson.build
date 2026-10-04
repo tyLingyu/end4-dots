@@ -170,7 +170,9 @@ ii_sources = files(
   'src/render/text/font_weight_catalog.cpp',
   'src/render/wallpaper_renderer.cpp',
   'src/runtime/anchors.cpp',
+  'src/runtime/animation.cpp',
   'src/runtime/color.cpp',
+  'src/runtime/easing.cpp',
   'src/runtime/item.cpp',
   'src/runtime/layout.cpp',
   'src/runtime/object.cpp',
@@ -245,6 +247,8 @@ nlohmann_dep = dependency('nlohmann_json')
 foreach _t : [
   ['property', 'tests/runtime/property_test.cpp'],
   ['item', 'tests/runtime/item_test.cpp'],
+  ['easing', 'tests/runtime/easing_test.cpp'],
+  ['animation', 'tests/runtime/animation_test.cpp'],
   ['diff', 'tests/diff/diff_test.cpp'],
 ]
   test(_t[0], executable(_t[0] + '_test', [_t[1]] + ii_exe_sources,

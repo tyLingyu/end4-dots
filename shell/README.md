@@ -2,8 +2,8 @@
 
 illogical-impulse（`dots/.config/quickshell/ii`）的原生 C++ 移植，目标是用 GLES 渲染、只支持 Hyprland，外观与 QML 版尽量 1:1。
 
-当前处于**阶段 1（运行时核心）**：QML 的属性 / 绑定、Item 树、anchors、布局、Text 已在 C++ 中实现并对 Qt 校准；
-`ii-shell` 目前在每个输出中央显示 `tests/visual/osd_demo.qml` 的 C++ 版本，作为端到端检查。
+当前处于**阶段 1（运行时核心）**：QML 的属性 / 绑定、Item 树、anchors、布局、Text、动画与 Behavior 已在 C++ 中实现并对 Qt 校准；
+`ii-shell` 目前在每个输出中央显示 `tests/visual/osd_demo.qml` 的 C++ 版本作为端到端检查，`ii-shell --animate` 让音量循环变化。
 
 ## 构建
 
@@ -27,6 +27,8 @@ meson test -C build
 |---|---|
 | `tests/runtime/property_test.cpp` | 属性与绑定语义（依赖追踪、赋值打断绑定、循环、各种销毁时序） |
 | `tests/runtime/item_test.cpp` | Item 树的运行期变化（anchors 增删、重设父项、布局随子项变化重排） |
+| `tests/runtime/easing_test.cpp` | 缓动曲线与 Qt 的采样值比对（`tests/diff/easing_dump.qml` 经 AnimationController 导出） |
+| `tests/runtime/animation_test.cpp` | 动画、组合动画、Behavior（手动时钟） |
 | `tests/diff/` | **与 Qt 的差分测试**：`cases/*.qml` 由 Qt 运行并导出几何（`regen.py` → `expected/*.json`），`diff_test.cpp` 用运行时构建同样的场景比对 |
 | `tests/visual/compare.sh` | 视觉对比：Qt 渲染 `osd_demo.qml` 与 ii-shell 实机截图逐像素比较（需在 Hyprland 下运行） |
 
@@ -38,7 +40,7 @@ meson test -C build
 |---|---|
 | `src/core` `src/util` `src/render` `src/wayland` `src/system` `src/i18n` | 拷自 Noctalia（见下），按需裁剪 |
 | `src/app/main_loop.*` | 拷自 Noctalia，去掉了与其 Bar / Application 的耦合 |
-| `src/runtime` | QML 运行时：`property`（绑定）、`object` / `item`、`anchors`、`layout`（Row/ColumnLayout）、`positioner`（Row/Column）、`rectangle`、`text` / `text_layout`、`color` |
+| `src/runtime` | QML 运行时：`property`（绑定）、`object` / `item`、`anchors`、`layout`（Row/ColumnLayout）、`positioner`（Row/Column）、`rectangle`、`text` / `text_layout`、`color`、`easing`、`animation`（驱动器、Number/Color/Rotation/SmoothedAnimation、Sequential/Parallel、Behavior） |
 | `src/core/lsan_suppressions.cpp` | ASan 构建下屏蔽 fontconfig / Pango 字体缓存的误报 |
 | `src/main.cpp` | ii-shell 入口（当前为阶段 1 演示） |
 | `protocols/` | 非 wayland-protocols 自带的协议 XML（拷自 Noctalia） |

@@ -33,7 +33,16 @@ namespace ii {
     void adopt(std::unique_ptr<Object> object);
     std::unique_ptr<Object> release(Object* object);
 
+    // Marks construction as finished (QML: the component is completed), owned objects first,
+    // then runs componentComplete() and emits completed (`Component.onCompleted`). Generated
+    // code calls this once on the root of each instantiated component. Idempotent.
+    void complete();
+    [[nodiscard]] bool isCompleted() const noexcept { return m_completed; }
+    Signal<> completed;
+
   protected:
+    virtual void componentComplete() {}
+
     // Destroys every owned object now. Derived destructors call this when owned objects must
     // go before the derived part is torn down (Item: children before its scene node).
     void destroyOwned() noexcept;
@@ -41,6 +50,7 @@ namespace ii {
   private:
     Object* m_owner = nullptr;
     std::vector<std::unique_ptr<Object>> m_owned;
+    bool m_completed = false;
   };
 
 } // namespace ii

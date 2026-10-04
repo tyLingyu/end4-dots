@@ -1,10 +1,12 @@
 // ii-shell, stage 1: shows tests/visual/osd_demo.qml, built with the runtime, centred on every
 // output, as an end-to-end check of Item / Rectangle / Text / RowLayout / anchors on screen.
+// `--animate` cycles the level with a looping animation (bindings + text + layout per frame).
 
 #include "app/main_loop.h"
 #include "core/log.h"
 #include "render/gl_shared_context.h"
 #include "render/render_context.h"
+#include "runtime/animation.h"
 #include "runtime/color.h"
 #include "runtime/item.h"
 #include "runtime/layout.h"
@@ -13,7 +15,10 @@
 #include "wayland/layer_surface.h"
 #include "wayland/wayland_connection.h"
 
+#include <cmath>
 #include <csignal>
+#include <cstring>
+#include <format>
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -29,10 +34,13 @@ namespace {
     std::unique_ptr<ii::Item> root;
   };
 
+  // Volume level shown by the demo; animated with --animate.
+  ii::Property<double> g_level{0.42};
+
   void onSignal(int /*signal*/) { MainLoop::requestShutdown(); }
 
   // Mirrors tests/visual/osd_demo.qml.
-  std::unique_ptr<ii::Item> buildOsdDemo() {
+  std::unique_ptr<ii::Item> buildOsdDemo(bool animate) {
     using namespace ii;
     auto root = std::make_unique<Item>();
     root->width.set(kWidth);
@@ -62,23 +70,41 @@ namespace {
     track->radius.set(6);
     track->color.set(qmlColor("#4a4458"));
     auto* fill = track->add<Rectangle>();
-    fill->width.bind([track] { return track->width.get() * 0.42; });
+    fill->width.bind([track] { return track->width.get() * g_level.get(); });
     fill->height.bind([track] { return track->height.get(); });
     fill->radius.set(6);
     fill->color.set(qmlColor("#cfbcff"));
 
     auto* value = row->add<Text>();
-    value->text.set("42");
+    value->text.bind([] { return std::format("{}", std::lround(g_level.get() * 100.0)); });
     value->font.family.set("Google Sans Flex");
     value->font.pixelSize.set(16);
     value->font.variableAxes.set({{"wght", 450.0}, {"wdth", 100.0}});
     value->color.set(qmlColor("#e6e0e9"));
+
+    if (animate) {
+      // 10% -> 90% -> 10%, forever, on ii's expressiveDefaultSpatial curve.
+      const Easing curve{.type = Easing::Type::BezierSpline, .bezierCurve = {0.38, 1.21, 0.22, 1.00, 1, 1}};
+      auto* cycle = root->create<SequentialAnimation>();
+      for (const auto& [from, to] : {std::pair{0.1, 0.9}, std::pair{0.9, 0.1}}) {
+        auto* step = cycle->add<NumberAnimation>();
+        step->target = &g_level;
+        step->from.set(from);
+        step->to.set(to);
+        step->duration.set(1500);
+        step->easing.set(curve);
+      }
+      cycle->loops.set(Animation::Infinite);
+      cycle->running.set(true);
+    }
+    root->complete();
     return root;
   }
 
-  std::unique_ptr<Window> createWindow(WaylandConnection& wayland, RenderContext& render, const WaylandOutput& output) {
+  std::unique_ptr<Window>
+  createWindow(WaylandConnection& wayland, RenderContext& render, const WaylandOutput& output, bool animate) {
     auto window = std::make_unique<Window>();
-    window->root = buildOsdDemo();
+    window->root = buildOsdDemo(animate);
     window->surface = std::make_unique<LayerSurface>(
         wayland,
         LayerSurfaceConfig{
@@ -99,7 +125,24 @@ namespace {
       raw->root->height.set(height);
     });
     // Layout-style work is polished right before the frame is laid out and drawn.
-    window->surface->setPrepareFrameCallback([](bool /*needsUpdate*/, bool /*needsLayout*/) { ii::flushPolish(); });
+    // Animations advance on frame ticks; their layout effects are polished in the same frame.
+    // A tick requested before the first configure is dropped by the surface, so every prepared
+    // frame re-requests one while animations run (the first frame after configure prepares).
+    auto* surface = window->surface.get();
+    window->surface->setPrepareFrameCallback([surface](bool /*needsUpdate*/, bool /*needsLayout*/) {
+      ii::flushPolish();
+      if (ii::AnimationDriver::instance().hasRunningAnimations()) {
+        surface->requestFrameTick();
+      }
+    });
+    window->surface->setFrameTickCallback([surface](float /*deltaMs*/) {
+      auto& driver = ii::AnimationDriver::instance();
+      driver.tick();
+      ii::flushPolish();
+      if (driver.hasRunningAnimations()) {
+        surface->requestFrameTick();
+      }
+    });
     window->surface->setSceneRoot(window->root->node());
 
     if (!window->surface->initialize(output.output)) {
@@ -111,7 +154,8 @@ namespace {
 
 } // namespace
 
-int main() {
+int main(int argc, char** argv) {
+  const bool animate = argc > 1 && std::strcmp(argv[1], "--animate") == 0;
   std::signal(SIGINT, onSignal);
   std::signal(SIGTERM, onSignal);
 
@@ -135,8 +179,13 @@ int main() {
       window->surface->requestUpdate();
     }
   });
+  ii::AnimationDriver::instance().setFrameRequestHandler([&windows] {
+    for (auto& window : windows) {
+      window->surface->requestFrameTick();
+    }
+  });
   for (const auto& output : wayland.outputs()) {
-    if (auto window = createWindow(wayland, render, output)) {
+    if (auto window = createWindow(wayland, render, output, animate)) {
       // Building the scene queued polish before this window could be asked for a frame.
       if (ii::hasPendingPolish()) {
         window->surface->requestUpdate();
@@ -148,6 +197,7 @@ int main() {
 
   MainLoop loop(wayland, [] { return std::vector<PollSource*>{}; }, [&windows] {
     ii::setPolishRequestHandler({});
+    ii::AnimationDriver::instance().setFrameRequestHandler({});
     windows.clear();
   });
   loop.run();

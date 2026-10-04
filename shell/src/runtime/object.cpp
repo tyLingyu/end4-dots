@@ -22,6 +22,19 @@ namespace ii {
     return released;
   }
 
+  void Object::complete() {
+    if (m_completed) {
+      return;
+    }
+    m_completed = true;
+    // Index loop: completing may create further owned objects (e.g. a Loader's item).
+    for (std::size_t i = 0; i < m_owned.size(); ++i) {
+      m_owned[i]->complete();
+    }
+    componentComplete();
+    completed.emit();
+  }
+
   void Object::destroyOwned() noexcept {
     // Newest first, popping one at a time: a destructor may release or create siblings.
     while (!m_owned.empty()) {
