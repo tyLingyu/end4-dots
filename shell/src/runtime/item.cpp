@@ -16,6 +16,7 @@ namespace ii {
     }
     // The batch flushPolish() is walking, so a destroyed item can null itself out of it.
     std::vector<Item*>* g_polishBatch = nullptr;
+    std::function<void()> g_polishRequested;
   } // namespace
 
   Item::Item() : Item(std::make_unique<Node>()) {}
@@ -92,7 +93,11 @@ namespace ii {
   void Item::polishLater() {
     if (!m_polishPending) {
       m_polishPending = true;
+      const bool wasEmpty = polishQueue().empty();
       polishQueue().push_back(this);
+      if (wasEmpty && g_polishRequested) {
+        g_polishRequested();
+      }
     }
   }
 
@@ -172,5 +177,7 @@ namespace ii {
   }
 
   bool hasPendingPolish() noexcept { return !polishQueue().empty(); }
+
+  void setPolishRequestHandler(std::function<void()> handler) { g_polishRequested = std::move(handler); }
 
 } // namespace ii

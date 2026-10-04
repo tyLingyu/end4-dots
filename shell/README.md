@@ -2,7 +2,8 @@
 
 illogical-impulse（`dots/.config/quickshell/ii`）的原生 C++ 移植，目标是用 GLES 渲染、只支持 Hyprland，外观与 QML 版尽量 1:1。
 
-当前处于**阶段 0（脚手架）**：只验证 Wayland + GLES 渲染链路，在每个输出顶部画一个带文字的圆角面板。
+当前处于**阶段 1（运行时核心）**：QML 的属性 / 绑定、Item 树、anchors、布局、Text 已在 C++ 中实现并对 Qt 校准；
+`ii-shell` 目前在每个输出中央显示 `tests/visual/osd_demo.qml` 的 C++ 版本，作为端到端检查。
 
 ## 构建
 
@@ -16,23 +17,41 @@ ninja -C build
 
 开发构建默认开启 AddressSanitizer + UBSan；发布构建请用 `meson setup build --buildtype=release -Db_sanitize=none`。
 
+## 测试
+
+```sh
+meson test -C build
+```
+
+| 测试 | 内容 |
+|---|---|
+| `tests/runtime/property_test.cpp` | 属性与绑定语义（依赖追踪、赋值打断绑定、循环、各种销毁时序） |
+| `tests/runtime/item_test.cpp` | Item 树的运行期变化（anchors 增删、重设父项、布局随子项变化重排） |
+| `tests/diff/` | **与 Qt 的差分测试**：`cases/*.qml` 由 Qt 运行并导出几何（`regen.py` → `expected/*.json`），`diff_test.cpp` 用运行时构建同样的场景比对 |
+| `tests/visual/compare.sh` | 视觉对比：Qt 渲染 `osd_demo.qml` 与 ii-shell 实机截图逐像素比较（需在 Hyprland 下运行） |
+
+`expected/` 生成于 KDE 应用字体为 Google Sans Flex 11pt、字重 500 的环境；新增或修改用例后运行 `tests/diff/regen.py`（需要 `qml6`）。
+
 ## 目录
 
 | 路径 | 内容 |
 |---|---|
 | `src/core` `src/util` `src/render` `src/wayland` `src/system` `src/i18n` | 拷自 Noctalia（见下），按需裁剪 |
 | `src/app/main_loop.*` | 拷自 Noctalia，去掉了与其 Bar / Application 的耦合 |
-| `src/main.cpp` | ii-shell 入口（阶段 0 为演示面板） |
+| `src/runtime` | QML 运行时：`property`（绑定）、`object` / `item`、`anchors`、`layout`（Row/ColumnLayout）、`positioner`（Row/Column）、`rectangle`、`text` / `text_layout`、`color` |
+| `src/core/lsan_suppressions.cpp` | ASan 构建下屏蔽 fontconfig / Pango 字体缓存的误报 |
+| `src/main.cpp` | ii-shell 入口（当前为阶段 1 演示） |
 | `protocols/` | 非 wayland-protocols 自带的协议 XML（拷自 Noctalia） |
 | `third_party/wuffs` | 图片解码，许可证见目录内 |
 
 ## 第三方代码声明
 
-`src/` 下除 `main.cpp` 外的大部分代码，以及 `protocols/`、`third_party/` 拷贝自
+`src/` 下除 `main.cpp`、`runtime/` 外的大部分代码，以及 `protocols/`、`third_party/` 拷贝自
 [Noctalia](https://github.com/noctalia-dev/noctalia) commit `e639a87`（v5.2.1），以 MIT 许可证发布：
 
 > Copyright (c) 2026 noctalia-dev
 
 完整许可证文本见 [`LICENSE.noctalia`](LICENSE.noctalia)。拷贝后不再跟踪上游。对拷贝代码的改写在源码中以 `ii-shell:` 注释标出；
 整段删除的部分为：其他合成器（niri / sway / KDE / dwl / mango / umbriel）的支持与合成器抽象层、剪贴板服务、
-Tabler 图标字体与其字形注册表、可配置的 Tab 焦点快捷键、构建版本信息。
+Tabler 图标字体与其字形注册表、可配置的 Tab 焦点快捷键、构建版本信息。文字渲染改为不取整字形位置、关闭 hint metrics，
+并支持在字体族名后以 `@axis=value` 传入字体变体，以与 Qt 的排版一致。

@@ -5,6 +5,7 @@
 #include "runtime/property.h"
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -111,5 +112,8 @@ namespace ii {
   // Runs pending polish() calls until none are left.
   void flushPolish();
   [[nodiscard]] bool hasPendingPolish() noexcept;
+  // Called when the polish queue goes from empty to non-empty, so a window can request a frame
+  // (polish runs in the frame's prepare phase).
+  void setPolishRequestHandler(std::function<void()> handler);
 
 } // namespace ii

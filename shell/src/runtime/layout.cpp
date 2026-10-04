@@ -210,6 +210,10 @@ namespace ii {
       minimum = std::max(minimum, content.minimum);
       maximum = std::min(maximum, content.maximum);
     }
+    // Qt snaps layouts to the pixel grid and rounds minimum and preferred hints up (calibrated:
+    // tests/diff layout_fractional_hints); maxima are floored later, during distribution.
+    preferred = std::ceil(preferred);
+    minimum = std::ceil(minimum);
     maximum = std::max(maximum, minimum);
 
     if (hints.fill) {

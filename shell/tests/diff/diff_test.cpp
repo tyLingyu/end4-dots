@@ -350,6 +350,38 @@ namespace {
     return r;
   }
 
+  std::unique_ptr<Item> layoutFractionalHints() {
+    auto r = root(300, 100);
+    auto* row = named<RowLayout>(r.get(), "row");
+    row->width.set(200);
+    row->height.set(30);
+    row->spacing.set(3);
+    box(row, "a", 10.2, 7.3);
+    auto* b = box(row, "b", 20.5, 5);
+    b->layout().fillWidth.set(true);
+    b->layout().maximumWidth.set(60.4);
+    box(row, "c", 0.4, 5)->layout().fillWidth.set(true);
+
+    auto* shrink = named<RowLayout>(r.get(), "shrink");
+    shrink->y.set(40);
+    shrink->width.set(30);
+    shrink->height.set(20);
+    shrink->spacing.set(0);
+    auto* s1 = box(shrink, "s1", 25.5, 5);
+    s1->layout().fillWidth.set(true);
+    s1->layout().minimumWidth.set(10.3);
+    auto* s2 = box(shrink, "s2", 25.5, 5);
+    s2->layout().fillWidth.set(true);
+    s2->layout().minimumWidth.set(5.6);
+
+    auto* col = named<ColumnLayout>(r.get(), "col");
+    col->y.set(70);
+    col->spacing.set(0);
+    box(col, "k1", 12.1, 3.2);
+    box(col, "k2", 7.9, 4.5);
+    return r;
+  }
+
   Text* label(Item* parent, const char* name, double y, const char* text, const char* family, double px) {
     auto* t = named<Text>(parent, name);
     t->y.set(y);
@@ -395,6 +427,7 @@ namespace {
         {"layout_column_nested", layoutColumnNested},
         {"layout_row_edge", layoutRowEdge},
         {"layout_explicit_size", layoutExplicitSize},
+        {"layout_fractional_hints", layoutFractionalHints},
         {"positioners", positioners},
         {"text_metrics", textMetrics},
     };

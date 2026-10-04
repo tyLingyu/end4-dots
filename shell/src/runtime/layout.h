@@ -59,6 +59,7 @@ namespace ii {
   //  - between preferred and maximum, extra space goes to items that can grow, weighted by
   //    their preferred size (1 if that is 0), water-filling around maxima;
   //  - above the maximum total, cells keep growing (weighted by maximum) and items align in them;
+  //  - minimum/preferred hints are rounded up, maxima rounded down;
   //  - cell edges snap to whole pixels, then the item is aligned in its cell and snapped again.
   class LinearLayout : public Item {
   public:
