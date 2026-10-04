@@ -91,6 +91,7 @@ alias cat='bat -pp'
 alias grep='grep --color=auto'
 alias diff='diff --color=auto'
 alias ip='ip -c'
+alias pacman='sudo pacman'
 alias ..='cd ..'
 alias ...='cd ../..'
 # kitty doesn't clear scrollback properly with plain clear
