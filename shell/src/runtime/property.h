@@ -72,10 +72,19 @@ namespace ii {
     PropertyBase& operator=(const PropertyBase&) = delete;
 
     [[nodiscard]] bool hasBinding() const noexcept { return m_binding != nullptr; }
+    [[nodiscard]] const Binding* binding() const noexcept { return m_binding.get(); }
     void clearBinding() noexcept { m_binding.reset(); }
 
     // `onFooChanged`. Emitted after dependent bindings have re-evaluated.
     [[nodiscard]] Signal<>& changed() { return extra().changed; }
+
+    // Runtime-internal change hook (e.g. pushing geometry into the scene node), called before
+    // dependent bindings. A plain function pointer, so it allocates nothing beyond Extra.
+    using Hook = void (*)(void* context);
+    void setHook(Hook hook, void* context) {
+      extra().hook = hook;
+      extra().hookContext = context;
+    }
 
   protected:
     void recordRead() const;
@@ -89,6 +98,8 @@ namespace ii {
     struct Extra {
       std::vector<Binding*> subscribers;
       Signal<> changed;
+      Hook hook = nullptr;
+      void* hookContext = nullptr;
       bool* destroyedDuringNotify = nullptr;
     };
 

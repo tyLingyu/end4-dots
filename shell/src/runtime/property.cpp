@@ -115,6 +115,16 @@ namespace ii {
     bool* const outer = m_extra->destroyedDuringNotify;
     m_extra->destroyedDuringNotify = &destroyed;
 
+    if (m_extra->hook != nullptr) {
+      m_extra->hook(m_extra->hookContext);
+      if (destroyed) {
+        if (outer != nullptr) {
+          *outer = true;
+        }
+        return;
+      }
+    }
+
     // Re-evaluating a binding re-records its dependencies, and any binding may be destroyed
     // along the way, so walk a snapshot and skip entries that are no longer subscribed.
     const std::vector<Binding*> snapshot = m_extra->subscribers;

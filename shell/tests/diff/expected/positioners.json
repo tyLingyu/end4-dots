@@ -1,0 +1,72 @@
+{
+ "col": {
+  "height": 25,
+  "implicitHeight": 25,
+  "implicitWidth": 30,
+  "opacity": 1,
+  "visible": true,
+  "width": 30,
+  "x": 0,
+  "y": 50
+ },
+ "k1": {
+  "height": 10,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 30,
+  "x": 0,
+  "y": 50
+ },
+ "k2": {
+  "height": 11,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 12,
+  "x": 0,
+  "y": 64
+ },
+ "r1": {
+  "height": 20,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 10,
+  "x": 7,
+  "y": 2
+ },
+ "r2": {
+  "height": 5,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": false,
+  "width": 15,
+  "x": 5,
+  "y": 0
+ },
+ "r3": {
+  "height": 8,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 20,
+  "x": 20,
+  "y": 2
+ },
+ "row": {
+  "height": 24,
+  "implicitHeight": 24,
+  "implicitWidth": 37,
+  "opacity": 1,
+  "visible": true,
+  "width": 37,
+  "x": 5,
+  "y": 0
+ }
+}

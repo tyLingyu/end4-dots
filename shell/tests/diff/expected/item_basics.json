@@ -1,0 +1,62 @@
+{
+ "explicitWins": {
+  "height": 25,
+  "implicitHeight": 25,
+  "implicitWidth": 40,
+  "opacity": 1,
+  "visible": true,
+  "width": 10,
+  "x": 0,
+  "y": 0
+ },
+ "faded": {
+  "height": 0,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 0.5,
+  "visible": true,
+  "width": 0,
+  "x": 50,
+  "y": 60
+ },
+ "fadedChild": {
+  "height": 1,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 1,
+  "x": 57,
+  "y": 68
+ },
+ "hidden": {
+  "height": 5,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": false,
+  "width": 5,
+  "x": 0,
+  "y": 0
+ },
+ "hiddenChild": {
+  "height": 3,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": false,
+  "width": 3,
+  "x": 1,
+  "y": 2
+ },
+ "implicitOnly": {
+  "height": 25,
+  "implicitHeight": 25,
+  "implicitWidth": 40,
+  "opacity": 1,
+  "visible": true,
+  "width": 40,
+  "x": 0,
+  "y": 0
+ }
+}

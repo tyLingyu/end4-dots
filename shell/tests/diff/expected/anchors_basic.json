@@ -1,0 +1,22 @@
+{
+ "center": {
+  "height": 31,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 51,
+  "x": 174,
+  "y": 134
+ },
+ "fill": {
+  "height": 280,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 380,
+  "x": 10,
+  "y": 10
+ }
+}

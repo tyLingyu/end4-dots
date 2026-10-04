@@ -1,0 +1,46 @@
+#pragma once
+
+#include "runtime/property.h"
+
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace ii {
+
+  // QtObject: the ownership tree. An Object owns the objects created through it and destroys
+  // them (newest first) before itself. Visual parenting is separate and lives in Item.
+  class Object {
+  public:
+    Object() = default;
+    virtual ~Object();
+
+    Object(const Object&) = delete;
+    Object& operator=(const Object&) = delete;
+
+    Property<std::string> objectName;
+
+    [[nodiscard]] Object* owner() const noexcept { return m_owner; }
+
+    template <typename T, typename... Args> T* create(Args&&... args) {
+      auto object = std::make_unique<T>(std::forward<Args>(args)...);
+      T* raw = object.get();
+      adopt(std::move(object));
+      return raw;
+    }
+
+    void adopt(std::unique_ptr<Object> object);
+    std::unique_ptr<Object> release(Object* object);
+
+  protected:
+    // Destroys every owned object now. Derived destructors call this when owned objects must
+    // go before the derived part is torn down (Item: children before its scene node).
+    void destroyOwned() noexcept;
+
+  private:
+    Object* m_owner = nullptr;
+    std::vector<std::unique_ptr<Object>> m_owned;
+  };
+
+} // namespace ii

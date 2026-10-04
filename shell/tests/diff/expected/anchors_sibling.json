@@ -1,0 +1,72 @@
+{
+ "a": {
+  "height": 40,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 50,
+  "x": 20,
+  "y": 30
+ },
+ "belowA": {
+  "height": 10,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 21,
+  "x": 34,
+  "y": 70
+ },
+ "bottomRight": {
+  "height": 10,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 10,
+  "x": 286,
+  "y": 181
+ },
+ "offsetCenter": {
+  "height": 20,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 20,
+  "x": 152.5,
+  "y": 87
+ },
+ "rightOfA": {
+  "height": 30,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 30,
+  "x": 75,
+  "y": 30
+ },
+ "stretch": {
+  "height": 5,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 223,
+  "x": 70,
+  "y": 100
+ },
+ "vcenterOnly": {
+  "height": 13,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 8,
+  "x": 5,
+  "y": 93
+ }
+}

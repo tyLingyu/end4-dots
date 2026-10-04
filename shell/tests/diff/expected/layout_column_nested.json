@@ -1,0 +1,72 @@
+{
+ "body": {
+  "height": 208,
+  "implicitHeight": 0,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 284,
+  "x": 8,
+  "y": 36
+ },
+ "centered": {
+  "height": 20,
+  "implicitHeight": 20,
+  "implicitWidth": 51,
+  "opacity": 1,
+  "visible": true,
+  "width": 51,
+  "x": 125,
+  "y": 272
+ },
+ "col": {
+  "height": 284,
+  "implicitHeight": 76,
+  "implicitWidth": 51,
+  "opacity": 1,
+  "visible": true,
+  "width": 284,
+  "x": 8,
+  "y": 8
+ },
+ "footer": {
+  "height": 20,
+  "implicitHeight": 20,
+  "implicitWidth": 50,
+  "opacity": 1,
+  "visible": true,
+  "width": 50,
+  "x": 242,
+  "y": 248
+ },
+ "header": {
+  "height": 24,
+  "implicitHeight": 24,
+  "implicitWidth": 29,
+  "opacity": 1,
+  "visible": true,
+  "width": 284,
+  "x": 8,
+  "y": 8
+ },
+ "icon": {
+  "height": 24,
+  "implicitHeight": 24,
+  "implicitWidth": 24,
+  "opacity": 1,
+  "visible": true,
+  "width": 24,
+  "x": 8,
+  "y": 8
+ },
+ "title": {
+  "height": 16,
+  "implicitHeight": 16,
+  "implicitWidth": 0,
+  "opacity": 1,
+  "visible": true,
+  "width": 255,
+  "x": 37,
+  "y": 12
+ }
+}
