@@ -1,0 +1,3711 @@
+{
+ "source_commit": "e595b6ae",
+ "structs": {
+  "BackgroundWidgetConfig": {
+   "placementStrategy": "std::string",
+   "x": "double",
+   "y": "double"
+  },
+  "BottomWidgetTab": {
+   "type": "std::string",
+   "name": "std::string",
+   "icon": "std::string",
+   "widget": "std::string"
+  },
+  "CalendarDay": {
+   "day": "int",
+   "today": "int"
+  },
+  "ComboBoxEntry": {
+   "displayName": "std::string",
+   "value": "std::string",
+   "icon": "std::string"
+  },
+  "CopyListEntry": {
+   "content": "std::string",
+   "y": "double",
+   "height": "double"
+  },
+  "CopyListLine": {
+   "content": "std::string",
+   "start": "int",
+   "end": "int"
+  },
+  "CornerRounding": {
+   "radius": "double",
+   "smoothing": "double"
+  },
+  "CpuStats": {
+   "total": "double",
+   "idle": "double"
+  },
+  "DdcMonitor": {
+   "name": "std::string",
+   "busNum": "std::string"
+  },
+  "ElementData": {
+   "name": "std::string",
+   "symbol": "std::string",
+   "number": "int",
+   "weight": "double",
+   "type": "std::string"
+  },
+  "FolderListEntry": {
+   "fileName": "std::string",
+   "filePath": "std::string",
+   "fileUrl": "std::string",
+   "fileIsDir": "bool"
+  },
+  "FuzzyDesktopEntry": {
+   "name": "FuzzyPrepared",
+   "entry": "qs::DesktopEntry*"
+  },
+  "FuzzyPrepared": {
+   "target": "std::string"
+  },
+  "FuzzyStringEntry": {
+   "name": "FuzzyPrepared",
+   "entry": "std::string"
+  },
+  "HyprlandBind": {
+   "key": "std::string",
+   "modmask": "int",
+   "description": "std::string"
+  },
+  "HyprlandClient": {
+   "address": "std::string",
+   "at": "ii::Point",
+   "size": "ii::Size",
+   "workspace": "HyprlandWorkspaceRef",
+   "floating": "bool",
+   "monitor": "int",
+   "class_": "std::string",
+   "title": "std::string",
+   "pid": "int"
+  },
+  "HyprlandLayer": {
+   "namespace_": "std::string",
+   "x": "int",
+   "y": "int",
+   "w": "int",
+   "h": "int",
+   "address": "std::string",
+   "pid": "int"
+  },
+  "HyprlandMonitorInfo": {
+   "id": "int",
+   "name": "std::string",
+   "activeWorkspace": "HyprlandWorkspaceRef",
+   "specialWorkspace": "HyprlandWorkspaceRef"
+  },
+  "HyprlandMonitorLayers": {
+   "levels": "std::map<std::string, std::vector<HyprlandLayer>>"
+  },
+  "HyprlandWorkspaceInfo": {
+   "id": "int",
+   "name": "std::string",
+   "monitor": "std::string",
+   "monitorID": "int",
+   "windows": "int"
+  },
+  "HyprlandWorkspaceRef": {
+   "id": "int",
+   "name": "std::string"
+  },
+  "LauncherAction": {
+   "action": "std::string",
+   "execute": "std::function<void(const std::string&)>"
+  },
+  "LayerRegion": {
+   "at": "ii::Point",
+   "size": "ii::Size",
+   "namespace_": "std::string"
+  },
+  "LocaleInfo": {
+   "firstDayOfWeek": "int"
+  },
+  "MprisTrack": {
+   "uniqueId": "int",
+   "artUrl": "std::string",
+   "title": "std::string",
+   "artist": "std::string",
+   "album": "std::string"
+  },
+  "NotifAction": {
+   "identifier": "std::string",
+   "text": "std::string"
+  },
+  "NotifGroup": {
+   "appName": "std::string",
+   "appIcon": "std::string",
+   "notifications": "std::vector<Notif*>",
+   "time": "double"
+  },
+  "OsdIndicator": {
+   "id": "std::string",
+   "sourceUrl": "std::string"
+  },
+  "OskKeyData": {
+   "keytype": "std::string",
+   "label": "std::string",
+   "labelShift": "std::string",
+   "labelCaps": "std::string",
+   "labelAlt": "std::string",
+   "shape": "std::string",
+   "keycode": "int"
+  },
+  "OskLayout": {
+   "name_short": "std::string",
+   "description": "std::string",
+   "comment": "std::string",
+   "keys": "std::vector<std::vector<OskKeyData>>"
+  },
+  "OverlayWidgetInfo": {
+   "identifier": "std::string",
+   "materialSymbol": "std::string"
+  },
+  "OverlayWidgetState": {
+   "pinned": "bool",
+   "clickthrough": "bool",
+   "x": "double",
+   "y": "double",
+   "width": "double",
+   "height": "double"
+  },
+  "QuickDirectory": {
+   "icon": "std::string",
+   "name": "std::string",
+   "path": "std::string"
+  },
+  "QuickToggleEntry": {
+   "type": "std::string",
+   "size": "int"
+  },
+  "RecognizedTrack": {
+   "title": "std::string",
+   "subtitle": "std::string",
+   "url": "std::string"
+  },
+  "RegexSubstitution": {
+   "regex": "std::regex",
+   "replace": "std::string"
+  },
+  "ResourceInfo": {
+   "icon": "std::string",
+   "name": "std::string",
+   "history": "std::vector<double>",
+   "maxAvailableString": "std::string"
+  },
+  "ScreenRegion": {
+   "at": "ii::Point",
+   "size": "ii::Size"
+  },
+  "SelectionOption": {
+   "displayName": "std::string",
+   "icon": "std::string",
+   "value": "nlohmann::json"
+  },
+  "SettingsPage": {
+   "name": "std::string",
+   "icon": "std::string",
+   "iconRotation": "int",
+   "component": "std::string"
+  },
+  "TabButtonEntry": {
+   "icon": "std::string",
+   "name": "std::string"
+  },
+  "TodoItem": {
+   "content": "std::string",
+   "done": "bool"
+  },
+  "TodoTaskView": {
+   "content": "std::string",
+   "done": "bool",
+   "originalIndex": "int"
+  },
+  "VisionBlock": {
+   "confidence": "double",
+   "paragraphs": "std::vector<VisionParagraph>"
+  },
+  "VisionBoundingPoly": {
+   "vertices": "std::vector<VisionVertex>"
+  },
+  "VisionDetectedBreak": {
+   "type": "std::string"
+  },
+  "VisionParagraph": {
+   "boundingBox": "VisionBoundingPoly",
+   "words": "std::vector<VisionWord>",
+   "text": "std::string"
+  },
+  "VisionSymbol": {
+   "text": "std::string",
+   "property": "std::optional<VisionSymbolProperty>"
+  },
+  "VisionSymbolProperty": {
+   "detectedBreak": "std::optional<VisionDetectedBreak>"
+  },
+  "VisionVertex": {
+   "x": "int",
+   "y": "int"
+  },
+  "VisionWord": {
+   "symbols": "std::vector<VisionSymbol>"
+  },
+  "WeatherData": {
+   "uv": "std::string",
+   "humidity": "std::string",
+   "sunrise": "std::string",
+   "sunset": "std::string",
+   "windDir": "std::string",
+   "wCode": "std::string",
+   "city": "std::string",
+   "wind": "std::string",
+   "precip": "std::string",
+   "visib": "std::string",
+   "press": "std::string",
+   "temp": "std::string",
+   "tempFeelsLike": "std::string",
+   "lastRefresh": "std::string"
+  },
+  "WeatherLocation": {
+   "valid": "bool",
+   "lat": "double",
+   "lon": "double"
+  },
+  "WeekDay": {
+   "date": "ii::DateTime",
+   "day": "int",
+   "month": "int",
+   "year": "int",
+   "today": "bool"
+  },
+  "WifiAccessPointInfo": {
+   "active": "bool",
+   "strength": "int",
+   "frequency": "int",
+   "ssid": "std::string",
+   "bssid": "std::string",
+   "security": "std::string"
+  },
+  "WindowRegion": {
+   "at": "ii::Point",
+   "size": "ii::Size",
+   "class_": "std::string",
+   "title": "std::string"
+  }
+ },
+ "properties": [
+  {
+   "file": "modules/common/Appearance.qml",
+   "line": 226,
+   "name": "main",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Appearance.qml:226 variable-font axis tag -> value ({wght: 450, wdth: 100}); consumed as `font.variableAxes` (StyledText.qml:19, MaterialTextField.qml:30, ...)",
+   "notes": "Qt's font.variableAxes is a free-form map of 4-char OpenType axis tags to numbers (also built ad hoc in MaterialSymbol.qml and DigitalClock.qml), so a map rather than a fixed struct."
+  },
+  {
+   "file": "modules/common/Appearance.qml",
+   "line": 230,
+   "name": "numbers",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Appearance.qml:230 {wght: 450}; passed to font.variableAxes (StyledSlider.qml:219, StyledSpinBox.qml:34, ...)",
+   "notes": "Same type as entry 0."
+  },
+  {
+   "file": "modules/common/Appearance.qml",
+   "line": 233,
+   "name": "title",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Appearance.qml:233 {wght: 550}; passed to font.variableAxes (PagePlaceholder.qml:46, WindowDialogTitle.qml:14, ...)",
+   "notes": "Same type as entry 0."
+  },
+  {
+   "file": "modules/common/Icons.qml",
+   "line": 54,
+   "name": "weatherIconMap",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Icons.qml:54 literal wttr.in weather code string -> Material symbol name; used via hasOwnProperty(key)/weatherIconMap[key] in getWeatherIcon (line 107)",
+   "notes": "Keys are numeric strings (\"113\", \"116\", ...); getWeatherIcon returns undefined when absent, so use find() and return std::optional<std::string> or empty."
+  },
+  {
+   "file": "modules/common/Images.qml",
+   "line": 16,
+   "name": "thumbnailSizes",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::map<std::string, int>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Images.qml:16 literal freedesktop thumbnail size name -> pixel size (128/256/512/1024); indexed in ThumbnailImage.qml:44 and iterated with Object.keys in thumbnailSizeNameForDimensions (line 23)",
+   "notes": "Iteration order matters: thumbnailSizeNameForDimensions walks normal, large, x-large, xx-large in insertion order and returns the first that fits. std::map orders lexicographically (large, normal, ...), so iterate by ascending value instead, or hold an ordered vector of pairs."
+  },
+  {
+   "file": "modules/common/models/LauncherSearchResult.qml",
+   "line": 10,
+   "name": "fontType",
+   "modifiers": [],
+   "cpp_type": "LauncherSearchResult::FontType",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "LauncherSearchResult.qml:10 initialized from enum FontType {Normal, Monospace} declared in the same file; compared against LauncherSearchResult.FontType.* in SearchItem.qml:24",
+   "notes": "Declared `var` but always holds the enum; the C++ port should declare the nested enum (enum class FontType { Normal, Monospace }) in LauncherSearchResult. Enum type is outside the spec's vocabulary list."
+  },
+  {
+   "file": "modules/common/models/LauncherSearchResult.qml",
+   "line": 14,
+   "name": "iconType",
+   "modifiers": [],
+   "cpp_type": "LauncherSearchResult::IconType",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "LauncherSearchResult.qml:14 initialized from enum IconType {Material, Text, System, None}; set to IconType.* values in LauncherSearchResult constructors (services/LauncherSearch.qml) and switched on in SearchItem.qml:141",
+   "notes": "Nested enum (enum class IconType { Material, Text, System, None }); outside the spec's vocabulary list. Also read from action results in SearchItem.qml:265."
+  },
+  {
+   "file": "modules/common/models/LauncherSearchResult.qml",
+   "line": 17,
+   "name": "execute",
+   "modifiers": [],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "LauncherSearchResult.qml:17 default `() => {...}`; every assignment in services/LauncherSearch.qml is `() => {...}` and callers invoke it with no args (SearchItem.qml:115, :295, LauncherSearch.qml:252)",
+   "notes": "The separate `allActions` entries in LauncherSearch.qml take an args string, but those are plain objects, not LauncherSearchResult.execute."
+  },
+  {
+   "file": "modules/common/models/LauncherSearchResult.qml",
+   "line": 20,
+   "name": "actions",
+   "modifiers": [],
+   "cpp_type": "std::vector<LauncherSearchResult*>",
+   "kind": "object_list",
+   "confidence": "high",
+   "evidence": "LauncherSearchResult.qml:20 default []; services/LauncherSearch.qml:192,262 assign arrays of resultComp.createObject(...) (resultComp = LauncherSearchResult); SearchItem.qml:112,261 read .name/.iconName/.iconType/.execute()",
+   "notes": "Ownership: created with createObject(null, ...), so parentless objects; the C++ side must own them."
+  },
+  {
+   "file": "modules/common/models/WorkspaceModel.qml",
+   "line": 11,
+   "name": "liveMonitorData",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::optional<HyprlandMonitorInfo>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "WorkspaceModel.qml:11 HyprlandData.monitors.find(...) over JSON.parse(`hyprctl monitors -j`) (services/HyprlandData.qml:120); undefined when no monitor matches; fields read: id, specialWorkspace.name",
+   "notes": "Struct lists fields read anywhere in QML (id, name, activeWorkspace.id used by Lock.qml/ActiveWindow.qml, specialWorkspace.name); `hyprctl monitors -j` also has width, height, scale, x, y, focused, etc. (checked against live output). HyprlandData.monitors should be std::vector<HyprlandMonitorData>."
+  },
+  {
+   "file": "modules/common/models/WorkspaceModel.qml",
+   "line": 18,
+   "name": "specialWorkspace",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::optional<HyprlandWorkspaceRef>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "WorkspaceModel.qml:18 liveMonitorData?.specialWorkspace; undefined when liveMonitorData is undefined; read as specialWorkspace?.name (line 19)",
+   "notes": "Reuses HyprlandWorkspaceRef from entry 9. Real hyprctl always has a specialWorkspace object ({id:0,name:\"\"} when inactive), so it is only absent when the monitor lookup fails."
+  },
+  {
+   "file": "modules/common/models/gCloud/GCloudApi.qml",
+   "line": 21,
+   "name": "outputData",
+   "modifiers": [],
+   "cpp_type": "nlohmann::json",
+   "kind": "json",
+   "confidence": "medium",
+   "evidence": "GCloudApi.qml:21 set from JSON.parse(out) in handleApiOutput; shape depends on the subclass: Vision responses[0].fullTextAnnotation.pages (GCloudVisionResult.qml:26), Translate translations[].translatedText (ScreenTextOverlay.qml:167), both with optional error.{code,message}",
+   "notes": "Kept as json: base-class property holding two different Google API response shapes, read through unknown fields in subclasses/consumers. Could be split per subclass (VisionResponse / TranslateResponse) in the port; Vision-side structs are defined in entry 14."
+  },
+  {
+   "file": "modules/common/models/gCloud/GCloudApi.qml",
+   "line": 22,
+   "name": "state",
+   "modifiers": [],
+   "cpp_type": "GCloudApi::State",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "GCloudApi.qml:22 initialized from enum State {Done, Preparing, Processing, Error} declared in the same file; compared with GCloudApi.State.* in ScreenTextOverlay.qml:84-92",
+   "notes": "Nested enum (enum class State { Done, Preparing, Processing, Error }); outside the spec's vocabulary list."
+  },
+  {
+   "file": "modules/common/models/gCloud/GCloudVisionResult.qml",
+   "line": 10,
+   "name": "rawData",
+   "modifiers": [],
+   "cpp_type": "nlohmann::json",
+   "kind": "json",
+   "confidence": "medium",
+   "evidence": "GCloudVisionResult.qml:10 assigned verbatim from apiOutputData (the Vision API response) in initializeWithData; never read anywhere else in the tree",
+   "notes": "Left as json: raw Vision API response stored untouched and never read. Could be dropped in the port."
+  },
+  {
+   "file": "modules/common/models/gCloud/GCloudVisionResult.qml",
+   "line": 11,
+   "name": "rawBlocks",
+   "modifiers": [],
+   "cpp_type": "std::vector<VisionBlock>",
+   "kind": "object_list",
+   "confidence": "medium",
+   "evidence": "GCloudVisionResult.qml:11,26-40 blocks collected from apiOutputData.responses[0].fullTextAnnotation.pages[].blocks[] with block.confidence > threshold; each block's .paragraphs is iterated (line 46)",
+   "notes": "Struct fields cover what QML reads/writes; the Google Vision API objects carry more (blockType, boundingBox, property...). `text` on VisionParagraph is not from the API: it is added by initializeWithData (line 84). Vertex x/y may be omitted by the API when 0, default them to 0. Defines the VisionBlock/VisionParagraph/... tree reused by entries 15 and 16."
+  },
+  {
+   "file": "modules/common/models/gCloud/GCloudVisionResult.qml",
+   "line": 12,
+   "name": "rawParagraphs",
+   "modifiers": [],
+   "cpp_type": "std::vector<VisionParagraph>",
+   "kind": "object_list",
+   "confidence": "medium",
+   "evidence": "GCloudVisionResult.qml:12,44-53 flattened list of blocks[i].paragraphs[j] (shallow copy, so JS objects are shared with coherentParagraphs); never read outside this file",
+   "notes": "Reuses VisionParagraph (and its sub-structs) from entry 14. In QML the objects are shared with rawBlocks/coherentParagraphs so `text` mutations show through; C++ copies will not unless held by shared_ptr. Not read anywhere, so likely removable."
+  },
+  {
+   "file": "modules/common/models/gCloud/GCloudVisionResult.qml",
+   "line": 13,
+   "name": "coherentParagraphs",
+   "modifiers": [],
+   "cpp_type": "std::vector<VisionParagraph>",
+   "kind": "object_list",
+   "confidence": "medium",
+   "evidence": "GCloudVisionResult.qml:13,56-87 paragraphs with .text filled from words[].symbols[].text; read in ScreenTextOverlay.qml:153-155 (p.text) and :271 (modelData.boundingBox.vertices[i].x/.y, modelData.text)",
+   "notes": "Reuses VisionParagraph (and its sub-structs) from entry 14. ScreenTextOverlay.visionParagraphs / VisionBoundingBoxRect.modelData should use the same type."
+  },
+  {
+   "file": "modules/common/models/hyprland/HyprlandConfigOption.qml",
+   "line": 14,
+   "name": "value",
+   "modifiers": [],
+   "cpp_type": "nlohmann::json",
+   "kind": "json",
+   "confidence": "medium",
+   "evidence": "HyprlandConfigOption.qml:17 set from obj[key] of `hyprctl getoption -j`, whose value key varies by option type ({\"bool\":true}, {\"str\":\"...\"}, {\"css\":\"4 4 4 4\"}, ...); read as `!confOpt.value` (GameModeToggle.qml:9) and `confOpt.value == shaderPath` (HyprlandAntiFlashbangShader.qml:14)",
+   "notes": "Left as json: the value type depends on the runtime `key` option (bool, int, float, string, css, vec2...). Known users only need bool and std::string; a std::variant<bool,int,double,std::string> or a templated HyprlandConfigOption<T> would also work if the port wants it."
+  },
+  {
+   "file": "modules/common/models/quickToggles/QuickToggleModel.qml",
+   "line": 16,
+   "name": "mainAction",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "QuickToggleModel.qml:16 required; every toggle assigns `() => {...}` (e.g. GameModeToggle.qml:12, NetworkToggle.qml:14) and AndroidQuickToggleButton.qml:73,99 calls root.mainAction() with no args",
+   "notes": ""
+  },
+  {
+   "file": "modules/common/models/quickToggles/QuickToggleModel.qml",
+   "line": 18,
+   "name": "altAction",
+   "modifiers": [],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "QuickToggleModel.qml:18 default null; assigned `() => {...}` in EasyEffectsToggle.qml:24 and MusicRecognitionToggle.qml:22; AndroidQuickToggleButton.qml:33,72 truth-tests then calls it with no args",
+   "notes": "Empty std::function represents the null default (callers test `if (altAction)`)."
+  },
+  {
+   "file": "modules/common/panels/lock/LockContext.qml",
+   "line": 23,
+   "name": "targetAction",
+   "modifiers": [],
+   "cpp_type": "LockContext::ActionEnum",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "LockContext.qml:11 `enum ActionEnum { Unlock, Poweroff, Reboot }`; property initialised/reset with LockContext.ActionEnum.Unlock (l.23,27), emitted via unlocked(targetAction) and compared in LockScreen.qml:63-66 and LockSurface.qml:218-222,334-344.",
+   "notes": "Enum declared in LockContext.qml itself; spelled as LockContext::ActionEnum (nested enum of the generated LockContext class). The `unlocked(targetAction: var)` signal and LockSurface GuardedButton `required property var targetAction` carry the same type."
+  },
+  {
+   "file": "modules/common/widgets/AddressBar.qml",
+   "line": 10,
+   "name": "directory",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AddressBar.qml:11 assigns it to addressInput.text; WallpaperSelectorContent.qml:253 passes Wallpapers.effectiveDirectory (readonly string, services/Wallpapers.qml:21)",
+   "notes": "Filesystem path."
+  },
+  {
+   "file": "modules/common/widgets/AddressBreadcrumb.qml",
+   "line": 10,
+   "name": "directory",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AddressBreadcrumb.qml:12 uses .startsWith/.trim()/.split; AddressBar.qml:96-97 binds it to the string AddressBar.directory",
+   "notes": "Filesystem path."
+  },
+  {
+   "file": "modules/common/widgets/AddressBreadcrumb.qml",
+   "line": 11,
+   "name": "breadcrumbDirectory",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AddressBreadcrumb.qml:11 initialised to \"\", assigned from directory, used with .startsWith/.split(\"/\")",
+   "notes": ""
+  },
+  {
+   "file": "modules/common/widgets/AddressBreadcrumb.qml",
+   "line": 27,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AddressBreadcrumb.qml:27 delegate of model breadcrumbDirectory.split(\"/\"), used as buttonText (path segment)",
+   "notes": "ListView delegate modelData; element of the std::vector<std::string> produced by split."
+  },
+  {
+   "file": "modules/common/widgets/CircularProgress.qml",
+   "line": 21,
+   "name": "easingType",
+   "modifiers": [],
+   "cpp_type": "ii::Easing::Type",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CircularProgress.qml:21 initialised to Easing.OutCubic and only consumed by easing.type (line 36); never set externally",
+   "notes": "Enum value of QtQuick Easing.Type (not in the vocabulary table; spelled ii::Easing::Type)."
+  },
+  {
+   "file": "modules/common/widgets/ClippedFilledCircularProgress.qml",
+   "line": 20,
+   "name": "easingType",
+   "modifiers": [],
+   "cpp_type": "ii::Easing::Type",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "ClippedFilledCircularProgress.qml:20 initialised to Easing.OutCubic and only consumed by easing.type (line 46); never set externally",
+   "notes": "Enum value of QtQuick Easing.Type (not in the vocabulary table; spelled ii::Easing::Type)."
+  },
+  {
+   "file": "modules/common/widgets/ConfigSelectionArray.qml",
+   "line": 24,
+   "name": "currentValue",
+   "modifiers": [],
+   "cpp_type": "nlohmann::json",
+   "kind": "json",
+   "confidence": "high",
+   "evidence": "ConfigSelectionArray.qml:24 compared with modelData.value (line 51); callers pass a string (Config.options.background...style), int (BarConfig.qml:33 bitmask, GeneralConfig weeb 0/1, cornerStyle) or bool (BarConfig.qml:67 autoHide.enable) depending on the instance",
+   "notes": "Left as json: each instance is bool|int|std::string and matches SelectionOption.value. Port could alternatively make ConfigSelectionArray a template on the value type, or use std::variant<bool,int,std::string>."
+  },
+  {
+   "file": "modules/common/widgets/ConfigSelectionArray.qml",
+   "line": 32,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "SelectionOption",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "ConfigSelectionArray.qml:32 delegate reads modelData.icon, .displayName and .value (lines 46-50); option literals in settings/*.qml have exactly {displayName, icon?, value}",
+   "notes": "icon is optional (buttonIcon: modelData.icon || \"\") so empty string means none. value is heterogeneous (string|int|bool) across instances -> nlohmann::json. Same struct is the element type of ConfigSelectionArray.options."
+  },
+  {
+   "file": "modules/common/widgets/DirectoryIcon.qml",
+   "line": 12,
+   "name": "fileModelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "FolderListEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "DirectoryIcon.qml:17-37 reads fileIsDir, filePath, fileName, fileUrl; WallpaperSelectorContent.qml:321 passes the row (modelData) of Wallpapers.folderModel (Qt FolderListModel)",
+   "notes": "Row of Qt.labs.folderlistmodel / FolderListModelWithHistory roles; only these four are read. fileUrl is a url, stored as std::string. Same shape as WallpaperDirectoryItem.fileModelData."
+  },
+  {
+   "file": "modules/common/widgets/FullscreenPolkitWindow.qml",
+   "line": 21,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "FullscreenPolkitWindow.qml:21-23 delegate of Variants model: Quickshell.screens, assigned to PanelWindow.screen",
+   "notes": ""
+  },
+  {
+   "file": "modules/common/widgets/Graph.qml",
+   "line": 17,
+   "name": "alignment",
+   "modifiers": [],
+   "cpp_type": "Graph::Alignment",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Graph.qml:17 initialised to Graph.Alignment.Left; Resources.qml:127 sets Graph.Alignment.Right; enum Alignment { Left, Right } declared at Graph.qml:11",
+   "notes": "Enum declared in this QML file, so nested enum of the Graph class."
+  },
+  {
+   "file": "modules/common/widgets/GroupButton.qml",
+   "line": 18,
+   "name": "downAction",
+   "modifiers": [],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "invoked with no arguments at GroupButton.qml:98; call sites in other files pass `() => ...` (e.g. AddressBar.qml:38, DockApps.qml:161)",
+   "notes": "Nullable (guarded by `if (root.downAction)`); empty std::function means unset. Return value ignored."
+  },
+  {
+   "file": "modules/common/widgets/GroupButton.qml",
+   "line": 19,
+   "name": "releaseAction",
+   "modifiers": [],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "invoked with no arguments at GroupButton.qml:103; call sites in other files pass `() => ...` (e.g. AddressBar.qml:38, DockApps.qml:161)",
+   "notes": "Nullable (guarded by `if (root.releaseAction)`); empty std::function means unset. Return value ignored."
+  },
+  {
+   "file": "modules/common/widgets/GroupButton.qml",
+   "line": 20,
+   "name": "altAction",
+   "modifiers": [],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "invoked with no arguments at GroupButton.qml:90 and 114; call sites in other files pass `() => ...` (e.g. AddressBar.qml:38, DockApps.qml:161)",
+   "notes": "Nullable (guarded by `if (root.altAction)`); empty std::function means unset. Return value ignored."
+  },
+  {
+   "file": "modules/common/widgets/GroupButton.qml",
+   "line": 21,
+   "name": "middleClickAction",
+   "modifiers": [],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "invoked with no arguments at GroupButton.qml:94; call sites in other files pass `() => ...` (e.g. AddressBar.qml:38, DockApps.qml:161)",
+   "notes": "Nullable (guarded by `if (root.middleClickAction)`); empty std::function means unset. Return value ignored."
+  },
+  {
+   "file": "modules/common/widgets/GroupButton.qml",
+   "line": 29,
+   "name": "parentGroup",
+   "modifiers": [],
+   "cpp_type": "ii::Item*",
+   "kind": "object_ref",
+   "confidence": "medium",
+   "evidence": "GroupButton.qml:29 = root.parent; reads .children, .clickIndex, .childrenCount (lines 30-32)",
+   "notes": "Parent is usually the inner RowLayout/ColumnLayout of ButtonGroup/VerticalButtonGroup (ButtonGroup.qml:36-44 defines clickIndex/childrenCount on it), but can be any Item (Dock, SysTray...). Port may prefer a ButtonGroupLayout-like type if those layouts become a class."
+  },
+  {
+   "file": "modules/common/widgets/MaterialCookie.qml",
+   "line": 20,
+   "name": "cornerRounding",
+   "modifiers": [],
+   "cpp_type": "CornerRounding",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "MaterialCookie.qml:20 `new CornerRounding.CornerRounding(...)`; shapes/shapes/corner-rounding.js:8-11 class has exactly radius and smoothing",
+   "notes": "Instance of the JS class CornerRounding (corner-rounding.js); passed to RoundedPolygon.star(sides, 1, 0.8, cornerRounding) at line 33. Not set externally. Struct has the two members of the JS class."
+  },
+  {
+   "file": "modules/common/widgets/MaterialShape.qml",
+   "line": 43,
+   "name": "shape",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "MaterialShape::Shape",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "MaterialShape.qml:43 compared against MaterialShape.Shape.* in switch (lines 49-85); callers assign MaterialShape.Shape.* (e.g. SearchBar.qml:40-47, NotificationAppIcon.qml:28)",
+   "notes": "Enum declared in MaterialShape.qml:6 -> nested enum of MaterialShape. Note NotificationAppIcon extends MaterialShape and assigns it."
+  },
+  {
+   "file": "modules/common/widgets/NotificationAppIcon.qml",
+   "line": 11,
+   "name": "appIcon",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationAppIcon.qml:11 initialised to \"\"; used as Quickshell.iconPath(root.appIcon, ...) and compared with \"\"; NotificationGroup.qml:159 passes notificationGroup.appIcon (string)",
+   "notes": ""
+  },
+  {
+   "file": "modules/common/widgets/NotificationAppIcon.qml",
+   "line": 12,
+   "name": "summary",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationAppIcon.qml:12 initialised to \"\"; passed to NotificationUtils.findSuitableMaterialSymbol(root.summary); NotificationGroup.qml:160 passes Notif.summary (string)",
+   "notes": ""
+  },
+  {
+   "file": "modules/common/widgets/NotificationAppIcon.qml",
+   "line": 13,
+   "name": "urgency",
+   "modifiers": [],
+   "cpp_type": "qs::NotificationUrgency",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationAppIcon.qml:13 initialised to NotificationUrgency.Normal, compared with NotificationUrgency.Critical (line 14); NotificationGroup.qml:161-162 assigns NotificationUrgency.Critical/Normal",
+   "notes": "Quickshell.Services.Notifications enum. Note: Notif.urgency (services/Notifications.qml:35) is a *string* (enum.toString()), but this property is only ever given enum values."
+  },
+  {
+   "file": "modules/common/widgets/NotificationAppIcon.qml",
+   "line": 15,
+   "name": "image",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationAppIcon.qml:15 initialised to \"\"; compared with \"\" and used as image source; callers pass Notif.image (string, services/Notifications.qml:29)",
+   "notes": ""
+  },
+  {
+   "file": "modules/common/widgets/NotificationGroup.qml",
+   "line": 15,
+   "name": "notificationGroup",
+   "modifiers": [],
+   "cpp_type": "std::optional<NotifGroup>",
+   "kind": "value",
+   "confidence": "medium",
+   "evidence": "NotificationListView.qml:22-24 assigns Notifications.groupsByAppName[modelData], i.e. the object built in services/Notifications.qml:118-130 with {appName, appIcon, notifications, time}; read with `?.` throughout NotificationGroup.qml",
+   "notes": "Optional because the property has no initialiser and every read uses `?.` (the lookup in groupsByAppName can transiently miss). Same struct is the value type of Notifications.groupsByAppName / popupGroupsByAppName: std::map<std::string, NotificationGroupData>. notifications elements are Notif instances (inline component `Notif` in services/Notifications.qml:19)."
+  },
+  {
+   "file": "modules/common/widgets/NotificationGroup.qml",
+   "line": 16,
+   "name": "notifications",
+   "modifiers": [],
+   "cpp_type": "std::vector<Notif*>",
+   "kind": "object_list",
+   "confidence": "high",
+   "evidence": "NotificationGroup.qml:16 = notificationGroup?.notifications ?? []; elements are Notif objects (services/Notifications.qml:118-130 pushes `notif` from Notifications.list: list<Notif>)",
+   "notes": "Notif is the inline component declared in services/Notifications.qml:19 (QtObject with notificationId, appName, appIcon, image, summary, body, urgency, time, actions, ...)."
+  },
+  {
+   "file": "modules/common/widgets/NotificationGroup.qml",
+   "line": 26,
+   "name": "qmlParent",
+   "modifiers": [],
+   "cpp_type": "StyledListView*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "NotificationGroup.qml:26 = root.parent.parent: delegate -> ListView contentItem -> StyledListView; reads dragIndex/dragDistance/resetDrag (StyledListView.qml:13-27)",
+   "notes": "Written to at NotificationGroup.qml:100,105 (dragIndex, dragDistance) and resetDrag() at line 36. NotificationListView extends StyledListView."
+  },
+  {
+   "file": "modules/common/widgets/NotificationGroup.qml",
+   "line": 27,
+   "name": "parentDragIndex",
+   "modifiers": [],
+   "cpp_type": "int",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationGroup.qml:27 = qmlParent?.dragIndex; StyledListView.qml:13 `property int dragIndex: -1`",
+   "notes": "Becomes undefined only if qmlParent is null; use -1 as the fallback like NotificationItem.qml:24."
+  },
+  {
+   "file": "modules/common/widgets/NotificationGroup.qml",
+   "line": 28,
+   "name": "parentDragDistance",
+   "modifiers": [],
+   "cpp_type": "double",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationGroup.qml:28 = qmlParent?.dragDistance; StyledListView.qml:14 `property real dragDistance: 0`",
+   "notes": "Fallback 0 if qmlParent is null (as NotificationItem.qml:25)."
+  },
+  {
+   "file": "modules/common/widgets/NotificationGroup.qml",
+   "line": 29,
+   "name": "dragIndexDiff",
+   "modifiers": [],
+   "cpp_type": "int",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationGroup.qml:29 = Math.abs(parentDragIndex - index), both ints; compared against 0/1/2 (lines 30-33)",
+   "notes": "Math.abs of int difference; the QML `index` is the ListView delegate index."
+  },
+  {
+   "file": "modules/common/widgets/NotificationGroup.qml",
+   "line": 245,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "Notif*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "NotificationGroup.qml:245 delegate of ScriptModel whose values are root.notifications.slice().reverse() (Notif objects); assigned to NotificationItem.notificationObject",
+   "notes": "Notif is the inline component in services/Notifications.qml:19."
+  },
+  {
+   "file": "modules/common/widgets/NotificationItem.qml",
+   "line": 14,
+   "name": "notificationObject",
+   "modifiers": [],
+   "cpp_type": "Notif*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "NotificationItem.qml:14 reads .summary, .urgency, .image, .actions, .body, .notificationId (Notif properties); only assigned in NotificationGroup.qml:250 from modelData",
+   "notes": "Notif is the inline component in services/Notifications.qml:19. Nullable pointer; no initial value."
+  },
+  {
+   "file": "modules/common/widgets/NotificationItem.qml",
+   "line": 23,
+   "name": "qmlParent",
+   "modifiers": [],
+   "cpp_type": "StyledListView*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "NotificationItem.qml:23 = root.parent.parent: delegate in StyledListView notificationsColumn (NotificationGroup.qml:228-243); reads dragIndex/dragDistance/resetDrag",
+   "notes": "Written to at NotificationItem.qml:81,86 and resetDrag() at line 35."
+  },
+  {
+   "file": "modules/common/widgets/NotificationItem.qml",
+   "line": 24,
+   "name": "parentDragIndex",
+   "modifiers": [],
+   "cpp_type": "int",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationItem.qml:24 = qmlParent?.dragIndex ?? -1; StyledListView.qml:13 is int",
+   "notes": ""
+  },
+  {
+   "file": "modules/common/widgets/NotificationItem.qml",
+   "line": 25,
+   "name": "parentDragDistance",
+   "modifiers": [],
+   "cpp_type": "double",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationItem.qml:25 = qmlParent?.dragDistance ?? 0; StyledListView.qml:14 is real",
+   "notes": ""
+  },
+  {
+   "file": "modules/common/widgets/NotificationItem.qml",
+   "line": 26,
+   "name": "dragIndexDiff",
+   "modifiers": [],
+   "cpp_type": "int",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationItem.qml:26 = Math.abs(parentDragIndex - index), both ints; compared with 0/1/2",
+   "notes": ""
+  },
+  {
+   "file": "modules/common/widgets/NotificationItem.qml",
+   "line": 276,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "NotifAction",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationItem.qml:276 delegate of Repeater model notificationObject.actions; reads modelData.text and .identifier (lines 278,281); built in services/Notifications.qml:23-26 as {identifier, text}",
+   "notes": "Plain JS objects mapped from the Quickshell NotificationAction list, not qs::NotificationAction*. Same struct is the element type of Notif.actions (list<var>)."
+  },
+  {
+   "file": "modules/common/widgets/NotificationListView.qml",
+   "line": 19,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotificationListView.qml:19 delegate of ScriptModel over Notifications.popupAppNameList/appNameList (list<string>); used as key into groupsByAppName (line 23-24)",
+   "notes": "Application name; element of std::vector<std::string>."
+  },
+  {
+   "file": "modules/common/widgets/PopupToolTip.qml",
+   "line": 24,
+   "name": "anchorEdges",
+   "modifiers": [],
+   "cpp_type": "qs::Edges",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "PopupToolTip.qml:24 initialised to Edges.Top and forwarded to PopupWindow anchor.edges (line 46); SysTrayItem.qml:103 sets Edges.Bottom/Top",
+   "notes": "Quickshell Edges flags enum (combinable). Not in the vocabulary table; spelled qs::Edges."
+  },
+  {
+   "file": "modules/common/widgets/PopupToolTip.qml",
+   "line": 25,
+   "name": "anchorGravity",
+   "modifiers": [],
+   "cpp_type": "qs::Edges",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "PopupToolTip.qml:25 initialised from anchorEdges and forwarded to PopupWindow anchor.gravity (line 47); never set externally",
+   "notes": "Quickshell Edges flags enum; defaults to the value of anchorEdges."
+  },
+  {
+   "file": "modules/common/widgets/RippleButton.qml",
+   "line": 21,
+   "name": "downAction",
+   "modifiers": [],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "RippleButton.qml:74 invokes root.downAction() with no args; call sites pass `() => ...`",
+   "notes": "Nullable (guarded by `if (root.downAction)`)."
+  },
+  {
+   "file": "modules/common/widgets/RippleButton.qml",
+   "line": 22,
+   "name": "releaseAction",
+   "modifiers": [],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "RippleButton.qml:82 invokes root.releaseAction() with no args; call sites pass `() => ...`",
+   "notes": "Nullable (guarded by `if (root.releaseAction)`)."
+  },
+  {
+   "file": "modules/common/widgets/RippleButton.qml",
+   "line": 23,
+   "name": "altAction",
+   "modifiers": [],
+   "cpp_type": "std::function<void(ii::MouseEvent&)>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "RippleButton.qml:66 invokes root.altAction(event) with the MouseArea press event; SysTrayMenuEntry.qml:48 declares `(event) => { event.accepted = false }`",
+   "notes": "Unlike GroupButton.altAction this one receives the mouse event. Most call sites pass a zero-arg `() =>` lambda, which the port must wrap or ignore the argument. Nullable."
+  },
+  {
+   "file": "modules/common/widgets/RippleButton.qml",
+   "line": 24,
+   "name": "middleClickAction",
+   "modifiers": [],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "RippleButton.qml:70 invokes root.middleClickAction() with no args; DockAppButton.qml:73 passes `() => ...`",
+   "notes": "Nullable (guarded by `if (root.middleClickAction)`)."
+  },
+  {
+   "file": "modules/common/widgets/RoundCorner.qml",
+   "line": 8,
+   "name": "corner",
+   "modifiers": [],
+   "cpp_type": "RoundCorner::CornerEnum",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RoundCorner.qml:8 initialised to RoundCorner.CornerEnum.TopLeft and compared against CornerEnum values (lines 22-25); Bar.qml:183 and ScreenCorners.qml:153-163 assign CornerEnum values",
+   "notes": "Enum declared in RoundCorner.qml:7 -> nested enum of RoundCorner. ScreenCorners.qml:17 also uses the values as map keys."
+  },
+  {
+   "file": "modules/common/widgets/SelectionDialog.qml",
+   "line": 15,
+   "name": "defaultChoice",
+   "modifiers": [],
+   "cpp_type": "std::optional<std::string>",
+   "kind": "value",
+   "confidence": "low",
+   "evidence": "SelectionDialog.qml:15 declared without initialiser, `!== undefined` check and items.indexOf(defaultChoice) at line 70; no external instantiation of SelectionDialog exists",
+   "notes": "SelectionDialog is unused anywhere in the tree. items are rendered with modelData.toString() (line 88), so strings are assumed; if items were ever non-strings this would change."
+  },
+  {
+   "file": "modules/common/widgets/SelectionDialog.qml",
+   "line": 79,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "low",
+   "evidence": "SelectionDialog.qml:79 delegate of ScriptModel items, rendered with modelData.toString() and compared via indexOf with defaultChoice",
+   "notes": "SelectionDialog is unused anywhere in the tree, so item type is a guess: strings (selected(var result) also yields an item or null)."
+  },
+  {
+   "file": "modules/common/widgets/SineCookie.qml",
+   "line": 48,
+   "name": "pointsList",
+   "modifiers": [],
+   "cpp_type": "std::vector<ii::Point>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "SineCookie.qml:48-62 builds `points` by points.push(Qt.point(x, y)) and returns it; consumed by PathPolyline.path",
+   "notes": "Computed binding; not set externally."
+  },
+  {
+   "file": "modules/common/widgets/StateLayer.qml",
+   "line": 11,
+   "name": "state",
+   "modifiers": [],
+   "cpp_type": "StateLayer::State",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StateLayer.qml:11 initialised to StateLayer.State.Hover and switched against State values (lines 12-17); StateOverlay.qml:19,32,45,58 assigns State.Hover/Focus/Press/Drag",
+   "notes": "Enum declared in StateLayer.qml:7 -> nested enum of StateLayer."
+  },
+  {
+   "file": "modules/common/widgets/StyledComboBox.qml",
+   "line": 93,
+   "name": "model",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "ComboBoxEntry",
+   "kind": "value",
+   "confidence": "medium",
+   "evidence": "StyledComboBox.qml:93 is the ItemDelegate's `model` row; reads model.icon (lines 132,142) and model[root.textRole] (line 153); GeneralConfig.qml:140-148 supplies objects {displayName, value} with textRole \"displayName\"",
+   "notes": "This is the per-row delegate model object, not the ComboBox model list. Row shape for object models is {displayName, value, icon?}; icon optional (empty string = none). VolumeDialogContent.qml:46 instead supplies plain strings (Audio.friendlyDeviceName), in which case the row degenerates to the string itself (and `model[textRole]` with empty textRole yields nothing there)."
+  },
+  {
+   "file": "modules/common/widgets/StyledDropShadow.qml",
+   "line": 6,
+   "name": "target",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "ii::Item*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "StyledDropShadow.qml:7 passed as DropShadow.source; instantiated with Loader/MaterialShape items (CookieClock.qml:39 sineCookieLoader/roundedPolygonCookieLoader, WeatherWidget.qml:19 backgroundShape)",
+   "notes": "Any visual item; Loader targets are Loader items."
+  },
+  {
+   "file": "modules/common/widgets/StyledRectangle.qml",
+   "line": 12,
+   "name": "contentLayer",
+   "modifiers": [],
+   "cpp_type": "StyledRectangle::ContentLayer",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledRectangle.qml:12 initialised to StyledRectangle.ContentLayer.Pane and switched over (lines 14-20); Workspaces.qml:98,431 assign ContentLayer.Group",
+   "notes": "Enum declared in StyledRectangle.qml:11 -> nested enum of StyledRectangle."
+  },
+  {
+   "file": "modules/common/widgets/StyledRectangularShadow.qml",
+   "line": 6,
+   "name": "target",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "ii::Item*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "StyledRectangularShadow.qml:6 used as anchors.fill and target.radius (lines 7-8); all ~25 call sites pass an Item/Rectangle id (e.g. barBackground, popupBackground, thumbnailImageLoader)",
+   "notes": "Reads `target.radius`, so most targets are Rectangles (ii::Rectangle*), but some are Loaders (WallpaperDirectoryItem.qml:51) or other Items, hence ii::Item*; a missing radius reads as undefined."
+  },
+  {
+   "file": "modules/common/widgets/StyledSlider.qml",
+   "line": 30,
+   "name": "configuration",
+   "modifiers": [],
+   "cpp_type": "StyledSlider::Configuration",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledSlider.qml:30 initialised to StyledSlider.Configuration.S, compared with Configuration.Wavy (lines 46,53) and used numerically as track width (line 40); callers pass Configuration.XS/S/M/Wavy",
+   "notes": "Enum declared in StyledSlider.qml:21 with explicit integer values (Wavy=4, XS=12, S=18, M=30, L=42, XL=72) and the value is also used as a real (trackWidth: configuration) -> keep it a C++ enum with those values."
+  },
+  {
+   "file": "modules/common/widgets/StyledSlider.qml",
+   "line": 104,
+   "name": "normalized",
+   "modifiers": [],
+   "cpp_type": "std::vector<double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledSlider.qml:104 = root.dividerValues.map(v => (v - from)/(to - from)); dividerValues is list<real>",
+   "notes": "Property of the inline `background: Item` of StyledSlider."
+  },
+  {
+   "file": "modules/common/widgets/StyledSlider.qml",
+   "line": 105,
+   "name": "filtered",
+   "modifiers": [],
+   "cpp_type": "std::vector<double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledSlider.qml:105 = normalized.filter(...) (subset of doubles)",
+   "notes": "Property of the inline `background: Item` of StyledSlider."
+  },
+  {
+   "file": "modules/common/widgets/StyledSlider.qml",
+   "line": 106,
+   "name": "leftValues",
+   "modifiers": [],
+   "cpp_type": "std::vector<double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledSlider.qml:106 = [0, ...filtered.filter(...), root.visualPosition] (list of reals)",
+   "notes": "Property of the inline `background: Item` of StyledSlider."
+  },
+  {
+   "file": "modules/common/widgets/StyledSlider.qml",
+   "line": 107,
+   "name": "rightValues",
+   "modifiers": [],
+   "cpp_type": "std::vector<double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledSlider.qml:107 = [root.visualPosition, ...filtered.filter(...), 1] (list of reals)",
+   "notes": "Property of the inline `background: Item` of StyledSlider."
+  },
+  {
+   "file": "modules/common/widgets/StyledSlider.qml",
+   "line": 108,
+   "name": "leftWidths",
+   "modifiers": [],
+   "cpp_type": "std::vector<double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledSlider.qml:108 = leftValues.map((v,i,a) => a[i+1] - v).slice(0, -1) (list of reals; the NaN last element is sliced off)",
+   "notes": "Property of the inline `background: Item` of StyledSlider. Length = leftValues.size() - 1."
+  },
+  {
+   "file": "modules/common/widgets/StyledSlider.qml",
+   "line": 109,
+   "name": "rightWidths",
+   "modifiers": [],
+   "cpp_type": "std::vector<double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledSlider.qml:109 = rightValues.map((v,i,a) => a[i+1] - v).slice(0, -1) (list of reals; the NaN last element is sliced off)",
+   "notes": "Property of the inline `background: Item` of StyledSlider. Length = rightValues.size() - 1."
+  },
+  {
+   "file": "modules/common/widgets/StyledText.qml",
+   "line": 13,
+   "name": "defaultFont",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledText.qml:13 selects Appearance.font.family.numbers or .main, both `property string` (Appearance.qml:216-217); consumed as font.family",
+   "notes": "Font family name."
+  },
+  {
+   "file": "modules/common/widgets/ToolbarTabBar.qml",
+   "line": 12,
+   "name": "tabButtonList",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::vector<TabButtonEntry>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "ToolbarTabBar.qml:46 Repeater model and :98 .length; callers pass literals of {icon, name} (Cheatsheet.qml:16-25, OptionsToolbar.qml:28-31); delegate reads modelData.name/.icon (lines 32-33)",
+   "notes": "Required property; element shape also used by PomodoroWidget.tabButtonList and TodoWidget.tabButtonList (same {icon, name} literal)."
+  },
+  {
+   "file": "modules/common/widgets/ToolbarTabBar.qml",
+   "line": 30,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "TabButtonEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "ToolbarTabBar.qml:30 default delegate reads modelData.name and modelData.icon (lines 32-33); element of tabButtonList",
+   "notes": "Element of ToolbarTabBar.tabButtonList; shares the TabButtonEntry struct."
+  },
+  {
+   "file": "modules/common/widgets/WeekRow.qml",
+   "line": 12,
+   "name": "locale",
+   "modifiers": [],
+   "cpp_type": "LocaleInfo",
+   "kind": "value",
+   "confidence": "low",
+   "evidence": "WeekRow.qml:12 declared without initialiser; only `root.locale.firstDayOfWeek` is read (line 18); WeekRow is not instantiated anywhere in the tree",
+   "notes": "Intended to be Qt.locale() (a QML Locale value type). Only firstDayOfWeek (0=Sunday .. 6=Saturday, matches DateUtils.getFirstDayOfWeek's getDay() convention, default 1) is used; replace with a real ii::Locale if the port provides one. WeekRow is unused."
+  },
+  {
+   "file": "modules/common/widgets/WeekRow.qml",
+   "line": 34,
+   "name": "model",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "WeekDay",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "WeekRow.qml:34 is the default delegate's `model` row; the rows are built at WeekRow.qml:23-29 as {date, day, month, year, today}",
+   "notes": "Per-row delegate model object (same shape as the Qt MonthGrid delegate props). date is a JS Date; month is 1-based. WeekRow.qml itself is unused elsewhere."
+  },
+  {
+   "file": "modules/ii/background/Background.qml",
+   "line": 28,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "Background.qml:12-28 Variants over Quickshell.screens; modelData used as screen: modelData (l.75), Hyprland.monitorFor(modelData) (l.36), .width/.height",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/background/Background.qml",
+   "line": 32,
+   "name": "activeWorkspaceWithFullscreen",
+   "modifiers": [],
+   "cpp_type": "qs::HyprlandWorkspace*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "Background.qml:32 .filter(...)[0] over list<HyprlandWorkspace>; compared with `!= undefined` for the visible binding",
+   "notes": "Nullable: null when no workspace on this monitor has a fullscreen window and is active."
+  },
+  {
+   "file": "modules/ii/background/widgets/AbstractBackgroundWidget.qml",
+   "line": 19,
+   "name": "configEntry",
+   "modifiers": [],
+   "cpp_type": "BackgroundWidgetConfig*",
+   "kind": "object_ref",
+   "confidence": "medium",
+   "evidence": "AbstractBackgroundWidget.qml:19 Config.options.background.widgets[configEntryName] with configEntryName \"clock\" or \"weather\" (ClockWidget.qml:14, WeatherWidget.qml:13); only .placementStrategy/.x/.y are read, .x/.y written back (l.39-40)",
+   "notes": "Must be a pointer into the live Config tree (writes persist the widget position). BackgroundWidgetConfig is the common subset of Config.options.background.widgets.clock and .weather (both also have `enable`); in C++ it can be a common base of those two config sub-objects."
+  },
+  {
+   "file": "modules/ii/background/widgets/clock/ClockWidget.qml",
+   "line": 28,
+   "name": "textHorizontalAlignment",
+   "modifiers": [],
+   "cpp_type": "ii::Text::HAlignment",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "ClockWidget.qml:28-37 returns Text.AlignHCenter/AlignLeft/AlignRight; assigned to Text.horizontalAlignment (l.157) and compared with Text.AlignLeft/AlignRight",
+   "notes": "QtQuick Text horizontal alignment enum."
+  },
+  {
+   "file": "modules/ii/background/widgets/clock/DigitalClock.qml",
+   "line": 14,
+   "name": "textHorizontalAlignment",
+   "modifiers": [],
+   "cpp_type": "ii::Text::HAlignment",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "DigitalClock.qml:14 default Text.AlignHCenter; bound to ClockText.horizontalAlignment (l.42,59,69); set from ClockWidget.textHorizontalAlignment (l.68)",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/bar/ActiveWindow.qml",
+   "line": 17,
+   "name": "biggestWindow",
+   "modifiers": [],
+   "cpp_type": "std::optional<HyprlandClient>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "ActiveWindow.qml:17 = HyprlandData.biggestWindowForWorkspace(...) which returns an element of windowList (hyprctl clients -j) or null (HyprlandData.qml:73-80); reads .class and .title (lines 20, 73-74).",
+   "notes": "Introduces HyprlandClient for the hyprctl clients shape, limited to keys read anywhere in the tree (address, at, size, workspace.id, floating, monitor, class, title, pid; see HyprlandData.qml, Session.qml:10, Background.qml:37, RegionSelection.qml). HyprlandData.windowList (id 245) and windowByAddress (id 247) should reuse it. 'class' is a C++ keyword, rename the field in the port. optional copy rather than pointer because windowList is replaced wholesale on every refresh."
+  },
+  {
+   "file": "modules/ii/bar/ActiveWindow.qml",
+   "line": 30,
+   "name": "desktopEntry",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "qs::DesktopEntry*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "ActiveWindow.qml:30-33 returns DesktopEntries.heuristicLookup(appId) or null; reads .name and .icon at lines 35-36.",
+   "notes": "Nullable pointer; re-evaluated when DesktopEntries.applicationsChanged bumps desktopEntriesRevision."
+  },
+  {
+   "file": "modules/ii/bar/BarContent.qml",
+   "line": 15,
+   "name": "screen",
+   "modifiers": [],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "BarContent.qml:15 = root.QsWindow.window?.screen; line 16 reads screen?.width.",
+   "notes": "Nullable until the window exists."
+  },
+  {
+   "file": "modules/ii/bar/BatteryIndicator.qml",
+   "line": 10,
+   "name": "chargeState",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "qs::UPowerDeviceState",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "BatteryIndicator.qml:10 = Battery.chargeState = UPower.displayDevice.state (Battery.qml:13), compared to UPowerDeviceState.Charging/PendingCharge.",
+   "notes": "Quickshell UPowerDeviceState enum; not in the vocabulary table. BatteryPopup compares it to the raw ints 4 and 1."
+  },
+  {
+   "file": "modules/ii/bar/StyledPopupHeaderRow.qml",
+   "line": 8,
+   "name": "icon",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledPopupHeaderRow.qml:16 feeds it to MaterialSymbol.text; all callers pass string literals (BatteryPopup.qml:17, ClockWidgetPopup.qml:41, ResourcesPopup.qml:24, VerticalMedia.qml:78).",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/bar/StyledPopupHeaderRow.qml",
+   "line": 9,
+   "name": "label",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledPopupHeaderRow.qml:23 feeds it to StyledText.text; callers pass Translation.tr(...) results, string literals, or root.formattedDate (BatteryPopup.qml:18, ClockWidgetPopup.qml:42, ResourcesPopup.qml:25).",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/bar/SysTray.qml",
+   "line": 19,
+   "name": "activeMenu",
+   "modifiers": [],
+   "cpp_type": "SysTrayMenu*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "SysTray.qml:37 assigns the window from SysTrayItem.menuOpened, which SysTrayMenu.qml:40 emits as root (SysTrayMenu is a PopupWindow); lines 33-34 and 62 call .close().",
+   "notes": "Nullable; the menuOpened signal parameter is declared 'var' only because QML cannot name QsWindow (SysTrayMenu.qml:18 comment). Also appears in HyprlandFocusGrab.windows (line 58)."
+  },
+  {
+   "file": "modules/ii/bar/Workspaces.qml",
+   "line": 219,
+   "name": "biggestWindow",
+   "modifiers": [],
+   "cpp_type": "std::optional<HyprlandClient>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Workspaces.qml:219 = wsModel.biggestWindow[index]; WorkspaceModel.qml:23-27 fills it from HyprlandData.biggestWindowForWorkspace (client or null); reads .class and truthiness.",
+   "notes": "Reuses HyprlandClient (introduced by id 89). WorkspaceModel.biggestWindow is list<var> of the same optional clients."
+  },
+  {
+   "file": "modules/ii/bar/Workspaces.qml",
+   "line": 220,
+   "name": "mainAppIconSource",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Workspaces.qml:220 = Quickshell.iconPath(...) which returns a path/url string; used as AppIcon.source at line 235.",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/bar/Workspaces.qml",
+   "line": 414,
+   "name": "indexPair",
+   "modifiers": [],
+   "cpp_type": "AnimatedTabIndexPair*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "Workspaces.qml:414-417 instantiates AnimatedTabIndexPair { index: ... } inline; idx1/idx2 read at lines 427-428; component at modules/common/models/AnimatedTabIndexPair.qml.",
+   "notes": "Owned child object (created by the property initializer, parented to the TrailingIndicator)."
+  },
+  {
+   "file": "modules/ii/cheatsheet/Cheatsheet.qml",
+   "line": 16,
+   "name": "tabButtonList",
+   "modifiers": [],
+   "cpp_type": "std::vector<TabButtonEntry>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "Cheatsheet.qml:16 literal list of {icon, name}; passed to ToolbarTabBar.tabButtonList which reads modelData.icon/.name (ToolbarTabBar.qml delegate)",
+   "notes": "Same shape as tabButtonList in OptionsToolbar.qml, PomodoroWidget.qml and TodoWidget.qml (all ToolbarTabBar/tab-bar users); reuse TabButtonEntry. .length is used for tab cycling."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetKeybinds.qml",
+   "line": 32,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CheatsheetKeybinds.qml:30 model is [...HyprlandKeybinds.keybindCategories, \"\"] (list of category-name strings) feeding CheatsheetKeybindsCategory.categoryName (required string)",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetKeybindsCategory.qml",
+   "line": 24,
+   "name": "macSymbolMap",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CheatsheetKeybindsCategory.qml object literal of string->string, merged into keySubstitutions and indexed by key name",
+   "notes": "Only used as a lookup table (Object.assign source); treat as const data."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetKeybindsCategory.qml",
+   "line": 39,
+   "name": "functionSymbolMap",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CheatsheetKeybindsCategory.qml object literal of string->string, merged into keySubstitutions and indexed by key name",
+   "notes": "Only used as a lookup table (Object.assign source); treat as const data."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetKeybindsCategory.qml",
+   "line": 54,
+   "name": "mouseSymbolMap",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CheatsheetKeybindsCategory.qml object literal of string->string, merged into keySubstitutions and indexed by key name",
+   "notes": "Only used as a lookup table (Object.assign source); treat as const data."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetKeybindsCategory.qml",
+   "line": 63,
+   "name": "keyBlacklist",
+   "modifiers": [],
+   "cpp_type": "std::vector<std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CheatsheetKeybindsCategory.qml:63 list of strings; used via keyBlacklist.includes(bindLine.keyData.key)",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetKeybindsCategory.qml",
+   "line": 64,
+   "name": "keySubstitutions",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CheatsheetKeybindsCategory.qml:64 Object.assign of string->string literals plus Config.options.cheatsheet.superKey and the three symbol maps; looked up via keySubstitutions[key] in transformKey / modMaskToStringList",
+   "notes": "Reactive: rebuilt from the 3 symbol maps and Config.options.cheatsheet.{superKey,useMacSymbol,useFnSymbol,useMouseSymbol}. Merge order matters (later maps override earlier)."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetKeybindsCategory.qml",
+   "line": 161,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "HyprlandBind",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CheatsheetKeybindsCategory.qml:156-161 model is HyprlandKeybinds.keybinds.filter(...) where keybinds = JSON.parse(`hyprctl binds -j`) (services/HyprlandKeybinds.qml:38); fields read: description, key, modmask",
+   "notes": "Struct lists only the fields QML reads; `hyprctl binds -j` also emits locked, mouse, release, repeat, longPress, non_consuming, has_description, submap, keycode, catch_all, dispatcher, arg etc. (checked against live output). Add them if the port needs them. services/HyprlandKeybinds.qml `keybinds` should be std::vector<HyprlandKeybind>."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetKeybindsCategory.qml",
+   "line": 170,
+   "name": "keyData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "HyprlandBind",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CheatsheetKeybindsCategory.qml:170 BindLine.keyData, assigned from the delegate's modelData (a hyprctl bind entry, line 162); reads .modmask, .key, .description",
+   "notes": "Reuses HyprlandKeybind from entry 106."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetKeybindsCategory.qml",
+   "line": 188,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CheatsheetKeybindsCategory.qml:180-189 model is list of modifier strings from modMaskToStringList().map(...) or [modList.join(\" \")]; passed to transformKey(modelData) (string)",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetPeriodicTable.qml",
+   "line": 6,
+   "name": "elements",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<std::vector<ElementData>>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "CheatsheetPeriodicTable.qml:6 = PTable.elements; periodic_table.js:2 is a list of rows of {name, symbol, number, weight, type}",
+   "notes": "type values seen: empty, metal, nonmetal, noblegas, lanthanum, actinium; QML only tests type != \"empty\" so std::string is enough (could be an enum). Rows contain 'empty' placeholder tiles (number -1, weight 0)."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetPeriodicTable.qml",
+   "line": 7,
+   "name": "series",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<std::vector<ElementData>>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "CheatsheetPeriodicTable.qml:7 = PTable.series (periodic_table.js:147), same row/tile shape as elements",
+   "notes": "Reuses ElementData from entry 109."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetPeriodicTable.qml",
+   "line": 23,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::vector<ElementData>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "CheatsheetPeriodicTable.qml:23 delegate modelData is one row of PTable.elements, used as inner Repeater model (line 24)",
+   "notes": "Reuses ElementData from entry 109."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetPeriodicTable.qml",
+   "line": 28,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "ElementData",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CheatsheetPeriodicTable.qml:28 inner delegate modelData is one tile, passed to ElementTile.element",
+   "notes": "Reuses ElementData from entry 109."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetPeriodicTable.qml",
+   "line": 48,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::vector<ElementData>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "CheatsheetPeriodicTable.qml:48 delegate modelData is one row of PTable.series, used as inner Repeater model",
+   "notes": "Reuses ElementData from entry 109."
+  },
+  {
+   "file": "modules/ii/cheatsheet/CheatsheetPeriodicTable.qml",
+   "line": 53,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "ElementData",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CheatsheetPeriodicTable.qml:53 inner delegate modelData is one series tile, passed to ElementTile.element",
+   "notes": "Reuses ElementData from entry 109."
+  },
+  {
+   "file": "modules/ii/cheatsheet/ElementTile.qml",
+   "line": 8,
+   "name": "element",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "ElementData",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "ElementTile.qml:8 element reads .type, .number, .weight, .symbol, .name; fed from CheatsheetPeriodicTable tiles",
+   "notes": "Reuses ElementData from entry 109."
+  },
+  {
+   "file": "modules/ii/dock/Dock.qml",
+   "line": 26,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "Dock.qml:19-27 Variants over Quickshell.screens; modelData is assigned to PanelWindow.screen.",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/dock/DockAppButton.qml",
+   "line": 12,
+   "name": "appToplevel",
+   "modifiers": [],
+   "cpp_type": "TaskbarAppEntry*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "DockApps.qml:54-55 sets appToplevel: modelData from ScriptModel over TaskbarApps.apps; TaskbarApps.qml:62-67 defines inline component TaskbarAppEntry {appId, toplevels, pinned}; DockAppButton reads .appId/.toplevels.",
+   "notes": "TaskbarAppEntry is an inline component of services/TaskbarApps.qml (QtObject created with createObject(null, ...)), so the C++ type is TaskbarApps' nested TaskbarAppEntry. Despite the name it is an app group (appId + list of qs::Toplevel*), not a single toplevel."
+  },
+  {
+   "file": "modules/ii/dock/DockAppButton.qml",
+   "line": 13,
+   "name": "appListRoot",
+   "modifiers": [],
+   "cpp_type": "DockApps*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "DockApps.qml:56 is the only instantiation site and passes appListRoot: root (the root Item of DockApps.qml); DockAppButton.qml:52-58 sets lastHoveredButton/buttonHovered on it.",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/dock/DockAppButton.qml",
+   "line": 21,
+   "name": "desktopEntry",
+   "modifiers": [],
+   "cpp_type": "qs::DesktopEntry*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "DockAppButton.qml:21,29 = DesktopEntries.heuristicLookup(appToplevel.appId); lines 66 and 74 call .execute() through ?. (nullable).",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/dock/DockApps.qml",
+   "line": 54,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "TaskbarAppEntry*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "DockApps.qml:49-55 ListView model ScriptModel values TaskbarApps.apps (list of TaskbarAppEntry objects, TaskbarApps.qml:56).",
+   "notes": "Reuses TaskbarAppEntry (see id 117)."
+  },
+  {
+   "file": "modules/ii/dock/DockApps.qml",
+   "line": 65,
+   "name": "appTopLevel",
+   "modifiers": [],
+   "cpp_type": "TaskbarAppEntry*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "DockApps.qml:65 = root.lastHoveredButton?.appToplevel (DockAppButton.appToplevel); reads .toplevels at lines 67 and 154.",
+   "notes": "Nullable (no button hovered yet). Reuses TaskbarAppEntry (see id 117). Note lastHoveredButton is declared 'Item' in DockApps.qml:21 but only ever holds a DockAppButton*."
+  },
+  {
+   "file": "modules/ii/dock/DockApps.qml",
+   "line": 159,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "qs::Toplevel*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "DockApps.qml:153-165 ScriptModel values previewPopup.appTopLevel?.toplevels (ToplevelManager.toplevels.values entries, TaskbarApps.qml:44-50); calls .close()/.activate(), reads .title, passes as ScreencopyView.captureSource.",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/lock/Lock.qml",
+   "line": 15,
+   "name": "savedWorkspaces",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, int>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Lock.qml:14-15,25,47-58 `next[mon] = ws` with mon = screen name and ws = activeWorkspace.id; read back as savedWorkspaces[monName] with `!== undefined` check",
+   "notes": "Monitor name -> workspace id; missing key means no saved workspace (use find())."
+  },
+  {
+   "file": "modules/ii/lock/LockSurface.qml",
+   "line": 332,
+   "name": "targetAction",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "LockContext::ActionEnum",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "LockSurface.qml:320,326 set to LockContext.ActionEnum.Poweroff/Reboot; compared with root.context.targetAction and passed to context.unlocked(); enum in modules/common/panels/lock/LockContext.qml:11 (Unlock, Poweroff, Reboot)",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/mediaControls/MediaControls.qml",
+   "line": 19,
+   "name": "realPlayers",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<qs::MprisPlayer*>",
+   "kind": "object_list",
+   "confidence": "high",
+   "evidence": "MediaControls.qml:19 = MprisController.players, declared `list<MprisPlayer>` filtered by isRealPlayer (services/MprisController.qml:19); .length and indexing used in filterDuplicatePlayers",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/mediaControls/MediaControls.qml",
+   "line": 20,
+   "name": "meaningfulPlayers",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<qs::MprisPlayer*>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "MediaControls.qml:20 filterDuplicatePlayers(realPlayers) returns a subset of the players array; used as ScriptModel.values for a Repeater whose delegate has `required property MprisPlayer modelData` (line 134)",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/mediaControls/PlayerControl.qml",
+   "line": 18,
+   "name": "artUrl",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "PlayerControl.qml:18 = player?.trackArtUrl (Quickshell MprisPlayer.trackArtUrl is a string URL); used in Qt.md5(artUrl), artUrl.length and a curl command",
+   "notes": "player is a required property so the value is never actually undefined; treat null player as empty string."
+  },
+  {
+   "file": "modules/ii/mediaControls/PlayerControl.qml",
+   "line": 35,
+   "name": "iconName",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "PlayerControl.qml:35 TrackChangeButton.iconName set to \"skip_previous\" / \"skip_next\" (lines 232, 275) and used as MaterialSymbol.text",
+   "notes": "Inline component TrackChangeButton in PlayerControl.qml."
+  },
+  {
+   "file": "modules/ii/onScreenDisplay/OnScreenDisplay.qml",
+   "line": 16,
+   "name": "focusedScreen",
+   "modifiers": [],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "OnScreenDisplay.qml:16 Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name); assigned to PanelWindow.screen (line 106); nullptr when no match",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/onScreenDisplay/OnScreenDisplay.qml",
+   "line": 19,
+   "name": "indicators",
+   "modifiers": [],
+   "cpp_type": "std::vector<OsdIndicator>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OnScreenDisplay.qml:19 literal list of {id, sourceUrl}; looked up with .find(i => i.id === currentIndicator)?.sourceUrl for a Loader source (line 159)",
+   "notes": "Static list of 3 indicators (volume, brightness, gamma). sourceUrl is a relative QML path; in C++ this likely becomes a factory/enum instead of a URL."
+  },
+  {
+   "file": "modules/ii/onScreenDisplay/indicators/BrightnessIndicator.qml",
+   "line": 9,
+   "name": "focusedScreen",
+   "modifiers": [],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "BrightnessIndicator.qml:9 Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name); passed to Brightness.getMonitorForScreen(ShellScreen)",
+   "notes": "Same expression as entry 129."
+  },
+  {
+   "file": "modules/ii/onScreenDisplay/indicators/BrightnessIndicator.qml",
+   "line": 10,
+   "name": "brightnessMonitor",
+   "modifiers": [],
+   "cpp_type": "BrightnessMonitor*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "BrightnessIndicator.qml:10 Brightness.getMonitorForScreen(focusedScreen) = monitors.find(m => m.screen === screen) (services/Brightness.qml:26), where monitors is list<BrightnessMonitor>; nullptr if no match; read as ?.brightness",
+   "notes": "BrightnessMonitor is an inline component declared in services/Brightness.qml:94 (Brightness::BrightnessMonitor)."
+  },
+  {
+   "file": "modules/ii/onScreenKeyboard/OskContent.qml",
+   "line": 8,
+   "name": "layouts",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, OskLayout>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OskContent.qml:8 = Layouts.byName (layouts.js:5): layout name -> {name_short, description, comment, keys: rows of key objects}; indexed by activeLayoutName",
+   "notes": "Layouts present: English (US), German, Russian. QML only reads .keys; the other three metadata fields are in the data. Keys have labelAlt in the data but QML never reads it."
+  },
+  {
+   "file": "modules/ii/onScreenKeyboard/OskContent.qml",
+   "line": 9,
+   "name": "activeLayoutName",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OskContent.qml:9-11 either Config.options.osk.layout (string) or Layouts.defaultLayout (\"English (US)\"), chosen by layouts.hasOwnProperty(...)",
+   "notes": "Declared with a boolean-looking parenthesised condition but it is the ternary result (a layout name), not a bool."
+  },
+  {
+   "file": "modules/ii/onScreenKeyboard/OskContent.qml",
+   "line": 12,
+   "name": "currentLayout",
+   "modifiers": [],
+   "cpp_type": "OskLayout",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OskContent.qml:12 layouts[activeLayoutName]; activeLayoutName is guaranteed to be an existing key (hasOwnProperty guard / defaultLayout); .keys read at line 23",
+   "notes": "Reuses OskLayout from entry 133. A copy or const reference into the map; in C++ keep as a pointer/reference to the map entry if reactivity cost matters."
+  },
+  {
+   "file": "modules/ii/onScreenKeyboard/OskContent.qml",
+   "line": 27,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::vector<OskKeyData>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "OskContent.qml:27 delegate modelData is one row of currentLayout.keys, used as inner Repeater model (line 31)",
+   "notes": "Reuses OskKeyData from entry 133."
+  },
+  {
+   "file": "modules/ii/onScreenKeyboard/OskContent.qml",
+   "line": 34,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "OskKeyData",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OskContent.qml:34 inner delegate modelData is one key object, assigned to OskKey.keyData",
+   "notes": "Reuses OskKeyData from entry 133."
+  },
+  {
+   "file": "modules/ii/onScreenKeyboard/OskKey.qml",
+   "line": 10,
+   "name": "keyData",
+   "modifiers": [],
+   "cpp_type": "OskKeyData",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OskKey.qml:10 set from the delegate modelData (OskContent.qml:35); reads .label, .keytype, .keycode, .shape, .labelShift, .labelCaps",
+   "notes": "Reuses OskKeyData from entry 133. Spacer keys (keytype \"spacer\", shape \"empty\") have no keycode/label shift fields; use defaults (keycode 0, empty strings)."
+  },
+  {
+   "file": "modules/ii/onScreenKeyboard/OskKey.qml",
+   "line": 13,
+   "name": "keycode",
+   "modifiers": [],
+   "cpp_type": "int",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OskKey.qml:13 = keyData.keycode; layouts.js keycodes are integers (e.g. 30, 59); compared via Ydotool.shiftKeys.includes (list<int>) and passed to Ydotool.press/release",
+   "notes": "Spacer keys have no keycode (undefined in JS); they are disabled (shape == \"empty\") so 0 is a safe default."
+  },
+  {
+   "file": "modules/ii/onScreenKeyboard/OskKey.qml",
+   "line": 20,
+   "name": "widthMultiplier",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OskKey.qml:20 literal shape-name -> real multiplier (1, 1.6, 1.9, 2.5, 1.3); used at line 41 as widthMultiplier[shape] || baseWidth",
+   "notes": "Keys: normal, fn, tab, caps, shift, control; looked up as widthMultiplier[shape] with `|| baseWidth` fallback (JS NaN/undefined -> fallback), so C++ needs find() with fallback for shapes not in the map (empty, space, expand)."
+  },
+  {
+   "file": "modules/ii/onScreenKeyboard/OskKey.qml",
+   "line": 28,
+   "name": "heightMultiplier",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OskKey.qml:28 literal shape-name -> real multiplier (1, 0.7); used at line 42 as heightMultiplier[shape] || baseHeight",
+   "notes": "Keys: normal, fn, tab, caps, shift, control; looked up as widthMultiplier[shape] with `|| baseWidth` fallback (JS NaN/undefined -> fallback), so C++ needs find() with fallback for shapes not in the map (empty, space, expand)."
+  },
+  {
+   "file": "modules/ii/overlay/OverlayTaskbar.qml",
+   "line": 44,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "OverlayWidgetInfo",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OverlayTaskbar.qml:41-46 ScriptModel values OverlayContext.availableWidgets, reads modelData.identifier/materialSymbol; entries defined at OverlayContext.qml:11-17.",
+   "notes": "Same shape as OverlayContext.availableWidgets (list<var>); reuse OverlayWidgetInfo there."
+  },
+  {
+   "file": "modules/ii/overlay/StyledOverlayWidget.qml",
+   "line": 30,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "OverlayWidgetInfo",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "StyledOverlayWidget.qml:31-32 reads modelData.identifier and modelData.materialSymbol; OverlayContent.qml:56-58 finds entries in OverlayContext.availableWidgets.",
+   "notes": "Reuses OverlayWidgetInfo (introduced by id 142). Line 32 falls back to 'widgets' when materialSymbol is missing, but every current entry defines it. OverlayContent's find() could yield undefined for an unknown persisted identifier; ignored."
+  },
+  {
+   "file": "modules/ii/overlay/StyledOverlayWidget.qml",
+   "line": 34,
+   "name": "persistentStateEntry",
+   "modifiers": [],
+   "cpp_type": "OverlayWidgetState*",
+   "kind": "object_ref",
+   "confidence": "medium",
+   "evidence": "StyledOverlayWidget.qml:34 = Persistent.states.overlay[identifier]; fields x/y/width/height/pinned/clickthrough read and written (lines 77-80, 138-182); Persistent.qml:76-136 defines them.",
+   "notes": "Pointer/reference into the Persistent overlay JsonObject for the given widget (it is mutated, so not a copy); the C++ side needs an identifier->state lookup (e.g. std::map<std::string, OverlayWidgetState*>). Widgets crosshair, floatingImage, fpsLimiter, recorder, resources, volumeMixer, notes all have exactly these six fields; resources/volumeMixer additionally have tabIndex, accessed only via Persistent.states.overlay.<name>.tabIndex, not through this property. Representation (pointer into Persistent) is a judgement call."
+  },
+  {
+   "file": "modules/ii/overlay/crosshair/CrosshairContent.qml",
+   "line": 12,
+   "name": "propertyMap",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CrosshairContent.qml:12-34 object literal mapping Valorant crosshair code keys to property names; used at line 76 as root.propertyMap[key].",
+   "notes": "Values are names of sibling properties used for dynamic root[targetKey] access; the port needs an explicit key->setter table rather than a stored map of names."
+  },
+  {
+   "file": "modules/ii/overlay/crosshair/CrosshairContent.qml",
+   "line": 35,
+   "name": "colorMap",
+   "modifiers": [],
+   "cpp_type": "std::map<int, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CrosshairContent.qml:35-44 literal keys 0..7 to '#RRGGBB'; indexed with the int property color at lines 112 and 113.",
+   "notes": "Keys are integers (JS coerces to strings); std::map<int,std::string> keeps the 'colorMap[color] !== undefined' check meaningful. A std::vector<std::string> of 8 entries would also work."
+  },
+  {
+   "file": "modules/ii/overlay/crosshair/CrosshairContent.qml",
+   "line": 102,
+   "name": "code",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CrosshairContent.qml:102 = Config.options.crosshair.code; Config.qml:318 declares it as a string property; line 71 loadFromCode(code: string).",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/overlay/fpsLimiter/FpsLimiterContent.qml",
+   "line": 17,
+   "name": "currentState",
+   "modifiers": [],
+   "cpp_type": "FpsLimiterContent::State",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "FpsLimiterContent.qml:15 declares enum State { Normal, Success, Error }; initializer and all assignments use FpsLimiterContent.State.*.",
+   "notes": "QML enum declared in this component; maps to an enum class nested in FpsLimiterContent."
+  },
+  {
+   "file": "modules/ii/overlay/notes/NotesContent.qml",
+   "line": 17,
+   "name": "copyListEntries",
+   "modifiers": [],
+   "cpp_type": "std::vector<CopyListEntry>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "NotesContent.qml:116-136 builds {content, y, height} entries; used as ScriptModel values (lines 189-191); delegate reads modelData.content/y/height.",
+   "notes": "Rebuilt wholesale in updateCopylistPositions(); entries can be null in the intermediate map but are filtered out."
+  },
+  {
+   "file": "modules/ii/overlay/notes/NotesContent.qml",
+   "line": 19,
+   "name": "parsedCopylistLines",
+   "modifiers": [],
+   "cpp_type": "std::vector<CopyListLine>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotesContent.qml:86-90 pushes {content, start, end} per bullet line; read back at lines 107-118 via line.start/line.end/line.content.",
+   "notes": "start/end are character offsets from RegExp match.index."
+  },
+  {
+   "file": "modules/ii/overlay/notes/NotesContent.qml",
+   "line": 194,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "CopyListEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "NotesContent.qml:189-195 Repeater over ScriptModel values root.copyListEntries; delegate reads modelData.height/y/content.",
+   "notes": "Reuses CopyListEntry (introduced by id 149)."
+  },
+  {
+   "file": "modules/ii/overlay/resources/Resources.qml",
+   "line": 63,
+   "name": "modelData",
+   "modifiers": [],
+   "cpp_type": "ResourceInfo",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Resources.qml:18-37 root.resources literals {icon, name, history, maxAvailableString}; delegate (line 63) takes root.resources[index] and reads icon/name.",
+   "notes": "history comes from ResourceUsage.*UsageHistory (list<real>) and maxAvailableString from ResourceUsage.maxAvailable*String (string); the struct is rebuilt reactively as those change. Not a required property: a plain property initialised from the list element."
+  },
+  {
+   "file": "modules/ii/overview/SearchBar.qml",
+   "line": 24,
+   "name": "searchPrefixType",
+   "modifiers": [],
+   "cpp_type": "SearchBar::SearchPrefixType",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "SearchBar.qml:22-33 returns members of the enum SearchBar.SearchPrefixType (Action, App, Clipboard, Emojis, Math, ShellCommand, WebSearch, DefaultSearch)",
+   "notes": "QML enum declared on SearchBar (enum SearchPrefixType); property is derived from searchingText and compared in switch statements."
+  },
+  {
+   "file": "modules/ii/overview/SearchItem.qml",
+   "line": 21,
+   "name": "iconType",
+   "modifiers": [],
+   "cpp_type": "LauncherSearchResult::IconType",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "SearchItem.qml:21 entry?.iconType; LauncherSearchResult.qml defines `enum IconType { Material, Text, System, None }` and its iconType default is IconType.None",
+   "notes": "If entry is null this is undefined in QML; treat as IconType::None. Compared against LauncherSearchResult.IconType.* in switch (l.141)."
+  },
+  {
+   "file": "modules/ii/overview/SearchItem.qml",
+   "line": 23,
+   "name": "itemExecute",
+   "modifiers": [],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "SearchItem.qml:23 entry?.execute; LauncherSearchResult.execute is an arrow function; invoked as root.itemExecute() with no args (l.108)",
+   "notes": "Empty std::function when entry is null."
+  },
+  {
+   "file": "modules/ii/overview/SearchItem.qml",
+   "line": 24,
+   "name": "fontType",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "SearchItem.qml:24-31 switch on entry?.fontType returns \"monospace\" or \"main\"; used as key into Appearance.font.family[root.fontType] and compared to \"monospace\" (l.61)",
+   "notes": "Kept as string because it is a lookup key into Appearance.font.family; could alternatively be an enum with values Monospace/Main."
+  },
+  {
+   "file": "modules/ii/overview/SearchItem.qml",
+   "line": 215,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "SearchItem.qml:211-218 Repeater over root.urls (property list<string>) creating Favicon with url: modelData (Favicon.url is string)",
+   "notes": "Model is [] when query == itemName, otherwise the list of URL strings extracted from itemName."
+  },
+  {
+   "file": "modules/ii/overview/SearchItem.qml",
+   "line": 264,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "LauncherSearchResult*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "SearchItem.qml:261-264 Repeater over entry.actions; actions are built with resultComp.createObject (LauncherSearch.qml:192-205,262-275) and read .iconType/.iconName/.name/.execute()",
+   "notes": "LauncherSearchResult.actions is declared `property var actions: []` but holds LauncherSearchResult objects; that property should be std::vector<LauncherSearchResult*>."
+  },
+  {
+   "file": "modules/ii/overview/SearchItem.qml",
+   "line": 265,
+   "name": "iconType",
+   "modifiers": [],
+   "cpp_type": "LauncherSearchResult::IconType",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "SearchItem.qml:265 modelData.iconType where modelData is a LauncherSearchResult action; compared to LauncherSearchResult.IconType.Material/System (l.278,287)",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/overview/SearchWidget.qml",
+   "line": 211,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "LauncherSearchResult*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "SearchWidget.qml:211 delegate of ScriptModel over LauncherSearch.results; passed as SearchItem.entry (`property LauncherSearchResult entry`); results items are created via resultComp (LauncherSearchResult {})",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/regionSelector/CursorGuide.qml",
+   "line": 8,
+   "name": "action",
+   "modifiers": [],
+   "cpp_type": "RegionSelection::SnipAction",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "CursorGuide.qml:12-28 switches on it with RegionSelection.SnipAction.*; RegionSelection.qml:404 binds root.action.",
+   "notes": "QML enum declared in RegionSelection.qml; maps to a C++ enum class nested in RegionSelection (not in the type vocabulary table)."
+  },
+  {
+   "file": "modules/ii/regionSelector/CursorGuide.qml",
+   "line": 9,
+   "name": "selectionMode",
+   "modifiers": [],
+   "cpp_type": "RegionSelection::SelectionMode",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:405 binds selectionMode: root.selectionMode (enum SelectionMode, RegionSelection.qml:33).",
+   "notes": "QML enum declared in RegionSelection.qml; maps to a C++ enum class nested in RegionSelection (not in the type vocabulary table). Declared in CursorGuide but never read there."
+  },
+  {
+   "file": "modules/ii/regionSelector/OptionsToolbar.qml",
+   "line": 21,
+   "name": "action",
+   "modifiers": [],
+   "cpp_type": "RegionSelection::SnipAction",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OptionsToolbar.qml:21 comment 'Use a synchronizer on these'; RegionSelection.qml:523-525 syncs it to root.action.",
+   "notes": "QML enum declared in RegionSelection.qml; maps to a C++ enum class nested in RegionSelection (not in the type vocabulary table). Two-way synced with RegionSelection.action (Synchronizer)."
+  },
+  {
+   "file": "modules/ii/regionSelector/OptionsToolbar.qml",
+   "line": 22,
+   "name": "selectionMode",
+   "modifiers": [],
+   "cpp_type": "RegionSelection::SelectionMode",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "OptionsToolbar.qml:37-39 assigns RegionSelection.SelectionMode.RectCorners/Circle; synced to RegionSelection.selectionMode.",
+   "notes": "QML enum declared in RegionSelection.qml; maps to a C++ enum class nested in RegionSelection (not in the type vocabulary table). Two-way synced with RegionSelection.selectionMode (Synchronizer)."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 35,
+   "name": "action",
+   "modifiers": [],
+   "cpp_type": "RegionSelection::SnipAction",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:35 initializer RegionSelection.SnipAction.Copy; enum declared at line 32.",
+   "notes": "QML enum declared in RegionSelection.qml; maps to a C++ enum class nested in RegionSelection (not in the type vocabulary table). Also reassigned in snip() (lines 275-277)."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 36,
+   "name": "selectionMode",
+   "modifiers": [],
+   "cpp_type": "RegionSelection::SelectionMode",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:36 initializer RegionSelection.SelectionMode.RectCorners; enum declared at line 33.",
+   "notes": "QML enum declared in RegionSelection.qml; maps to a C++ enum class nested in RegionSelection (not in the type vocabulary table)."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 37,
+   "name": "phase",
+   "modifiers": [],
+   "cpp_type": "RegionSelection::Phase",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:37 initializer RegionSelection.Phase.Select; enum declared at line 34; switched on at lines 302-305.",
+   "notes": "QML enum declared in RegionSelection.qml; maps to a C++ enum class nested in RegionSelection (not in the type vocabulary table)."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 57,
+   "name": "windows",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<HyprlandClient>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:57 copies HyprlandData.windowList (hyprctl clients -j, HyprlandData.qml:102) and reads floating/workspace.id/at/size/class/title.",
+   "notes": "Reuses struct HyprlandClient (introduced by id 89). Same shape as HyprlandData.windowList elements; sorted copy with floating windows first."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 62,
+   "name": "layers",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::map<std::string, HyprlandMonitorLayers>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:62,95-96 reads root.layers[monitorName].levels['2'] with layer.namespace/x/y/w/h; source is hyprctl layers -j (HyprlandData.qml:131).",
+   "notes": "Keyed by monitor name. Same shape as HyprlandData.layers (id 253), reuse HyprlandMonitorLayers there. hyprctl also emits address and pid per layer; omitted because never read. 'namespace' is a C++ keyword, the field needs renaming in the port (JSON key stays 'namespace')."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 81,
+   "name": "mouseButton",
+   "modifiers": [],
+   "cpp_type": "std::optional<ii::MouseButton>",
+   "kind": "value",
+   "confidence": "medium",
+   "evidence": "RegionSelection.qml:81 initializer null; line 336 assigns mouse.button; line 276 compares to Qt.RightButton.",
+   "notes": "Qt.MouseButton enum; ii::MouseButton is not in the vocabulary table, use the project's equivalent of Qt::MouseButton. Nullable until first press."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 82,
+   "name": "imageRegions",
+   "modifiers": [],
+   "cpp_type": "std::vector<ScreenRegion>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:231 assigns RegionFunctions.filterImageRegions(JSON.parse(...)); find_regions.py:113 emits {at:[x,y], size:[w,h]} with --hyprctl.",
+   "notes": "Also used as Repeater model through ScriptModel (lines 468-477). ScreenRegion is the common {at,size} base of WindowRegion/LayerRegion; those can derive from it or embed the same two fields."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 421,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "WindowRegion",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:83-93 builds windowRegions as {at, size, class, title}; delegate reads modelData.at/size/class (lines 422-433).",
+   "notes": "Element of ScriptModel values root.windowRegions (list<var>). 'class' is a C++ keyword, rename the field in the port (JSON key stays 'class'). Reuses ScreenRegion fields at/size."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 451,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "LayerRegion",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:94-115 builds layerRegions as {at, size, namespace}; delegate reads modelData.at/size/namespace (lines 452-462).",
+   "notes": "Element of ScriptModel values root.layerRegions (list<var>). 'namespace' is a C++ keyword, rename the field in the port. Reuses ScreenRegion fields at/size."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 480,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "ScreenRegion",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:468-481 Repeater over root.imageRegions; delegate reads modelData.at/size only.",
+   "notes": "Reuses ScreenRegion (introduced by id 171)."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelector.qml",
+   "line": 16,
+   "name": "action",
+   "modifiers": [],
+   "cpp_type": "RegionSelection::SnipAction",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelector.qml:16 initializer RegionSelection.SnipAction.Copy; assigned in screenshot()/search()/ocr()/record().",
+   "notes": "QML enum declared in RegionSelection.qml; maps to a C++ enum class nested in RegionSelection (not in the type vocabulary table)."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelector.qml",
+   "line": 17,
+   "name": "selectionMode",
+   "modifiers": [],
+   "cpp_type": "RegionSelection::SelectionMode",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "RegionSelector.qml:17 initializer RegionSelection.SelectionMode.RectCorners; assigned in search() etc.",
+   "notes": "QML enum declared in RegionSelection.qml; maps to a C++ enum class nested in RegionSelection (not in the type vocabulary table)."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelector.qml",
+   "line": 23,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "RegionSelector.qml:20-27 Variants over Quickshell.screens; modelData is passed to RegionSelection.screen.",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/regionSelector/TargetRegion.qml",
+   "line": 11,
+   "name": "clientDimensions",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "ScreenRegion",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "TargetRegion.qml:36-39 reads clientDimensions.at[0..1] and .size[0..1] only; RegionSelection.qml:422,452,481 pass window, layer and image regions.",
+   "notes": "Reuses ScreenRegion (introduced by id 171); the window and layer region extras (class/title/namespace) are never read here, so slicing to ScreenRegion is fine."
+  },
+  {
+   "file": "modules/ii/screenCorners/ScreenCorners.qml",
+   "line": 16,
+   "name": "actionForCorner",
+   "modifiers": [],
+   "cpp_type": "std::map<RoundCorner::CornerEnum, std::function<void()>>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "ScreenCorners.qml:16-19 object literal keyed by RoundCorner.CornerEnum.TopRight/BottomRight with arrow-function values; called as actionForCorner[corner]() and truthiness-tested (l.64,86,90,93)",
+   "notes": "Lookup of a missing corner (TopLeft/BottomLeft) is falsy in QML; in C++ use contains()/find(). Values toggle GlobalStates.sidebarRightOpen."
+  },
+  {
+   "file": "modules/ii/screenCorners/ScreenCorners.qml",
+   "line": 25,
+   "name": "corner",
+   "modifiers": [],
+   "cpp_type": "RoundCorner::CornerEnum",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "ScreenCorners.qml:25 CornerPanelWindow.corner set to RoundCorner.CornerEnum.* (l.153-168), forwarded to RoundCorner.corner and used as actionForCorner key",
+   "notes": "No initializer in QML (undefined until set); every instantiation sets it, so a default of TopLeft (as in RoundCorner.qml:8) is fine."
+  },
+  {
+   "file": "modules/ii/screenCorners/ScreenCorners.qml",
+   "line": 143,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "ScreenCorners.qml:138-145 Variants over Quickshell.screens; modelData passed to Hyprland.monitorFor and CornerPanelWindow.screen",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/screenCorners/ScreenCorners.qml",
+   "line": 148,
+   "name": "activeWorkspaceWithFullscreen",
+   "modifiers": [],
+   "cpp_type": "qs::HyprlandWorkspace*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "ScreenCorners.qml:148 .filter(...)[0] over list<HyprlandWorkspace>; `fullscreen: activeWorkspaceWithFullscreen != undefined` (l.149)",
+   "notes": "Nullable: null when no fullscreen window on an active workspace of this monitor."
+  },
+  {
+   "file": "modules/ii/screenTranslator/ScreenTextOverlay.qml",
+   "line": 28,
+   "name": "visionParagraphs",
+   "modifiers": [],
+   "cpp_type": "std::vector<VisionParagraph>",
+   "kind": "model",
+   "confidence": "medium",
+   "evidence": "ScreenTextOverlay.qml:153 = gcr.coherentParagraphs (Google Cloud Vision paragraphs with a computed text field, GCloudVisionResult.qml:84-87); used as Repeater model at lines 201 and 262; reads modelData.text and boundingBox.vertices[i].x/y (lines 203, 271-278).",
+   "notes": "Projection of the Vision API paragraph to the keys this consumer reads. The raw API paragraph also carries words[].symbols[], confidence and property, which only GCloudVisionResult uses (coherentParagraphs entry in that file should reuse VisionParagraph, extending it if its owner wants the words). Vision omits zero-valued coordinates, so defaults of 0 are correct. vertices holds 4 entries in practice (indexes 0,1,3 are read). Initial value [] is the empty vector."
+  },
+  {
+   "file": "modules/ii/screenTranslator/ScreenTextOverlay.qml",
+   "line": 30,
+   "name": "translation",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "ScreenTextOverlay.qml:169-174 object keyed by source paragraph text with translatedText values; read as translation[s] ?? s at line 33.",
+   "notes": "Missing key falls back to the original string, so use find() with default rather than operator[]."
+  },
+  {
+   "file": "modules/ii/screenTranslator/ScreenTextOverlay.qml",
+   "line": 269,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "VisionParagraph",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "ScreenTextOverlay.qml:200-203,261-264 Repeater over root.visionParagraphs; VisionBoundingBoxRect reads modelData.text and modelData.boundingBox.vertices (lines 271, 297).",
+   "notes": "Reuses VisionParagraph (introduced by id 183)."
+  },
+  {
+   "file": "modules/ii/screenTranslator/ScreenTranslator.qml",
+   "line": 15,
+   "name": "currentScreen",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "ScreenTranslator.qml:15 = Quickshell.screens.find(...) ?? null, matched against Hyprland.focusedMonitor name.",
+   "notes": "Nullable pointer."
+  },
+  {
+   "file": "modules/ii/screenTranslator/ScreenTranslator.qml",
+   "line": 19,
+   "name": "lockedScreen",
+   "modifiers": [],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "ScreenTranslator.qml:27 assigns root.currentScreen; line 34 passes it to ScreenTranslatorPanel.screen.",
+   "notes": "Nullable (undefined until first open)."
+  },
+  {
+   "file": "modules/ii/sessionScreen/SessionScreen.qml",
+   "line": 16,
+   "name": "focusedScreen",
+   "modifiers": [],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "SessionScreen.qml:16 Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name); read as focusedScreen?.width/height (l.56-57).",
+   "notes": "Nullable pointer (find() can return undefined). Same expression is used in OnScreenDisplay.qml:16 and BrightnessIndicator.qml:9."
+  },
+  {
+   "file": "modules/ii/sidebarRight/BottomWidgetGroup.qml",
+   "line": 20,
+   "name": "tabs",
+   "modifiers": [],
+   "cpp_type": "std::vector<BottomWidgetTab>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "BottomWidgetGroup.qml:20-39 literal list of 3 objects with fixed keys; used as Repeater model (l.159) and tabs[i].widget as Loader source",
+   "notes": "widget is a relative QML path (Loader.source); in C++ probably map to a component factory instead of a string."
+  },
+  {
+   "file": "modules/ii/sidebarRight/BottomWidgetGroup.qml",
+   "line": 162,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "BottomWidgetTab",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "BottomWidgetGroup.qml:162 delegate of Repeater over root.tabs; reads modelData.name and modelData.icon",
+   "notes": "Struct defined in entry 189."
+  },
+  {
+   "file": "modules/ii/sidebarRight/QuickSliders.qml",
+   "line": 15,
+   "name": "screen",
+   "modifiers": [],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "QuickSliders.qml:15 root.QsWindow.window?.screen is a Quickshell ShellScreen; passed to Brightness.getMonitorForScreen(screen: ShellScreen)",
+   "notes": "Nullable (window may be null)."
+  },
+  {
+   "file": "modules/ii/sidebarRight/QuickSliders.qml",
+   "line": 16,
+   "name": "brightnessMonitor",
+   "modifiers": [],
+   "cpp_type": "BrightnessMonitor*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "services/Brightness.qml:26 getMonitorForScreen returns monitors.find(...), elements are the BrightnessMonitor inline component (Brightness.qml:94)",
+   "notes": "BrightnessMonitor is an inline component of the Brightness singleton (services/Brightness.qml), not its own file; nullable since find() may return undefined."
+  },
+  {
+   "file": "modules/ii/sidebarRight/bluetoothDevices/BluetoothDeviceItem.qml",
+   "line": 10,
+   "name": "device",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "qs::BluetoothDevice*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "BluetoothDialog.qml:49-51 delegate sets device: modelData where modelData is `required property BluetoothDevice`; used with name/icon/paired/connected/battery/pair()/connect()",
+   "notes": "Quickshell.Bluetooth device. Nullable (code uses device?.)."
+  },
+  {
+   "file": "modules/ii/sidebarRight/calendar/CalendarWidget.qml",
+   "line": 12,
+   "name": "viewingDate",
+   "modifiers": [],
+   "cpp_type": "ii::DateTime",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "calendar_layout.js getDateInXMonthsTime returns a JS Date (new Date / new Date(y,m,1)); viewingDate.toLocaleDateString used in CalendarWidget.qml",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/sidebarRight/calendar/CalendarWidget.qml",
+   "line": 13,
+   "name": "calendarLayout",
+   "modifiers": [],
+   "cpp_type": "std::vector<std::vector<CalendarDay>>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "calendar_layout.js getCalendarLayout builds 6x7 array of {day, today}; CalendarWidget.qml reads calendarLayout[row][col].day/.today",
+   "notes": "Always 6 rows x 7 columns; today is -1 (other month), 0 (this month), 1 (highlighted today)."
+  },
+  {
+   "file": "modules/ii/sidebarRight/nightLight/NightLightDialog.qml",
+   "line": 16,
+   "name": "screen",
+   "modifiers": [],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "NightLightDialog.qml:16 root.QsWindow.window?.screen",
+   "notes": "Nullable. Same as QuickSliders.screen."
+  },
+  {
+   "file": "modules/ii/sidebarRight/nightLight/NightLightDialog.qml",
+   "line": 17,
+   "name": "brightnessMonitor",
+   "modifiers": [],
+   "cpp_type": "BrightnessMonitor*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "NightLightDialog.qml:17 Brightness.getMonitorForScreen(screen) (services/Brightness.qml:26)",
+   "notes": "Inline component of Brightness singleton; nullable."
+  },
+  {
+   "file": "modules/ii/sidebarRight/pomodoro/PomodoroWidget.qml",
+   "line": 10,
+   "name": "tabButtonList",
+   "modifiers": [],
+   "cpp_type": "std::vector<TabButtonEntry>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "PomodoroWidget.qml:10-13 literal list of {name, icon}; used as Repeater model feeding SecondaryTabButton buttonText/buttonIcon (l.53-57)",
+   "notes": "TabButtonEntry shape {name, icon} is shared with TodoWidget.tabButtonList, Cheatsheet.tabButtonList, ToolbarTabBar.tabButtonList and OptionsToolbar tabs (all {icon, name}); reuse the same struct."
+  },
+  {
+   "file": "modules/ii/sidebarRight/pomodoro/Stopwatch.qml",
+   "line": 96,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "int",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Stopwatch.qml:96 delegate over TimerService.stopwatchLaps; laps pushed from int stopwatchTime (TimerService.qml:140), used as lapTime in centiseconds (Math.floor(lapTime) % 100)",
+   "notes": "Each lap is cumulative elapsed time in 10 ms units."
+  },
+  {
+   "file": "modules/ii/sidebarRight/pomodoro/Stopwatch.qml",
+   "line": 97,
+   "name": "horizontalPadding",
+   "modifiers": [],
+   "cpp_type": "int",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Stopwatch.qml:97 literal 10, never set externally; used only for padding arithmetic",
+   "notes": "Could be double if the port unifies padding as real."
+  },
+  {
+   "file": "modules/ii/sidebarRight/pomodoro/Stopwatch.qml",
+   "line": 98,
+   "name": "verticalPadding",
+   "modifiers": [],
+   "cpp_type": "int",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Stopwatch.qml:98 literal 6, never set externally; used only for padding arithmetic",
+   "notes": "Could be double if the port unifies padding as real."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/AndroidQuickPanel.qml",
+   "line": 82,
+   "name": "modelData",
+   "modifiers": [],
+   "cpp_type": "std::vector<QuickToggleEntry>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidQuickPanel.qml:82 = root.toggleRows[index]; toggleRowsForList (l.41-60) returns array of rows of toggle objects {type, size}; row used as ScriptModel values (objectProp: \"type\")",
+   "notes": "One row of toggles (shape comes from Config.options.sidebar.quickToggles.android.toggles = [{size, type}, ...]). QuickToggleEntry is reused by AndroidQuickToggleButton.buttonData and the AndroidToggleDelegateChooser modelData entries."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/AndroidQuickPanel.qml",
+   "line": 142,
+   "name": "modelData",
+   "modifiers": [],
+   "cpp_type": "std::vector<QuickToggleEntry>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidQuickPanel.qml:142 = root.unusedToggleRows[index]; unusedToggles are {type, size: 1} (l.36-39)",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidQuickToggleButton.qml",
+   "line": 14,
+   "name": "buttonData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidQuickToggleButton.qml reads buttonData.type only (l.192,203,211,233); assigned from modelData in AndroidToggleDelegateChooser (buttonData: modelData)",
+   "notes": "Struct defined in entry 202. Value copy of the config entry; the toggle edit code mutates Config...toggles directly, not this copy."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidQuickToggleButton.qml",
+   "line": 32,
+   "name": "mainAction",
+   "modifiers": [],
+   "cpp_type": "std::function<void()>",
+   "kind": "callback",
+   "confidence": "high",
+   "evidence": "AndroidQuickToggleButton.qml:32 toggleModel?.mainAction ?? null; invoked as root.mainAction() with no args; QuickToggleModel.mainAction is assigned `() => {...}` in every *Toggle.qml",
+   "notes": "Nullable function (empty std::function when toggleModel is null)."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 27,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:27 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 43,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:43 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 59,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:59 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 75,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:75 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 88,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:88 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 101,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:101 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 114,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:114 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 127,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:127 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 140,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:140 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 153,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:153 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 169,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:169 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 182,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:182 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 198,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:198 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 214,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:214 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 227,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:227 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 240,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:240 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/androidStyle/AndroidToggleDelegateChooser.qml",
+   "line": 253,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickToggleEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AndroidToggleDelegateChooser.qml:253 delegate modelData read as .size and forwarded to buttonData; items come from toggleRows rows of {type,size}",
+   "notes": "Struct defined in entry 202."
+  },
+  {
+   "file": "modules/ii/sidebarRight/todo/TaskList.qml",
+   "line": 12,
+   "name": "taskList",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::vector<TodoTaskView>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "TodoWidget.qml:68-79 taskList = Todo.list.map(item => Object.assign({}, item, {originalIndex: i})).filter(done); TaskList.qml:25 ScriptModel values",
+   "notes": "TodoTaskView = Todo.list item ({content, done} per services/Todo.qml) plus originalIndex (index in the unfiltered Todo.list)."
+  },
+  {
+   "file": "modules/ii/sidebarRight/todo/TaskList.qml",
+   "line": 29,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "TodoTaskView",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "TaskList.qml:29 delegate of ScriptModel over taskList; reads .content, .done, .originalIndex (l.67,80-96)",
+   "notes": "Struct defined in entry 223."
+  },
+  {
+   "file": "modules/ii/sidebarRight/todo/TodoWidget.qml",
+   "line": 10,
+   "name": "tabButtonList",
+   "modifiers": [],
+   "cpp_type": "std::vector<TabButtonEntry>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "TodoWidget.qml:10 literal list of {icon, name}; Repeater model feeding SecondaryTabButton (l.46-52)",
+   "notes": "Struct TabButtonEntry defined in entry 198 (key order differs only)."
+  },
+  {
+   "file": "modules/ii/sidebarRight/volumeMixer/VolumeDialogContent.qml",
+   "line": 30,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "qs::PwNode*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "VolumeDialogContent.qml:30-33 delegate over appPwNodes (Audio.outputAppNodes/inputAppNodes) sets VolumeMixerEntry.node, which is `required property PwNode`",
+   "notes": "Nullable pointer; ScriptModel over a list of Pipewire nodes."
+  },
+  {
+   "file": "modules/ii/verticalBar/BatteryIndicator.qml",
+   "line": 11,
+   "name": "chargeState",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "qs::UPowerDeviceState",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "verticalBar/BatteryIndicator.qml:11 = Battery.chargeState = UPower.displayDevice.state (Battery.qml:13).",
+   "notes": "Same as id 92."
+  },
+  {
+   "file": "modules/ii/verticalBar/VerticalBar.qml",
+   "line": 35,
+   "name": "brightnessMonitor",
+   "modifiers": [],
+   "cpp_type": "BrightnessMonitor*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "VerticalBar.qml:35 = Brightness.getMonitorForScreen(...) which returns monitors.find(...) over BrightnessMonitor objects (Brightness.qml:22-28, component at line 94).",
+   "notes": "BrightnessMonitor is an inline component of services/Brightness.qml. Nullable if no monitor matches the screen."
+  },
+  {
+   "file": "modules/ii/verticalBar/VerticalBarContent.qml",
+   "line": 16,
+   "name": "screen",
+   "modifiers": [],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "VerticalBarContent.qml:16 = root.QsWindow.window?.screen.",
+   "notes": "Nullable until the window exists. Same as id 91."
+  },
+  {
+   "file": "modules/ii/wallpaperSelector/WallpaperDirectoryItem.qml",
+   "line": 11,
+   "name": "fileModelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "FolderListEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "WallpaperSelectorContent.qml:319-321 passes the Wallpapers.folderModel (FolderListModelWithHistory, a FolderListModel) delegate modelData; WallpaperDirectoryItem reads fileIsDir, fileName, filePath (lines 12,13,64,119).",
+   "notes": "Row of Qt.labs.folderlistmodel roles; only the three roles read are listed (the model also exposes fileURL, fileBaseName, fileSize, ...)."
+  },
+  {
+   "file": "modules/ii/wallpaperSelector/WallpaperSelectorContent.qml",
+   "line": 211,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "QuickDirectory",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "WallpaperSelectorContent.qml:163-210 model literal of {icon, name, path}; delegate reads modelData.icon/name/path (lines 213-228).",
+   "notes": "Model is built from Directories.* strings plus an optional Homework entry; the '---' entry has an empty icon and is disabled."
+  },
+  {
+   "file": "modules/ii/wallpaperSelector/WallpaperSelectorContent.qml",
+   "line": 319,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "FolderListEntry",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "WallpaperSelectorContent.qml:317-321 GridView model Wallpapers.folderModel; delegate passes modelData to fileModelData and reads fileModelData.filePath.",
+   "notes": "Reuses FolderListEntry (introduced by id 230)."
+  },
+  {
+   "file": "services/AppSearch.qml",
+   "line": 15,
+   "name": "substitutions",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AppSearch.qml:15-23 string->string literal, looked up by app id/class in guessIcon (l.106-107); no external readers.",
+   "notes": ""
+  },
+  {
+   "file": "services/AppSearch.qml",
+   "line": 24,
+   "name": "regexSubstitutions",
+   "modifiers": [],
+   "cpp_type": "std::vector<RegexSubstitution>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AppSearch.qml:24-41 list of {regex: RegExp literal, replace: string}, consumed by str.replace(regex, replace) in guessIcon l.110-117.",
+   "notes": "std::regex is not in the vocabulary but is the direct equivalent of the JS RegExp literal; replace strings use the ECMAScript '$1' backreference syntax which std::regex_replace understands."
+  },
+  {
+   "file": "services/AppSearch.qml",
+   "line": 51,
+   "name": "preppedNames",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<FuzzyDesktopEntry>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AppSearch.qml:51-54 list.map(a => ({name: Fuzzy.prepare(...), entry: a})) where list is list<DesktopEntry> (l.44); fed to Fuzzy.go(..., {key: 'name'}) and r.obj.entry read back.",
+   "notes": "FuzzyPrepared is the opaque result of Fuzzy.prepare() (fuzzysort.js:220 prepare -> new_result(target, ...)); only the original target string is meaningful to the port, rest is fuzzy-matcher internal state. Re-used by preppedIcons, Cliphist.preparedEntries (via FuzzyStringEntry) and Emojis.preparedEntries."
+  },
+  {
+   "file": "services/AppSearch.qml",
+   "line": 56,
+   "name": "preppedIcons",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<FuzzyDesktopEntry>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "AppSearch.qml:56-59 same {name: Fuzzy.prepare(icon), entry: DesktopEntry} shape as preppedNames, consumed by Fuzzy.go in guessIcon l.140-145.",
+   "notes": "Re-uses FuzzyDesktopEntry/FuzzyPrepared introduced by preppedNames (id 235); here name is prepared from the entry's icon instead of its name."
+  },
+  {
+   "file": "services/Battery.qml",
+   "line": 13,
+   "name": "chargeState",
+   "modifiers": [],
+   "cpp_type": "qs::UPowerDeviceState",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Battery.qml:13 = UPower.displayDevice.state (Quickshell UPowerDeviceState enum), compared to UPowerDeviceState.Charging/PendingCharge (l.14-15).",
+   "notes": "Enum, not covered by the vocabulary table: written as qs::UPowerDeviceState (Quickshell enum value, no pointer). Other files compare it to raw ints (BatteryPopup.qml:25,46,49,51,58 use 1 = Charging and 4 = FullyCharged); fall back to int if enums are not modelled."
+  },
+  {
+   "file": "services/Brightness.qml",
+   "line": 21,
+   "name": "ddcMonitors",
+   "modifiers": [],
+   "cpp_type": "std::vector<DdcMonitor>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Brightness.qml:80-83 pushes {name, busNum} parsed from `ddcutil detect --brief`; read in BrightnessMonitor.initialize (l.127) comparing m.name to screen.name and m.busNum to mon.busNum.",
+   "notes": "busNum is kept as a string (taken from split('/dev/i2c-')[1]) and compared with BrightnessMonitor.busNum which is declared string. Only used inside Brightness.qml."
+  },
+  {
+   "file": "services/Brightness.qml",
+   "line": 149,
+   "name": "setTimer",
+   "modifiers": [],
+   "cpp_type": "ii::Timer*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "Brightness.qml:149-155 `property var setTimer: Timer { id: setTimer ... }` inside inline component BrightnessMonitor; used via setTimer.restart() (l.122).",
+   "notes": "ii::Timer is the QtQml Timer analogue; spec vocabulary has no explicit Timer entry but 'ii::Text*, ii::Image*...' pattern for specific Qt types applies. Property is effectively an owned child object."
+  },
+  {
+   "file": "services/Brightness.qml",
+   "line": 200,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "qs::ShellScreen*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "Brightness.qml:196-200 `required property var modelData` of Scope inside `Variants { model: Quickshell.screens }`; reads modelData.name (l.201) and passes it to getMonitorForScreen(ShellScreen) (l.239).",
+   "notes": "Required Variants delegate model data."
+  },
+  {
+   "file": "services/Cliphist.qml",
+   "line": 19,
+   "name": "preparedEntries",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<FuzzyStringEntry>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Cliphist.qml:19-22 entries.map(a => ({name: Fuzzy.prepare(...), entry: a})) with entries a list<string> (l.18); fed to Fuzzy.go(..., {key:'name'}) and r.obj.entry returned (l.37-42).",
+   "notes": "FuzzyPrepared is introduced by AppSearch.preppedNames (id 235). FuzzyStringEntry is shared with Emojis.preparedEntries (id 243)."
+  },
+  {
+   "file": "services/DateTime.qml",
+   "line": 13,
+   "name": "clock",
+   "modifiers": [],
+   "cpp_type": "qs::SystemClock*",
+   "kind": "object_ref",
+   "confidence": "high",
+   "evidence": "DateTime.qml:13-20 `property var clock: SystemClock { id: clock ... }`; externally read as DateTime.clock.date/.hours/.minutes/.seconds (WeekRow.qml:28, CookieClock.qml:31-32, Hyprsunset.qml:35-36).",
+   "notes": "SystemClock is a Quickshell type (import Quickshell), hence qs::SystemClock. Property owns the instance it is declared with."
+  },
+  {
+   "file": "services/Emojis.qml",
+   "line": 18,
+   "name": "preparedEntries",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<FuzzyStringEntry>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Emojis.qml:18-21 list.map(a => ({name: Fuzzy.prepare(`${a}`), entry: a})); list is filled with trimmed text lines (updateEmojis l.45-54), returned entries are strings (LauncherSearch.qml:213-217 does entry.match/replace).",
+   "notes": "Re-uses FuzzyStringEntry/FuzzyPrepared introduced by Cliphist.preparedEntries (id 241) and AppSearch.preppedNames (id 235). Emojis.list itself is declared `list<var>` but only ever holds strings."
+  },
+  {
+   "file": "services/GoogleCloud.qml",
+   "line": 10,
+   "name": "keyContent",
+   "modifiers": [],
+   "cpp_type": "nlohmann::json",
+   "kind": "json",
+   "confidence": "medium",
+   "evidence": "GoogleCloud.qml:84 root.keyContent = KeyringStorage.keyringData?.googleCloud?.serviceAccountKey (user-pasted JSON via setKeyJson, l.42-46); only .project_id is read (l.85,89) and the whole object is re-serialized with JSON.stringify to the token script (l.60).",
+   "notes": "Google service-account key JSON round-trips untouched into an external script, so a fixed struct would drop unknown fields; a struct with project_id (std::string) plus json passthrough is an alternative. Initial value ({}) and possibly undefined from the optional-chained read."
+  },
+  {
+   "file": "services/HyprlandData.qml",
+   "line": 15,
+   "name": "windowList",
+   "modifiers": [],
+   "cpp_type": "std::vector<HyprlandClient>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandData.qml:102 JSON.parse of `hyprctl clients -j`; fields read: address, workspace.id (l.31,36,74), monitor (Background.qml:37), at/size (RegionSelection.qml:88-89, HyprlandData.qml:76), class/title (ActiveWindow.qml:20,74), floating (RegionSelection.qml:57-61), pid (Session.qml:10). Shape confirmed against live `hyprctl clients -j` output.",
+   "notes": "Only the fields the shell reads are listed (hyprctl emits more, e.g. mapped, hidden, initialClass, xwayland, fullscreen). `class` is a C++ keyword, hence class_ (JSON key stays 'class'). at/size are 2-element JSON arrays [x,y]/[w,h] mapped to ii::Point/ii::Size; monitor is the Hyprland monitor id (compared with HyprlandMonitor.id). HyprlandWorkspaceRef is shared with HyprlandMonitorInfo."
+  },
+  {
+   "file": "services/HyprlandData.qml",
+   "line": 16,
+   "name": "addresses",
+   "modifiers": [],
+   "cpp_type": "std::vector<std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandData.qml:109 root.windowList.map(win => win.address); addresses are '0x...' hex strings; no external readers.",
+   "notes": ""
+  },
+  {
+   "file": "services/HyprlandData.qml",
+   "line": 17,
+   "name": "windowByAddress",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, HyprlandClient>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandData.qml:103-108 tempWinByAddress[win.address] = win; looked up with `0x${toplevel.HyprlandToplevel.address}` keys (l.29-30, 43-44).",
+   "notes": "Re-uses HyprlandClient introduced by windowList (id 245). Lookup returns undefined for unknown addresses so callers must handle a miss (e.g. via find())."
+  },
+  {
+   "file": "services/HyprlandData.qml",
+   "line": 18,
+   "name": "workspaces",
+   "modifiers": [],
+   "cpp_type": "std::vector<HyprlandWorkspaceInfo>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandData.qml:142-144 JSON.parse of `hyprctl workspaces -j` filtered to ids 1..100; only ws.id is read in this file; the same shape is reused for activeWorkspace (l.162, read as .monitor in ActiveWindow.qml:16). Shape confirmed against live hyprctl output.",
+   "notes": "monitor is the monitor NAME string (e.g. 'eDP-1'), monitorID the numeric id; hyprctl emits more (lastwindow, hasfullscreen, ...) which are not read by the shell."
+  },
+  {
+   "file": "services/HyprlandData.qml",
+   "line": 19,
+   "name": "workspaceIds",
+   "modifiers": [],
+   "cpp_type": "std::vector<int>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandData.qml:151 root.workspaces.map(ws => ws.id); no external readers.",
+   "notes": ""
+  },
+  {
+   "file": "services/HyprlandData.qml",
+   "line": 20,
+   "name": "workspaceById",
+   "modifiers": [],
+   "cpp_type": "std::map<int, HyprlandWorkspaceInfo>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandData.qml:145-150 tempWorkspaceById[ws.id] = ws; no external readers.",
+   "notes": "Deviation from the string-keyed map rule: keys are integer workspace ids (JS coerces them to strings), so int keys are the natural C++ choice; use std::map<std::string, ...> if strict spec compliance is wanted. Re-uses HyprlandWorkspaceInfo from id 248."
+  },
+  {
+   "file": "services/HyprlandData.qml",
+   "line": 21,
+   "name": "activeWorkspace",
+   "modifiers": [],
+   "cpp_type": "std::optional<HyprlandWorkspaceInfo>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandData.qml:21 initial null, set at l.162 to JSON.parse of `hyprctl activeworkspace -j`; read as HyprlandData.activeWorkspace?.monitor in ActiveWindow.qml:16.",
+   "notes": "Optional because it stays null until the first hyprctl reply. Re-uses HyprlandWorkspaceInfo from id 248."
+  },
+  {
+   "file": "services/HyprlandData.qml",
+   "line": 22,
+   "name": "monitors",
+   "modifiers": [],
+   "cpp_type": "std::vector<HyprlandMonitorInfo>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandData.qml:120 JSON.parse of `hyprctl monitors -j`; fields read: id (WorkspaceModel.qml:11), name (Lock.qml:50), activeWorkspace.id (Lock.qml:51-54, ActiveWindow.qml:17), specialWorkspace.name (WorkspaceModel.qml:18-19). Shape confirmed against live hyprctl output.",
+   "notes": "Named HyprlandMonitorInfo to avoid clashing with qs::HyprlandMonitor. Only fields read by the shell are listed (hyprctl also emits width/height/scale/x/y/refreshRate/...). ActiveWindow.qml:17 indexes this array by monitor id (monitors[id]), assuming position == id. specialWorkspace has id 0 and name '' when none is open. Re-uses HyprlandWorkspaceRef from id 245."
+  },
+  {
+   "file": "services/HyprlandData.qml",
+   "line": 23,
+   "name": "layers",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, HyprlandMonitorLayers>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandData.qml:131 JSON.parse of `hyprctl layers -j`; RegionSelection.qml:95-104 reads layers[monitorName].levels['2'] and layer.namespace/x/y/w/h. Shape confirmed against live hyprctl output ({monitor: {levels: {'0'..'3': [layer...]}}}).",
+   "notes": "Outer map is keyed by monitor name; levels is keyed by the string layer index '0'..'3'. 'namespace' is renamed namespace_ in C++ (JSON key stays 'namespace'). hyprctl also emits alpha, not read by the shell."
+  },
+  {
+   "file": "services/HyprlandKeybinds.qml",
+   "line": 17,
+   "name": "keybinds",
+   "modifiers": [],
+   "cpp_type": "std::vector<HyprlandBind>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandKeybinds.qml:38 JSON.parse of `hyprctl binds -j`; fields read: description (l.41, CheatsheetKeybindsCategory.qml:107-115), key (l.119, 196, 202), modmask (l.182, 196). Shape confirmed against live hyprctl output.",
+   "notes": "Only fields read by the shell are listed (hyprctl also emits locked, mouse, release, dispatcher, arg, submap, ...). Consumed (after .filter) as a Repeater model in CheatsheetKeybindsCategory.qml:154-159."
+  },
+  {
+   "file": "services/HyprlandKeybinds.qml",
+   "line": 18,
+   "name": "keybindCategories",
+   "modifiers": [],
+   "cpp_type": "std::vector<std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandKeybinds.qml:39-47 groups array of unique description prefixes (strings); used as Repeater model [...HyprlandKeybinds.keybindCategories, ''] in CheatsheetKeybinds.qml:30.",
+   "notes": ""
+  },
+  {
+   "file": "services/HyprlandXkb.qml",
+   "line": 16,
+   "name": "cachedLayoutCodes",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandXkb.qml:52,61 cachedLayoutCodes[layoutDescription] = layoutCode (both strings); checked with hasOwnProperty (l.26); no external readers.",
+   "notes": ""
+  },
+  {
+   "file": "services/HyprlandXkb.qml",
+   "line": 20,
+   "name": "baseLayoutFilePath",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "HyprlandXkb.qml:20 initialised with a string path, used as `cat` argument (l.36); declared var but never anything else.",
+   "notes": ""
+  },
+  {
+   "file": "services/Hyprsunset.qml",
+   "line": 38,
+   "name": "manualActive",
+   "modifiers": [],
+   "cpp_type": "std::optional<bool>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Hyprsunset.qml:44,64,65,77,150 compared with / reset to undefined; assigned `root.temperatureActive` (bool) at l.151 and `active !== undefined ? active : !root.manualActive` at l.156; no external readers.",
+   "notes": "undefined means 'no manual override' and that state matters for ensureState()/reEvaluate()."
+  },
+  {
+   "file": "services/KeyringStorage.qml",
+   "line": 21,
+   "name": "keyringData",
+   "modifiers": [],
+   "cpp_type": "nlohmann::json",
+   "kind": "json",
+   "confidence": "medium",
+   "evidence": "KeyringStorage.qml:21 holds the parsed secret-tool payload (l.104); setNestedField(path, value) (l.34-64) writes at arbitrary key paths with Object.assign clone-and-reassign; only current reader is GoogleCloud.qml:84 (googleCloud.serviceAccountKey).",
+   "notes": "Generic path-addressed keyring document: callers choose the key path at runtime, so a fixed struct would only model today's single caller. Could become a struct {googleCloud: {serviceAccountKey: json}} if the generic setNestedField API is dropped."
+  },
+  {
+   "file": "services/KeyringStorage.qml",
+   "line": 23,
+   "name": "properties",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "KeyringStorage.qml:23-26 object literal {application: string, explanation: Translation.tr(...)}; iterated generically with Object.keys in propertiesAsArgs (l.27-31) to build secret-tool attribute args; no external readers.",
+   "notes": "Iterated by key, so a map fits better than a struct; std::map ordering (application, explanation) happens to equal the literal order."
+  },
+  {
+   "file": "services/KeyringStorage.qml",
+   "line": 27,
+   "name": "propertiesAsArgs",
+   "modifiers": [],
+   "cpp_type": "std::vector<std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "KeyringStorage.qml:27-31 reduce(arr.concat([key, properties[key]])) -> flat [key1, value1, key2, value2] string array spliced into the secret-tool command (l.81).",
+   "notes": ""
+  },
+  {
+   "file": "services/LatexRenderer.qml",
+   "line": 19,
+   "name": "renderPadding",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "int",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "LatexRenderer.qml:19 literal 4, interpolated into the MicroTeX '-padding=' argument (l.63); no external readers.",
+   "notes": ""
+  },
+  {
+   "file": "services/LatexRenderer.qml",
+   "line": 22,
+   "name": "processedExpressions",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "LatexRenderer.qml:46 processedExpressions[hash] = expression (hash is Qt.md5 hex string); no readers.",
+   "notes": ""
+  },
+  {
+   "file": "services/LatexRenderer.qml",
+   "line": 23,
+   "name": "renderedImagePaths",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "LatexRenderer.qml:73 renderedImagePaths[hash] = imagePath (generated QML string literals) on process exit; no readers.",
+   "notes": ""
+  },
+  {
+   "file": "services/LauncherSearch.qml",
+   "line": 38,
+   "name": "userActionScripts",
+   "modifiers": [],
+   "cpp_type": "std::vector<LauncherAction>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "LauncherSearch.qml:38-54 builds [{action: string, execute: (args) => {...}}] from the user actions FolderListModel; consumed through allActions (l.309-322) as action.action / action.execute(argsString).",
+   "notes": "execute receives the text after the first space of the query (root.query.split(' ').slice(1).join(' ')), always a string. LauncherAction is shared with searchActions (id 266) and allActions (id 267)."
+  },
+  {
+   "file": "services/LauncherSearch.qml",
+   "line": 64,
+   "name": "searchActions",
+   "modifiers": [],
+   "cpp_type": "std::vector<LauncherAction>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "LauncherSearch.qml:64-121 literal list of {action: string, execute: lambda}; consumed via allActions (l.124, 309-322).",
+   "notes": "Some lambdas ignore the argument (`() => ...`); they adapt to std::function<void(const std::string&)>. Re-uses LauncherAction introduced by userActionScripts (id 265)."
+  },
+  {
+   "file": "services/LauncherSearch.qml",
+   "line": 124,
+   "name": "allActions",
+   "modifiers": [],
+   "cpp_type": "std::vector<LauncherAction>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "LauncherSearch.qml:124 searchActions.concat(userActionScripts); mapped to results at l.309-324; no external readers.",
+   "notes": "Re-uses LauncherAction from id 265. Derived binding: concatenation of searchActions and userActionScripts."
+  },
+  {
+   "file": "services/MprisController.qml",
+   "line": 27,
+   "name": "activeTrack",
+   "modifiers": [],
+   "cpp_type": "MprisTrack",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "MprisController.qml:105-111 assigns {uniqueId, artUrl, title, artist, album}; read as activeTrack.uniqueId/.artUrl (l.90); no external readers.",
+   "notes": "Declared without initializer (undefined until the first updateTrack() call from onActivePlayerChanged); modelled as a default-initialised struct since the only reader is guarded by an active player. uniqueId comes from MprisPlayer.uniqueId (`?? 0`); title/artist/album fall back to translated 'Unknown ...' strings."
+  },
+  {
+   "file": "services/MprisController.qml",
+   "line": 142,
+   "name": "loopState",
+   "modifiers": [],
+   "cpp_type": "qs::MprisLoopState",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "MprisController.qml:142 `this.activePlayer?.loopState ?? MprisLoopState.None` (Quickshell.Services.Mpris enum), written back via setLoopState (l.143-146).",
+   "notes": "Enum, not covered by the vocabulary table: written as qs::MprisLoopState (value, no pointer). Fall back to int if enums are not modelled. No external readers of MprisController.loopState."
+  },
+  {
+   "file": "services/Notifications.qml",
+   "line": 78,
+   "name": "filePath",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Notifications.qml:78 = Directories.notificationsPath, a string built with FileUtils.trimFileProtocol (Directories.qml:36); passed through Qt.resolvedUrl for FileView.path (l.269).",
+   "notes": ""
+  },
+  {
+   "file": "services/Notifications.qml",
+   "line": 80,
+   "name": "popupList",
+   "modifiers": [],
+   "cpp_type": "std::vector<Notif*>",
+   "kind": "object_list",
+   "confidence": "high",
+   "evidence": "Notifications.qml:80 list.filter(notif => notif.popup) where list is `list<Notif>` (l.79) and Notif is the inline component declared at l.19; read as Notifications.popupList.length in NotificationPopup.qml:16.",
+   "notes": "Notif is an inline component of Notifications.qml (not a separate file)."
+  },
+  {
+   "file": "services/Notifications.qml",
+   "line": 82,
+   "name": "latestTimeForApp",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, double>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Notifications.qml:98-107 latestTimeForApp[notif.appName] = Math.max(..., notif.time) where Notif.time is a `double` (l.34); keys removed when an app has no notifications left; read in groupsForList (l.131).",
+   "notes": ""
+  },
+  {
+   "file": "services/Notifications.qml",
+   "line": 136,
+   "name": "groupsByAppName",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, NotifGroup>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Notifications.qml:118-134 groupsForList builds {appName, appIcon, notifications: [Notif...], time}; consumed as Notifications.groupsByAppName[appName] in NotificationListView.qml:22-24 and NotificationGroup.qml (appName, appIcon, notifications, time).",
+   "notes": "Keyed by appName. Named NotifGroup to avoid clashing with the NotificationGroup QML component. Shared with popupGroupsByAppName (id 274)."
+  },
+  {
+   "file": "services/Notifications.qml",
+   "line": 137,
+   "name": "popupGroupsByAppName",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, NotifGroup>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Notifications.qml:137 groupsForList(root.popupList), same function and consumer as groupsByAppName (NotificationListView.qml:22-23).",
+   "notes": "Re-uses NotifGroup introduced by groupsByAppName (id 273)."
+  },
+  {
+   "file": "services/ResourceUsage.qml",
+   "line": 23,
+   "name": "previousCpuStats",
+   "modifiers": [],
+   "cpp_type": "std::optional<CpuStats>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "ResourceUsage.qml:23 undefined until the first /proc/stat parse; set to { total, idle } at l.92 and read as previousCpuStats.total/.idle (l.86-88); no external readers.",
+   "notes": "Optional because undefined means 'no previous sample yet'. total/idle are sums of /proc/stat jiffies; double avoids int overflow on long uptimes."
+  },
+  {
+   "file": "services/SongRec.qml",
+   "line": 14,
+   "name": "monitorSource",
+   "modifiers": [],
+   "cpp_type": "SongRec::MonitorSource",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "SongRec.qml:12 `enum MonitorSource { Monitor, Input }`, property initialised with SongRec.MonitorSource.Monitor (l.14), toggled at l.34, compared in MusicRecognitionToggle.qml:11.",
+   "notes": "Enum declared in SongRec.qml itself; spelled as SongRec::MonitorSource (nested enum of the generated SongRec class)."
+  },
+  {
+   "file": "services/SongRec.qml",
+   "line": 44,
+   "name": "recognizedTrack",
+   "modifiers": [],
+   "cpp_type": "RecognizedTrack",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "SongRec.qml:44 initial {title:'', subtitle:'', url:''}; set at l.50-54 from songrec JSON (obj.track.title/subtitle/url); read at l.87,96,98.",
+   "notes": ""
+  },
+  {
+   "file": "services/TimerService.qml",
+   "line": 32,
+   "name": "stopwatchLaps",
+   "modifiers": [],
+   "cpp_type": "std::vector<int>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "TimerService.qml:32 binds Persistent.states.timer.stopwatch.laps (`list<var>`, Persistent.qml:148); laps are pushed as stopwatchTime (int, 10ms units; l.140) and read as numbers in Stopwatch.qml:90,139-140.",
+   "notes": "Persistent.stopwatch.laps is the source of truth; this property mirrors it. Elements are 10 ms ticks."
+  },
+  {
+   "file": "services/Todo.qml",
+   "line": 15,
+   "name": "filePath",
+   "modifiers": [],
+   "cpp_type": "std::string",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Todo.qml:15 = Directories.todoPath, a string built with FileUtils.trimFileProtocol (Directories.qml:33); passed through Qt.resolvedUrl for FileView.path (l.70).",
+   "notes": ""
+  },
+  {
+   "file": "services/Todo.qml",
+   "line": 16,
+   "name": "list",
+   "modifiers": [],
+   "cpp_type": "std::vector<TodoItem>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Todo.qml:26-29 items are {content: string, done: bool}; loaded by JSON.parse of the todo file (l.73); read as .content/.done in TaskList.qml:67,80,88, ClockWidgetPopup.qml:16,25, TodoWidget.qml:70,78.",
+   "notes": "Passed (after .filter) to TaskList.taskList, which feeds a ScriptModel."
+  },
+  {
+   "file": "services/Translation.qml",
+   "line": 11,
+   "name": "translations",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Translation.qml:62-63 assigned parsed translations/<lang>.json; all values in every translations/*.json are strings (checked); used as translations[key] in tr() (l.86).",
+   "notes": ""
+  },
+  {
+   "file": "services/Translation.qml",
+   "line": 12,
+   "name": "generatedTranslations",
+   "modifiers": [],
+   "cpp_type": "std::map<std::string, std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Translation.qml:72-73 assigned the parsed generated-translations JSON (same format as translations/<lang>.json); used as generatedTranslations[key] in tr() (l.86).",
+   "notes": ""
+  },
+  {
+   "file": "services/Translation.qml",
+   "line": 13,
+   "name": "availableLanguages",
+   "modifiers": [],
+   "cpp_type": "std::vector<std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Translation.qml:13 initial ['en_US']; set from the `find ... basename` scan output lines (l.38,107).",
+   "notes": ""
+  },
+  {
+   "file": "services/Translation.qml",
+   "line": 14,
+   "name": "availableGeneratedLanguages",
+   "modifiers": [],
+   "cpp_type": "std::vector<std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Translation.qml:14 initial []; set from the scan of the generated translations dir (l.46).",
+   "notes": ""
+  },
+  {
+   "file": "services/Translation.qml",
+   "line": 15,
+   "name": "allAvailableLanguages",
+   "modifiers": [],
+   "cpp_type": "std::vector<std::string>",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Translation.qml:15-18 sorted de-duplicated union of availableLanguages and availableGeneratedLanguages; spread into option lists in GeneralConfig.qml:144 and welcome.qml:154.",
+   "notes": "Derived binding (sorted set union)."
+  },
+  {
+   "file": "services/Weather.qml",
+   "line": 26,
+   "name": "location",
+   "modifiers": [],
+   "cpp_type": "WeatherLocation",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Weather.qml:26-30 initial {valid: false, lat: 0, lon: 0}; written at l.137-139 and read at l.86-87.",
+   "notes": "Pre-existing bug: the initializer declares `lon` but all writes (l.138) and reads (l.87) use `long`, so the declared `lon` is never updated. The struct uses `lon` as the single longitude field (long is a C++ keyword); the port should read/write it consistently."
+  },
+  {
+   "file": "services/Weather.qml",
+   "line": 32,
+   "name": "data",
+   "modifiers": [],
+   "cpp_type": "WeatherData",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "Weather.qml:49-81 refineData() builds every field as a display string (e.g. humidity + '%', temp + '°C', 'N', '113'); consumers treat them as text (WeatherPopup.qml:38-107, WeatherBar.qml:47, WeatherWidget.qml:36 calls temp.substring).",
+   "notes": "The initial literal uses numeric 0 placeholders for every field; in C++ these become empty strings. uv is the wttr.in uvIndex string passed straight to a text label (WeatherPopup.qml:65); wCode is a weather-code string passed to Icons.getWeatherIcon; lastRefresh is 'time • date' text."
+  },
+  {
+   "file": "services/network/WifiAccessPoint.qml",
+   "line": 4,
+   "name": "lastIpcObject",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "WifiAccessPointInfo",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "WifiAccessPoint.qml:5-10 reads ssid, bssid, strength (int), frequency (int), active (bool), security (string); producer is Network.qml:290-299 building exactly {active, strength, frequency, ssid, bssid, security} from `nmcli -g ...` output.",
+   "notes": "Required property set by Network.qml (apComp.createObject {lastIpcObject: network}) and replaced wholesale on refresh (l.316)."
+  },
+  {
+   "file": "settings.qml",
+   "line": 25,
+   "name": "pages",
+   "modifiers": [],
+   "cpp_type": "std::vector<SettingsPage>",
+   "kind": "model",
+   "confidence": "high",
+   "evidence": "settings.qml:25 literal list of {name, icon, [iconRotation], component}; used as Repeater model (line 210), pages.length for navigation, and pages[i].component as Loader source (lines 243, 270)",
+   "notes": "iconRotation is only present on the Bar entry (180); read as `modelData.iconRotation || 0`, so default int 0. `component` is a relative QML file path string (modules/settings/*.qml); in C++ this likely becomes a page factory."
+  },
+  {
+   "file": "settings.qml",
+   "line": 212,
+   "name": "index",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "int",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "settings.qml:212 Repeater delegate index, compared with root.currentPage (int) and assigned to it",
+   "notes": ""
+  },
+  {
+   "file": "settings.qml",
+   "line": 213,
+   "name": "modelData",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "SettingsPage",
+   "kind": "value",
+   "confidence": "high",
+   "evidence": "settings.qml:213 Repeater delegate modelData is one element of root.pages; reads .icon, .iconRotation, .name",
+   "notes": "Reuses SettingsPage from entry 289."
+  }
+ ]
+}
