@@ -41,6 +41,9 @@ namespace ii {
     Property<double> opacity{1.0};
     Property<bool> clip{false};
     Property<bool> enabled{true};
+    // Degrees and factor, around the item's centre (QML's default transformOrigin).
+    Property<double> rotation;
+    Property<double> scale{1.0};
     // Visual parent. Assigning reparents the item (and its node).
     Property<Item*> parent;
     // `item.visible` as QML reads it: own visibility and every ancestor's.
@@ -96,6 +99,8 @@ namespace ii {
     static void syncVisible(void* self);
     static void syncOpacity(void* self);
     static void syncClip(void* self);
+    static void syncRotation(void* self);
+    static void syncScale(void* self);
     static void onParentChanged(void* self);
 
     Node* m_node = nullptr;

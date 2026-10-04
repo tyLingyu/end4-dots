@@ -23,6 +23,19 @@ namespace ii {
 
   class PropertyBase;
 
+  // Receives writes to a property before they are stored (QML Behavior). Implemented by
+  // PropertyInterceptor<T>; type-erased here so PropertyBase stays non-template.
+  class InterceptorBase {
+  public:
+    virtual ~InterceptorBase() = default;
+  };
+
+  template <typename T> class PropertyInterceptor : public InterceptorBase {
+  public:
+    // Returns true when the write was taken over (e.g. turned into an animation).
+    virtual bool intercept(const T& value) = 0;
+  };
+
   class Binding {
   public:
     Binding(PropertyBase& target, const char* name) : m_target(target), m_name(name) {}
@@ -86,6 +99,12 @@ namespace ii {
       extra().hookContext = context;
     }
 
+    // At most one interceptor (a Behavior). Not owned; the interceptor clears itself on destruction.
+    void setInterceptor(InterceptorBase* interceptor) { extra().interceptor = interceptor; }
+    [[nodiscard]] InterceptorBase* interceptor() const noexcept {
+      return m_extra != nullptr ? m_extra->interceptor : nullptr;
+    }
+
   protected:
     void recordRead() const;
     void notifyChanged();
@@ -100,6 +119,7 @@ namespace ii {
       Signal<> changed;
       Hook hook = nullptr;
       void* hookContext = nullptr;
+      InterceptorBase* interceptor = nullptr;
       bool* destroyedDuringNotify = nullptr;
     };
 
@@ -133,6 +153,10 @@ namespace ii {
       store(std::move(value));
     }
 
+    // Stores without consulting the interceptor and without touching the binding: how an
+    // animation writes the values it produces (QML's BypassInterceptor | DontRemoveBinding).
+    void writeDirect(T value) { storeValue(std::move(value)); }
+
     template <typename F>
       requires std::invocable<F&> && std::convertible_to<std::invoke_result_t<F&>, T>
     void bind(F&& compute, const char* name = nullptr);
@@ -144,6 +168,15 @@ namespace ii {
     template <typename, typename> friend class FunctionBinding;
 
     void store(T value) {
+      if (InterceptorBase* base = interceptor()) {
+        if (static_cast<PropertyInterceptor<T>*>(base)->intercept(value)) {
+          return;
+        }
+      }
+      storeValue(std::move(value));
+    }
+
+    void storeValue(T value) {
       if constexpr (std::equality_comparable<T>) {
         if (m_value == value) {
           return;
