@@ -172,7 +172,6 @@ Singleton {
                         property string style: "cookie"        // Options: "cookie", "digital"
                         property string styleLocked: "cookie"  // Options: "cookie", "digital"
                         property JsonObject cookie: JsonObject {
-                            property bool aiStyling: false
                             property int sides: 12
                             property string dialNumberStyle: "dots"   // Options: "dots" , "numbers", "full" , "none"
                             property string hourHandStyle: "hollow"   // Options: "classic", "fill", "hollow", "hide"
@@ -416,16 +415,6 @@ Singleton {
                     property string imageSource: "https://media.tenor.com/H5U5bJzj3oAAAAAi/kukuru.gif"
                     property real scale: 0.5
                 }
-            }
-
-            property JsonObject overview: JsonObject {
-                property bool enable: true
-                property real scale: 0.18 // Relative to screen size
-                property real rows: 2
-                property real columns: 5
-                property bool orderRightLeft: false
-                property bool orderBottomUp: false
-                property bool centerIcons: true
             }
 
             property JsonObject regionSelector: JsonObject {

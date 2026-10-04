@@ -14,7 +14,6 @@ Item { // Bar content region
     id: root
 
     property var screen: root.QsWindow.window?.screen
-    property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
 
     component HorizontalBarSeparator: Rectangle {
         Layout.leftMargin: Appearance.sizes.baseBarHeight / 3
@@ -49,7 +48,6 @@ Item { // Bar content region
     FocusedScrollMouseArea { // Top section | scroll to change brightness
         id: barTopSectionMouseArea
         anchors.top: parent.top
-        implicitHeight: topSectionColumnLayout.implicitHeight
         implicitWidth: Appearance.sizes.baseVerticalBarWidth
         height: (root.height - middleSection.height) / 2
         width: Appearance.sizes.verticalBarWidth
@@ -57,17 +55,6 @@ Item { // Bar content region
         onScrollDown: Brightness.decreaseBrightness()
         onScrollUp: Brightness.increaseBrightness()
         onMovedAway: GlobalStates.osdBrightnessOpen = false
-
-        ColumnLayout { // Content
-            id: topSectionColumnLayout
-            anchors.fill: parent
-            spacing: 10
-
-            Item {
-                Layout.fillHeight: true
-            }
-            
-        }
     }
 
     Column { // Middle section
