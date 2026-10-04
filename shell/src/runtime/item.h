@@ -4,12 +4,22 @@
 #include "runtime/object.h"
 #include "runtime/property.h"
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
 class Node;
 
 namespace ii {
+
+  class LayoutAttached;
+
+  enum class Axis : std::uint8_t { Horizontal = 0, Vertical = 1 };
+
+  // Names of the default `width: implicitWidth` / `height: implicitHeight` bindings. Inline
+  // variables have one address program-wide, so the binding can be recognised by pointer.
+  inline constexpr char kImplicitWidthBindingName[] = "Item.width (implicit)";
+  inline constexpr char kImplicitHeightBindingName[] = "Item.height (implicit)";
 
   // QQuickItem. Owns a scene Node and keeps it in sync with its properties. The node lives in
   // the parent item's node while the item has a visual parent, and in m_detachedNode otherwise.
@@ -34,10 +44,19 @@ namespace ii {
     Property<Item*> parent;
     // `item.visible` as QML reads it: own visibility and every ancestor's.
     Property<bool> effectiveVisible{true};
+    // Bumped whenever a visual child is added or removed (QML `childrenChanged`).
+    Property<std::uint32_t> childrenRevision;
 
     // Created on first use, so un-anchored items pay nothing.
     [[nodiscard]] Anchors& anchors();
     [[nodiscard]] Anchors* anchorsIfAny() const noexcept { return m_anchors.get(); }
+
+    // `Layout.*` attached properties, created on first use.
+    [[nodiscard]] LayoutAttached& layout();
+    [[nodiscard]] LayoutAttached* layoutIfAny() const noexcept { return m_layout.get(); }
+
+    // True while width (height) still follows the implicit size, i.e. nobody assigned or bound it.
+    [[nodiscard]] bool followsImplicitSize(Axis axis) const noexcept;
 
     [[nodiscard]] AnchorLine leftLine() noexcept { return {this, AnchorEdge::Left}; }
     [[nodiscard]] AnchorLine rightLine() noexcept { return {this, AnchorEdge::Right}; }
@@ -83,6 +102,7 @@ namespace ii {
     Item* m_parentItem = nullptr;
     std::vector<Item*> m_childItems;
     std::unique_ptr<Anchors> m_anchors;
+    std::unique_ptr<LayoutAttached> m_layout;
     bool m_polishPending = false;
 
     friend void flushPolish();

@@ -1,6 +1,7 @@
 #include "runtime/item.h"
 
 #include "render/scene/node.h"
+#include "runtime/layout.h"
 
 #include <algorithm>
 #include <cmath>
@@ -27,8 +28,8 @@ namespace ii {
   void Item::init() {
     m_node->setUserData(this);
 
-    width.bind([this] { return implicitWidth.get(); }, "Item.width (implicit)");
-    height.bind([this] { return implicitHeight.get(); }, "Item.height (implicit)");
+    width.bind([this] { return implicitWidth.get(); }, kImplicitWidthBindingName);
+    height.bind([this] { return implicitHeight.get(); }, kImplicitHeightBindingName);
     effectiveVisible.bind(
         [this] {
           Item* p = parent.get();
@@ -75,6 +76,19 @@ namespace ii {
     return *m_anchors;
   }
 
+  LayoutAttached& Item::layout() {
+    if (m_layout == nullptr) {
+      m_layout = std::make_unique<LayoutAttached>();
+    }
+    return *m_layout;
+  }
+
+  bool Item::followsImplicitSize(Axis axis) const noexcept {
+    const Binding* binding = axis == Axis::Horizontal ? width.binding() : height.binding();
+    const char* expected = axis == Axis::Horizontal ? kImplicitWidthBindingName : kImplicitHeightBindingName;
+    return binding != nullptr && binding->name() == expected;
+  }
+
   void Item::polishLater() {
     if (!m_polishPending) {
       m_polishPending = true;
@@ -90,6 +104,7 @@ namespace ii {
     if (m_parentItem != nullptr) {
       std::erase(m_parentItem->m_childItems, this);
       node = m_parentItem->m_node->removeChild(m_node);
+      m_parentItem->childrenRevision.set(m_parentItem->childrenRevision.peek() + 1);
     } else {
       node = std::move(m_detachedNode);
     }
@@ -97,6 +112,7 @@ namespace ii {
     if (newParent != nullptr) {
       newParent->m_childItems.push_back(this);
       newParent->m_node->addChild(std::move(node));
+      newParent->childrenRevision.set(newParent->childrenRevision.peek() + 1);
     } else {
       m_detachedNode = std::move(node);
     }

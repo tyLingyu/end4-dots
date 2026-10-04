@@ -172,7 +172,9 @@ ii_sources = files(
   'src/runtime/anchors.cpp',
   'src/runtime/color.cpp',
   'src/runtime/item.cpp',
+  'src/runtime/layout.cpp',
   'src/runtime/object.cpp',
+  'src/runtime/positioner.cpp',
   'src/runtime/property.cpp',
   'src/runtime/rectangle.cpp',
   'src/system/app_identity.cpp',
@@ -237,6 +239,7 @@ executable('ii-shell',
 nlohmann_dep = dependency('nlohmann_json')
 foreach _t : [
   ['property', 'tests/runtime/property_test.cpp'],
+  ['item', 'tests/runtime/item_test.cpp'],
   ['diff', 'tests/diff/diff_test.cpp'],
 ]
   test(_t[0], executable(_t[0] + '_test', _t[1],

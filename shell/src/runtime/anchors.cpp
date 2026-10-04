@@ -118,7 +118,7 @@ namespace ii {
       item.x.clearBinding();
     }
     if (!ownsWidth && m_widthBinding != nullptr && item.width.binding() == m_widthBinding) {
-      item.width.bind([&item] { return item.implicitWidth.get(); }, "Item.width (implicit)");
+      item.width.bind([&item] { return item.implicitWidth.get(); }, kImplicitWidthBindingName);
     }
     m_xBinding = ownsX ? item.x.binding() : nullptr;
     m_widthBinding = ownsWidth ? item.width.binding() : nullptr;
@@ -165,7 +165,7 @@ namespace ii {
       item.y.clearBinding();
     }
     if (!ownsHeight && m_heightBinding != nullptr && item.height.binding() == m_heightBinding) {
-      item.height.bind([&item] { return item.implicitHeight.get(); }, "Item.height (implicit)");
+      item.height.bind([&item] { return item.implicitHeight.get(); }, kImplicitHeightBindingName);
     }
     m_yBinding = ownsY ? item.y.binding() : nullptr;
     m_heightBinding = ownsHeight ? item.height.binding() : nullptr;

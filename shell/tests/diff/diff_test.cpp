@@ -4,6 +4,8 @@
 // qml2cpp exists; then they will be generated from the same files.
 
 #include "runtime/item.h"
+#include "runtime/layout.h"
+#include "runtime/positioner.h"
 #include "runtime/rectangle.h"
 
 #include "../check.h"
@@ -164,12 +166,203 @@ namespace {
     return r;
   }
 
+  // Rectangle with an implicit size, the most common layout child in the cases.
+  Rectangle* box(Item* parent, const char* name, double iw, double ih) {
+    auto* r = named<Rectangle>(parent, name);
+    r->implicitWidth.set(iw);
+    r->implicitHeight.set(ih);
+    return r;
+  }
+
+  std::unique_ptr<Item> layoutRowBasic() {
+    auto r = root(400, 100);
+    auto* row = named<RowLayout>(r.get(), "row");
+    row->anchors().fill.set(r.get());
+    row->spacing.set(10);
+    box(row, "a", 50, 20);
+    auto* b = box(row, "b", 0, 30);
+    b->layout().fillWidth.set(true);
+    auto* c = box(row, "c", 30, 0);
+    c->layout().fillHeight.set(true);
+    return r;
+  }
+
+  std::unique_ptr<Item> layoutRowFillShare() {
+    auto r = root(500, 50);
+    auto* row = named<RowLayout>(r.get(), "row");
+    row->anchors().fill.set(r.get());
+    row->spacing.set(0);
+    box(row, "f1", 100, 10)->layout().fillWidth.set(true);
+    box(row, "f2", 20, 10)->layout().fillWidth.set(true);
+    auto* f3 = box(row, "f3", 0, 10);
+    f3->layout().fillWidth.set(true);
+    f3->layout().maximumWidth.set(60);
+    box(row, "fixed", 40, 10);
+    return r;
+  }
+
+  std::unique_ptr<Item> layoutRowShrink() {
+    auto r = root(150, 50);
+    auto* row = named<RowLayout>(r.get(), "row");
+    row->anchors().fill.set(r.get());
+    row->spacing.set(5);
+    box(row, "s1", 100, 10)->layout().minimumWidth.set(40);
+    box(row, "s2", 100, 10)->layout().minimumWidth.set(10);
+    return r;
+  }
+
+  std::unique_ptr<Item> layoutRowImplicit() {
+    auto r = root(300, 200);
+    auto* row = named<RowLayout>(r.get(), "row");
+    row->x.set(3);
+    row->y.set(4);
+    row->spacing.set(7);
+    box(row, "a", 20, 40);
+    box(row, "top", 10, 10)->layout().alignment.set(Align::Top);
+    box(row, "mid", 10, 11);
+    box(row, "bottom", 10, 10)->layout().alignment.set(Align::Bottom);
+    box(row, "hiddenOne", 99, 99)->visible.set(false);
+    box(row, "pref", 10, 5)->layout().preferredWidth.set(33);
+    auto* margined = box(row, "margined", 10, 10);
+    margined->layout().leftMargin.set(4);
+    margined->layout().topMargin.set(6);
+    return r;
+  }
+
+  std::unique_ptr<Item> layoutColumnNested() {
+    auto r = root(300, 300);
+    auto* col = named<ColumnLayout>(r.get(), "col");
+    col->anchors().fill.set(r.get());
+    col->anchors().margins.set(8);
+    col->spacing.set(4);
+    auto* header = named<RowLayout>(col, "header");
+    header->layout().fillWidth.set(true);
+    box(header, "icon", 24, 24);
+    box(header, "title", 0, 16)->layout().fillWidth.set(true);
+    auto* body = box(col, "body", 0, 0);
+    body->layout().fillWidth.set(true);
+    body->layout().fillHeight.set(true);
+    box(col, "footer", 50, 20)->layout().alignment.set(Align::Right);
+    box(col, "centered", 51, 20)->layout().alignment.set(Align::HCenter);
+    return r;
+  }
+
+  std::unique_ptr<Item> layoutRowEdge() {
+    auto r = root(400, 300);
+    auto rowAt = [&](const char* name, double y, double w, double spacing) {
+      auto* row = named<RowLayout>(r.get(), name);
+      row->y.set(y);
+      row->width.set(w);
+      row->height.set(20);
+      if (spacing >= 0) {
+        row->spacing.set(spacing);
+      }
+      return row;
+    };
+    auto* fixedOnly = rowAt("fixedOnly", 0, 300, -1);
+    box(fixedOnly, "x1", 50, 10);
+    box(fixedOnly, "x2", 50, 10);
+
+    auto* shrinkFill = rowAt("shrinkFill", 30, 100, 0);
+    auto* sf1 = box(shrinkFill, "sf1", 80, 10);
+    sf1->layout().fillWidth.set(true);
+    sf1->layout().minimumWidth.set(20);
+    auto* sf2 = box(shrinkFill, "sf2", 60, 10);
+    sf2->layout().fillWidth.set(true);
+    sf2->layout().minimumWidth.set(40);
+
+    auto* belowMin = rowAt("belowMin", 60, 30, 0);
+    auto* bm1 = box(belowMin, "bm1", 80, 10);
+    bm1->layout().fillWidth.set(true);
+    bm1->layout().minimumWidth.set(20);
+    auto* bm2 = box(belowMin, "bm2", 60, 10);
+    bm2->layout().fillWidth.set(true);
+    bm2->layout().minimumWidth.set(40);
+
+    auto* maxHit = rowAt("maxHit", 90, 300, 0);
+    auto* mh1 = box(maxHit, "mh1", 10, 10);
+    mh1->layout().fillWidth.set(true);
+    mh1->layout().maximumWidth.set(30);
+    box(maxHit, "mh2", 10, 10)->layout().fillWidth.set(true);
+    box(maxHit, "mh3", 20, 10)->layout().fillWidth.set(true);
+
+    auto* allMax = rowAt("allMax", 120, 300, 0);
+    auto* am1 = box(allMax, "am1", 10, 10);
+    am1->layout().fillWidth.set(true);
+    am1->layout().maximumWidth.set(40);
+    box(allMax, "am2", 25, 10);
+
+    auto* zeros = rowAt("zeros", 150, 301, 0);
+    box(zeros, "z1", 0, 10)->layout().fillWidth.set(true);
+    box(zeros, "z2", 0, 10)->layout().fillWidth.set(true);
+    auto* z3 = box(zeros, "z3", 0, 10);
+    z3->layout().fillWidth.set(true);
+    z3->layout().preferredWidth.set(1);
+
+    auto* crossFill = named<ColumnLayout>(r.get(), "crossFill");
+    crossFill->y.set(180);
+    crossFill->width.set(100);
+    crossFill->height.set(60);
+    auto* cf1 = box(crossFill, "cf1", 0, 10);
+    cf1->layout().fillWidth.set(true);
+    cf1->layout().maximumWidth.set(70);
+    box(crossFill, "cf2", 31, 10)->layout().alignment.set(Align::Left);
+    box(crossFill, "cf3", 31, 10);
+    return r;
+  }
+
+  std::unique_ptr<Item> layoutExplicitSize() {
+    auto r = root(300, 100);
+    auto* row = named<RowLayout>(r.get(), "row");
+    row->spacing.set(0);
+    auto* explicitW = named<Rectangle>(row, "explicitW");
+    explicitW->width.set(30);
+    explicitW->height.set(12);
+    auto* both = named<Rectangle>(row, "both");
+    both->implicitWidth.set(10);
+    both->width.set(40);
+    both->implicitHeight.set(8);
+    box(row, "plain", 15, 9);
+    return r;
+  }
+
+  std::unique_ptr<Item> positioners() {
+    auto r = root(300, 300);
+    auto* row = named<Row>(r.get(), "row");
+    row->x.set(5);
+    row->spacing.set(3);
+    row->padding.set(2);
+    auto sized = [](Item* parent, const char* name, double w, double h) {
+      auto* rect = named<Rectangle>(parent, name);
+      rect->width.set(w);
+      rect->height.set(h);
+      return rect;
+    };
+    sized(row, "r1", 10, 20);
+    sized(row, "r2", 15, 5)->visible.set(false);
+    sized(row, "r3", 20, 8);
+    auto* col = named<Column>(r.get(), "col");
+    col->y.set(50);
+    col->spacing.set(4);
+    sized(col, "k1", 30, 10);
+    sized(col, "k2", 12, 11);
+    return r;
+  }
+
   const std::map<std::string, Builder>& cases() {
     static const std::map<std::string, Builder> all{
         {"anchors_basic", anchorsBasic},
         {"anchors_sibling", anchorsSibling},
         {"anchors_fractional", anchorsFractional},
         {"item_basics", itemBasics},
+        {"layout_row_basic", layoutRowBasic},
+        {"layout_row_fill_share", layoutRowFillShare},
+        {"layout_row_shrink", layoutRowShrink},
+        {"layout_row_implicit", layoutRowImplicit},
+        {"layout_column_nested", layoutColumnNested},
+        {"layout_row_edge", layoutRowEdge},
+        {"layout_explicit_size", layoutExplicitSize},
+        {"positioners", positioners},
     };
     return all;
   }
