@@ -6,6 +6,10 @@ setopt share_history hist_ignore_all_dups hist_ignore_space hist_reduce_blanks e
 setopt autocd auto_pushd pushd_ignore_dups interactive_comments no_beep
 bindkey -e
 
+# ── dots-hyprland snippets: tty1 autostart, wallpaper colors, extra binds ──
+for f in "${XDG_CONFIG_HOME:-$HOME/.config}"/zshrc.d/*.(zsh|sh)(N); do source "$f"; done
+unset f
+
 # ── Completion ─────────────────────────────────────────────
 autoload -Uz compinit && compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump"
 eval "$(dircolors -b)"
