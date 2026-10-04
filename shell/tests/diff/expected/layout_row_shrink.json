@@ -1,0 +1,32 @@
+{
+ "row": {
+  "height": 50,
+  "implicitHeight": 10,
+  "implicitWidth": 205,
+  "opacity": 1,
+  "visible": true,
+  "width": 150,
+  "x": 0,
+  "y": 0
+ },
+ "s1": {
+  "height": 10,
+  "implicitHeight": 10,
+  "implicitWidth": 100,
+  "opacity": 1,
+  "visible": true,
+  "width": 100,
+  "x": 0,
+  "y": 20
+ },
+ "s2": {
+  "height": 10,
+  "implicitHeight": 10,
+  "implicitWidth": 100,
+  "opacity": 1,
+  "visible": true,
+  "width": 100,
+  "x": 105,
+  "y": 20
+ }
+}

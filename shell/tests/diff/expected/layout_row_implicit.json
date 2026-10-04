@@ -1,0 +1,82 @@
+{
+ "a": {
+  "height": 40,
+  "implicitHeight": 40,
+  "implicitWidth": 20,
+  "opacity": 1,
+  "visible": true,
+  "width": 20,
+  "x": 3,
+  "y": 4
+ },
+ "bottom": {
+  "height": 10,
+  "implicitHeight": 10,
+  "implicitWidth": 10,
+  "opacity": 1,
+  "visible": true,
+  "width": 10,
+  "x": 64,
+  "y": 34
+ },
+ "hiddenOne": {
+  "height": 99,
+  "implicitHeight": 99,
+  "implicitWidth": 99,
+  "opacity": 1,
+  "visible": false,
+  "width": 99,
+  "x": 3,
+  "y": 4
+ },
+ "margined": {
+  "height": 10,
+  "implicitHeight": 10,
+  "implicitWidth": 10,
+  "opacity": 1,
+  "visible": true,
+  "width": 10,
+  "x": 125,
+  "y": 22
+ },
+ "mid": {
+  "height": 11,
+  "implicitHeight": 11,
+  "implicitWidth": 10,
+  "opacity": 1,
+  "visible": true,
+  "width": 10,
+  "x": 47,
+  "y": 19
+ },
+ "pref": {
+  "height": 5,
+  "implicitHeight": 5,
+  "implicitWidth": 10,
+  "opacity": 1,
+  "visible": true,
+  "width": 33,
+  "x": 81,
+  "y": 22
+ },
+ "row": {
+  "height": 40,
+  "implicitHeight": 40,
+  "implicitWidth": 132,
+  "opacity": 1,
+  "visible": true,
+  "width": 132,
+  "x": 3,
+  "y": 4
+ },
+ "top": {
+  "height": 10,
+  "implicitHeight": 10,
+  "implicitWidth": 10,
+  "opacity": 1,
+  "visible": true,
+  "width": 10,
+  "x": 30,
+  "y": 4
+ }
+}

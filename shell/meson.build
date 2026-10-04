@@ -169,7 +169,12 @@ ii_sources = files(
   'src/render/text/font_registry.cpp',
   'src/render/text/font_weight_catalog.cpp',
   'src/render/wallpaper_renderer.cpp',
+  'src/runtime/anchors.cpp',
+  'src/runtime/color.cpp',
+  'src/runtime/item.cpp',
+  'src/runtime/object.cpp',
   'src/runtime/property.cpp',
+  'src/runtime/rectangle.cpp',
   'src/system/app_identity.cpp',
   'src/system/desktop_entry.cpp',
   'src/system/internal_app_metadata.cpp',
@@ -229,8 +234,13 @@ executable('ii-shell',
 )
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
+nlohmann_dep = dependency('nlohmann_json')
 foreach _t : [
   ['property', 'tests/runtime/property_test.cpp'],
+  ['diff', 'tests/diff/diff_test.cpp'],
 ]
-  test(_t[0], executable(_t[0] + '_test', _t[1], dependencies: ii_core_dep, cpp_args: ii_cpp_args))
+  test(_t[0], executable(_t[0] + '_test', _t[1],
+    dependencies: [ii_core_dep, nlohmann_dep],
+    cpp_args: ii_cpp_args + ['-DII_DIFF_EXPECTED_DIR="' + meson.current_source_dir() / 'tests/diff/expected' + '"'],
+  ))
 endforeach
