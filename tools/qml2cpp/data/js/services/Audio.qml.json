@@ -8,7 +8,7 @@
  },
  "16e937926a90": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call devices)",
   "context": "root.inputDevices",
   "expected": "std::vector<nlohmann::json>",
   "code": "root.devices(false)"
@@ -17,68 +17,47 @@
   "cpp": null,
   "kind": "function",
   "context": "root.playSystemSound",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function playSystemSound(soundName) { const ogaPath = `/usr/share/sounds/${root.audioTheme}/stereo/${soundName}.oga`;\n        const oggPath = `/usr/share/sounds/${root.audioTheme}/stereo/${soundName}.ogg`;\n\n        // Try playing .oga first\n        let command = [\n            \"ffplay\",\n            \"-nodisp\",\n            \"-autoexit\",\n            ogaPath\n        ];\n        Quickshell.execDetached(command);\n\n        // Also try playing .ogg (ffplay will just fail silently if file doesn't exist)\n        command = [\n            \"ffplay\",\n            \"-nodisp\",\n            \"-autoexit\",\n            oggPath\n        ];\n        Quickshell.execDetached(command); }"
  },
  "284b0a9c5ab4": {
   "cpp": null,
   "kind": "function",
   "context": "root.friendlyDeviceName",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function friendlyDeviceName(node) { return (node.nickname || node.description || Translation.tr(\"Unknown\")); }"
- },
- "317a0a7d6134": {
-  "cpp": null,
-  "kind": "function",
-  "context": "root.toggleMute",
-  "expected": "",
-  "code": "function toggleMute() { Audio.sink.audio.muted = !Audio.sink.audio.muted }"
  },
  "31b00562a49f": {
   "cpp": null,
-  "kind": "function",
+  "kind": "function of a child object",
   "context": "root/Connections.0.onVolumeChanged",
   "expected": "",
   "code": "function onVolumeChanged() { if (!Config.options.audio.protection.enable) return;\n            const newVolume = sink.audio.volume;\n            // when resuming from suspend, we should not write volume to avoid pipewire volume reset issues\n            if (isNaN(newVolume) || newVolume === undefined || newVolume === null) {\n                lastReady = false;\n                lastVolume = 0;\n                return;\n            }\n            if (!lastReady) {\n                lastVolume = newVolume;\n                lastReady = true;\n                return;\n            }\n            const maxAllowedIncrease = Config.options.audio.protection.maxAllowedIncrease / 100; \n            const maxAllowed = Config.options.audio.protection.maxAllowed / 100;\n\n            if (newVolume - lastVolume > maxAllowedIncrease) {\n                sink.audio.volume = lastVolume;\n                root.sinkProtectionTriggered(Translation.tr(\"Illegal increment\"));\n            } else if (newVolume > maxAllowed || newVolume > root.hardMaxValue) {\n                root.sinkProtectionTriggered(Translation.tr(\"Exceeded max allowed\"));\n                sink.audio.volume = Math.min(lastVolume, maxAllowed);\n            }\n            lastVolume = sink.audio.volume; }"
+ },
+ "3fd133da2bf4": {
+  "cpp": null,
+  "kind": "statements (double || double)",
+  "context": "root.incrementVolume",
+  "expected": "void",
+  "code": "const currentVolume = Audio.value;\n        const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;\n        Audio.sink.audio.volume = Math.min(1, Audio.sink.audio.volume + step);"
  },
  "48dad7246dce": {
   "cpp": null,
   "kind": "function",
   "context": "root.appNodes",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function appNodes(isSink) { return Pipewire.nodes.values.filter((node) => { // Should be list<PwNode> but it breaks ScriptModel\n            return root.correctType(node, isSink) && node.isStream\n        }) }"
- },
- "56adfbb925a0": {
-  "cpp": null,
-  "kind": "binding (name Pipewire)",
-  "context": "root.source",
-  "expected": "/*Quickshell.Services.Pipewire/PwNode*/*",
-  "code": "Pipewire.defaultAudioSource"
- },
- "6974fea15874": {
-  "cpp": null,
-  "kind": "function",
-  "context": "root.incrementVolume",
-  "expected": "",
-  "code": "function incrementVolume() { const currentVolume = Audio.value;\n        const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;\n        Audio.sink.audio.volume = Math.min(1, Audio.sink.audio.volume + step); }"
  },
  "6f9ceacd83de": {
   "cpp": null,
   "kind": "function",
   "context": "root.setDefaultSource",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function setDefaultSource(node) { Pipewire.preferredDefaultAudioSource = node; }"
- },
- "8786919084fa": {
-  "cpp": null,
-  "kind": "function",
-  "context": "root.toggleMicMute",
-  "expected": "",
-  "code": "function toggleMicMute() { Audio.source.audio.muted = !Audio.source.audio.muted }"
  },
  "8afd27fde103": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call appNodes)",
   "context": "root.inputAppNodes",
   "expected": "std::vector<nlohmann::json>",
   "code": "root.appNodes(false)"
@@ -87,26 +66,26 @@
   "cpp": null,
   "kind": "function",
   "context": "root.setDefaultSink",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function setDefaultSink(node) { Pipewire.preferredDefaultAudioSink = node; }"
  },
- "9a4561613607": {
+ "9e86fd7ee8e6": {
   "cpp": null,
-  "kind": "function",
+  "kind": "statements (double || double)",
   "context": "root.decrementVolume",
-  "expected": "",
-  "code": "function decrementVolume() { const currentVolume = Audio.value;\n        const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;\n        Audio.sink.audio.volume -= step; }"
+  "expected": "void",
+  "code": "const currentVolume = Audio.value;\n        const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;\n        Audio.sink.audio.volume -= step;"
  },
  "afbccaf8b69f": {
   "cpp": null,
   "kind": "function",
   "context": "root.correctType",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function correctType(node, isSink) { return (node.isSink === isSink) && node.audio }"
  },
  "afeda1a03fd6": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call devices)",
   "context": "root.outputDevices",
   "expected": "std::vector<nlohmann::json>",
   "code": "root.devices(true)"
@@ -120,7 +99,7 @@
  },
  "b284ce2426a3": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call appNodes)",
   "context": "root.outputAppNodes",
   "expected": "std::vector<nlohmann::json>",
   "code": "root.appNodes(true)"
@@ -129,7 +108,7 @@
   "cpp": null,
   "kind": "function",
   "context": "root.appNodeDisplayName",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function appNodeDisplayName(node) { return (node.properties[\"application.name\"] || node.description || node.name) }"
  },
  "b8bdaf09a0aa": {
@@ -150,14 +129,7 @@
   "cpp": null,
   "kind": "function",
   "context": "root.devices",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function devices(isSink) { return Pipewire.nodes.values.filter(node => {\n            return root.correctType(node, isSink) && !node.isStream\n        }) }"
- },
- "ef7aa206a964": {
-  "cpp": null,
-  "kind": "binding (name Pipewire)",
-  "context": "root.sink",
-  "expected": "/*Quickshell.Services.Pipewire/PwNode*/*",
-  "code": "Pipewire.defaultAudioSink"
  }
 }

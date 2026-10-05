@@ -1,7 +1,7 @@
 {
  "723ab1460358": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call tr)",
   "context": "osdValues.name",
   "expected": "std::string",
   "code": "Translation.tr(\"Volume\")"

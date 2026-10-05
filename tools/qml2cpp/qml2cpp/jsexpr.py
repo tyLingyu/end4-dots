@@ -11,8 +11,9 @@ import json
 from dataclasses import dataclass, field
 
 from .jsast import Node
-from .registry import ComponentRef
+from .registry import BuiltinRef, ComponentRef
 from .tsys import AnyType, Prop, TypeSystem
+from .typemap import runtime_for
 
 NUMERIC = {"double", "int"}
 
@@ -27,6 +28,7 @@ class Value:
     type: str | None  # C++ value type
     obj: AnyType | None = None  # QML type, when the value is an object
     is_ref: bool = False  # cpp is an object reference (singleton) rather than a pointer
+    group: str | None = None  # `x.font`: cpp/obj are x, members are looked up in the group
 
     def member(self, access: str) -> str:
         return f"{self.cpp}{'.' if self.is_ref else '->'}{access}"
@@ -77,6 +79,8 @@ class Translator:
             return f"qmlColor({value.cpp[len('std::string('):-1]})"
         if target == "std::string" and value.type in NUMERIC:
             return f"jsString({value.cpp})"
+        if target == "std::vector<nlohmann::json>" and value.type and value.cpp.startswith(f"{value.type}{{"):
+            return target + value.cpp[len(value.type):]  # an array literal for a list<var>
         if target.endswith("*") and value.type == "std::nullptr_t":
             return "nullptr"
         if target.endswith("*") and value.type and value.type.endswith("*"):
@@ -128,6 +132,10 @@ class Translator:
     # ── Names ────────────────────────────────────────────────────────────────
 
     def _property_value(self, base: Value, prop: Prop) -> Value:
+        if prop.kind == "group":
+            return Value(base.cpp, None, base.obj, base.is_ref, group=prop.name)
+        if prop.kind == "value":  # computed by a method: `parent.left` -> parent->leftLine()
+            return Value(base.member(prop.access), prop.cpp_type)
         if prop.kind == "alias" and prop.cpp_type is not None:
             if prop.alias_of and prop.alias_of[1] is None:  # alias to an object
                 return Value(base.member(prop.access), prop.cpp_type, prop.object_type)
@@ -146,9 +154,13 @@ class Translator:
             if obj.obj is not None and (prop := self.ts.prop(obj.obj, name)) is not None:
                 return self._property_value(obj, prop)
         ref = self.ts.resolve(scope.file, name)
-        if ref is not None and self.ts.view(ref).is_singleton and isinstance(ref, ComponentRef):
-            self.used.add(ref)
-            return Value(f"::{self.ts.view(ref).cpp_class}::instance()", None, ref, is_ref=True)
+        if ref is not None and self.ts.view(ref).is_singleton:
+            if isinstance(ref, ComponentRef):
+                self.used.add(ref)
+                return Value(f"::{self.ts.view(ref).cpp_class}::instance()", None, ref, is_ref=True)
+            if isinstance(ref, BuiltinRef) and (runtime := runtime_for(ref)) is not None:
+                self.used.add(ref)  # Quickshell, Hyprland, Pipewire: compat singletons
+                return Value(f"{runtime.cpp}::instance()", None, ref, is_ref=True)
         raise Untranslatable(f"name {name}")
 
     def _FieldMemberExpression(self, node: Node, scope: Scope) -> Value:
@@ -156,10 +168,15 @@ class Translator:
             raise Untranslatable("optional chaining")
         name = node.attrs["name"]
         base_node = node.children[0]
-        enum = self._enum(base_node, name)
+        enum = self._enum(base_node, name, scope)
         if enum is not None:
             return enum
         base = self.expression(base_node, scope)
+        if base.group is not None:
+            member = self.ts.view(base.obj).groups.get(base.group, {}).get(name)
+            if member is None:
+                raise Untranslatable(f"member {base.group}.{name}")
+            return Value(f"{base.member(member[0])}.get()", member[1])
         if base.obj is None:
             raise Untranslatable(f"member {name} of {base.type}")
         prop = self.ts.prop(base.obj, name)
@@ -190,14 +207,31 @@ class Translator:
         ("Text", "ElideLeft"): ("Elide::Left", "Elide"),
         ("Text", "ElideMiddle"): ("Elide::Middle", "Elide"),
         ("Text", "ElideRight"): ("Elide::Right", "Elide"),
+        # QFont::Weight
+        ("Font", "Thin"): ("100", "int"),
+        ("Font", "ExtraLight"): ("200", "int"),
+        ("Font", "Light"): ("300", "int"),
+        ("Font", "Normal"): ("400", "int"),
+        ("Font", "Medium"): ("500", "int"),
+        ("Font", "DemiBold"): ("600", "int"),
+        ("Font", "Bold"): ("700", "int"),
+        ("Font", "ExtraBold"): ("800", "int"),
+        ("Font", "Black"): ("900", "int"),
     }
 
-    def _enum(self, base: Node, name: str) -> Value | None:
+    def _enum(self, base: Node, name: str, scope: Scope) -> Value | None:
         if base.kind != "IdentifierExpression":
             return None
         hit = self.ENUMS.get((base.attrs["name"], name))
         if hit:
             return Value(hit[0], hit[1])
+        # Quickshell's enums are types holding `enum Enum`: WlrLayer.Overlay -> qs::WlrLayer::Overlay.
+        ref = self.ts.resolve(scope.file, base.attrs["name"]) if base.attrs["name"] not in scope.ids else None
+        if isinstance(ref, BuiltinRef):
+            info = self.ts.registry.builtin_info(ref)
+            if name in info.enums.get("Enum", []):
+                cls = "qs::" + info.cpp_name.rsplit("::", 1)[-1]
+                return Value(f"{cls}::{name}", cls)
         if base.attrs["name"] == "Easing":
             # QEasingCurve::Type is sequential, so its position in .qmltypes is its value.
             easing = self.ts.registry.builtins.by_cpp.get("QQmlEasing")
@@ -291,6 +325,9 @@ class Translator:
                 flatten(child)
         return out
 
+    # Methods of built-in types the runtime provides with the same name and no arguments.
+    BUILTIN_METHODS = {"start", "stop", "restart", "complete"}
+
     MATH = {
         "round": "jsRound",  # JS rounds .5 towards +Infinity; std::round rounds away from zero
         "floor": "std::floor",
@@ -304,9 +341,21 @@ class Translator:
         "cos": "std::cos",
     }
 
+    # Expressions without side effects: extra arguments made of these can be dropped, as JS ignores them.
+    PURE = {"IdentifierExpression", "FieldMemberExpression", "NumericLiteral", "StringLiteral", "TrueLiteral",
+            "FalseLiteral", "NullExpression", "NestedExpression", "UnaryMinusExpression", "NotExpression",
+            "ConditionalExpression"}
+
+    ASSIGNMENTS = {"=", "+=", "-=", "*=", "/=", "%=", "**=", "&=", "|=", "^=", "<<=", ">>=", ">>>=", "&&=", "||=", "??="}
+
+    def _pure(self, node: Node) -> bool:
+        return all(n.kind in self.PURE or n.kind == "BinaryExpression" and n.attrs.get("operatorToken") not in self.ASSIGNMENTS
+                   for n in node.walk())
+
     def _CallExpression(self, node: Node, scope: Scope) -> Value:
         callee = node.children[0]
-        args = [self.expression(a, scope) for a in self.arguments(node)]
+        arg_nodes = self.arguments(node)
+        args = [self.expression(a, scope) for a in arg_nodes]
         if (
             callee.kind == "FieldMemberExpression"
             and callee.children[0].kind == "IdentifierExpression"
@@ -329,10 +378,99 @@ class Translator:
             target = f"this->{name}" if base.cpp == "this" else base.member(name)
         else:
             raise Untranslatable("call")
+        if base.obj is not None and name in self.BUILTIN_METHODS and not args and not isinstance(base.obj, ComponentRef):
+            return Value(f"{target}()", "void")
+        signal = self.ts.signal(base.obj, name) if base.obj is not None else None
+        if signal is not None and self.ts.function(base.obj, name) is None:
+            if len(args) != len(signal) or any(t is None for _, t in signal):
+                raise Untranslatable(f"emit {name}")
+            coerced = [self.coerce(a, t) for a, (_, t) in zip(args, signal)]
+            return Value(f"{target}.emit({', '.join(coerced)})", "void")
         signature = self.ts.function(base.obj, name) if base.obj is not None else None
+        if signature is None and base.obj is not None:
+            signature = self.ts.builtin_method(base.obj, name, len(args))
         if signature is None:
             raise Untranslatable(f"call {name}")
+        if len(args) > len(signature.params) and all(self._pure(a) for a in arg_nodes[len(signature.params):]):
+            args = args[: len(signature.params)]  # JS ignores extra arguments
         if not signature.required <= len(args) <= len(signature.params):
             raise Untranslatable(f"call {name} with {len(args)} arguments")
         coerced = [self.coerce(a, signature.params[i][0].removeprefix("const ").removesuffix("&").strip()) for i, a in enumerate(args)]
         return Value(f"{target}({', '.join(coerced)})", signature.returns)
+
+    # ── Statements ───────────────────────────────────────────────────────────
+
+    def statements(self, node: Node | None, scope: Scope, returns: str | None = None) -> list[str]:
+        """C++ statements for a JS statement list, a block, or a bare expression (a handler body)."""
+        if node is None:
+            return []
+        kind = node.kind
+        if kind in ("StatementList", "Block", "SourceElements"):
+            out: list[str] = []
+            for child in node.children:
+                out += self.statements(child, scope, returns)
+            return out
+        if kind == "EmptyStatement":
+            return []
+        if kind == "LabelledStatement":
+            # `onPressed: f()` inside a function is a label, not a handler; unused unless jumped to.
+            if any(n.kind in ("BreakStatement", "ContinueStatement") and n.attrs.get("label") for n in node.walk()):
+                raise Untranslatable("labelled jump")
+            return self.statements(node.children[-1], scope, returns)
+        if kind == "ExpressionStatement":
+            return [self.expression_statement(node.children[0], scope)]
+        if kind in ("BinaryExpression", "CallExpression"):
+            return [self.expression_statement(node, scope)]
+        if kind == "IfStatement":
+            cond = self.truthy(self.expression(node.children[0], scope))
+            out = [f"if ({cond}) {{", *(f"  {line}" for line in self.statements(node.children[1], scope, returns)), "}"]
+            if len(node.children) > 2:
+                out[-1] = "} else {"
+                out += [*(f"  {line}" for line in self.statements(node.children[2], scope, returns)), "}"]
+            return out
+        if kind == "ReturnStatement":
+            if not node.children:
+                return ["return;"]
+            value = self.expression(node.children[0], scope)
+            return [f"return {self.coerce(value, returns) if returns else value.cpp};"]
+        if kind == "VariableStatement":
+            out = []
+            for decl in node.children[0].children:
+                if decl.kind != "PatternElement" or not decl.children:
+                    raise Untranslatable("variable declaration")
+                value = self.expression(decl.children[0], scope)
+                if value.type in (None, "void", "std::nullptr_t", "std::vector<>"):
+                    raise Untranslatable(f"variable of type {value.type}")
+                name = decl.attrs["bindingIdentifier"]
+                out.append(f"auto {name} = {value.cpp};")
+                scope.locals[name] = Value(name, value.type, value.obj, value.is_ref)
+            return out
+        raise Untranslatable(kind)
+
+    def expression_statement(self, node: Node, scope: Scope) -> str:
+        if node.kind == "BinaryExpression" and node.attrs.get("operatorToken") == "=":
+            setter, cpp_type = self.lvalue(node.children[0], scope)
+            value = self.expression(node.children[1], scope)
+            return f"{setter}.set({self.coerce(value, cpp_type)});"
+        if node.kind == "CallExpression":
+            return f"{self.expression(node, scope).cpp};"
+        raise Untranslatable(f"statement {node.kind}")
+
+    def lvalue(self, node: Node, scope: Scope) -> tuple[str, str]:
+        """(property expression, C++ type) of an assignment target."""
+        if node.kind == "FieldMemberExpression":
+            base = self.expression(node.children[0], scope)
+            prop = self.ts.prop(base.obj, node.attrs["name"]) if base.obj is not None else None
+        elif node.kind == "IdentifierExpression":
+            name = node.attrs["name"]
+            base = prop = None
+            for obj in (scope.scope_obj, scope.root_obj):
+                if obj.obj is not None and (prop := self.ts.prop(obj.obj, name)) is not None:
+                    base = obj
+                    break
+        else:
+            raise Untranslatable("assignment target")
+        if prop is None or prop.kind != "property" or prop.cpp_type is None or base is None:
+            raise Untranslatable("assignment to unknown property")
+        return (prop.access if base.cpp == "this" else base.member(prop.access)), prop.cpp_type
+

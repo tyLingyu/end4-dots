@@ -43,6 +43,14 @@ QT_CPP = {
     "QSizeF": "Size",
     "QRectF": "Rect",
     "QDateTime": "DateTime",
+    "QRect": "Rect",
+    "QProcess::ExitStatus": "int",
+    "void": "void",
+    # Enums (Text.AlignHCenter etc.) as the runtime stores them.
+    "HAlignment": "int",
+    "VAlignment": "int",
+    "WrapMode": "WrapMode",
+    "TextElideMode": "Elide",
 }
 
 
@@ -53,9 +61,11 @@ class Runtime:
     cpp: str  # class name in namespace ii
     header: str  # include path
     visual: bool  # an Item: children are added with add<T>() and become visual children
+    content: str | None = None  # a window: visual children go into this item ("contentItem()")
 
 
-# Built-in QML types -> runtime classes. Types not implemented yet are listed with their planned
+# Built-in QML types -> runtime classes (Quickshell's in namespace ii::qs, as var-types.json
+# writes them). Types not implemented yet are listed with their planned
 # header: generated code then fails to compile at exactly the pieces stage 3 has to provide.
 RUNTIME: dict[str, Runtime] = {
     "QtQuick/Item": Runtime("Item", "runtime/item.h", True),
@@ -86,24 +96,33 @@ RUNTIME: dict[str, Runtime] = {
     "QtQuick/FrameAnimation": Runtime("FrameAnimation", "runtime/animation.h", False),
     "QtQuick.Effects/RectangularShadow": Runtime("RectangularShadow", "runtime/effects.h", True),
     "QtQuick.Controls/ProgressBar": Runtime("ProgressBar", "runtime/controls.h", True),
-    "Quickshell/Scope": Runtime("Scope", "compat/scope.h", False),
-    "Quickshell/Singleton": Runtime("Singleton", "compat/scope.h", False),
-    "Quickshell/PanelWindow": Runtime("PanelWindow", "compat/panel_window.h", False),
-    "Quickshell/Region": Runtime("Region", "compat/panel_window.h", False),
-    "Quickshell/Variants": Runtime("Variants", "compat/variants.h", False),
-    "Quickshell/SystemClock": Runtime("SystemClock", "compat/system_clock.h", False),
-    "Quickshell/ColorQuantizer": Runtime("ColorQuantizer", "compat/color_quantizer.h", False),
-    "Quickshell.Io/Process": Runtime("Process", "compat/process.h", False),
-    "Quickshell.Io/StdioCollector": Runtime("StdioCollector", "compat/process.h", False),
-    "Quickshell.Io/SplitParser": Runtime("SplitParser", "compat/process.h", False),
-    "Quickshell.Io/FileView": Runtime("FileView", "compat/file_view.h", False),
-    "Quickshell.Io/JsonAdapter": Runtime("JsonAdapter", "compat/file_view.h", False),
-    "Quickshell.Io/JsonObject": Runtime("JsonObject", "compat/file_view.h", False),
-    "Quickshell.Io/IpcHandler": Runtime("IpcHandler", "compat/ipc.h", False),
-    "Quickshell.Hyprland/GlobalShortcut": Runtime("GlobalShortcut", "compat/hyprland.h", False),
-    "Quickshell.Services.Pipewire/PwObjectTracker": Runtime("PwObjectTracker", "compat/pipewire.h", False),
+    "Quickshell/Scope": Runtime("qs::Scope", "compat/scope.h", False),
+    "Quickshell/Singleton": Runtime("qs::Singleton", "compat/scope.h", False),
+    "Quickshell/PanelWindow": Runtime("qs::PanelWindow", "compat/panel_window.h", False, "contentItem()"),
+    "Quickshell/Region": Runtime("qs::Region", "compat/panel_window.h", False),
+    "Quickshell/ShellScreen": Runtime("qs::ShellScreen", "compat/screen.h", False),
+    "Quickshell/Quickshell": Runtime("qs::Quickshell", "compat/quickshell.h", False),
+    "Quickshell.Hyprland/Hyprland": Runtime("qs::Hyprland", "compat/hyprland.h", False),
+    "Quickshell.Hyprland/HyprlandMonitor": Runtime("qs::HyprlandMonitor", "compat/hyprland.h", False),
+    "Quickshell.Hyprland/HyprlandWorkspace": Runtime("qs::HyprlandWorkspace", "compat/hyprland.h", False),
+    "Quickshell.Services.Pipewire/Pipewire": Runtime("qs::Pipewire", "compat/pipewire.h", False),
+    "Quickshell.Services.Pipewire/PwNode": Runtime("qs::PwNode", "compat/pipewire.h", False),
+    "Quickshell.Services.Pipewire/PwNodeAudio": Runtime("qs::PwNodeAudio", "compat/pipewire.h", False),
+    "Quickshell.Io/DataStreamParser": Runtime("qs::DataStreamParser", "compat/process.h", False),
+    "Quickshell/Variants": Runtime("qs::Variants", "compat/variants.h", False),
+    "Quickshell/SystemClock": Runtime("qs::SystemClock", "compat/system_clock.h", False),
+    "Quickshell/ColorQuantizer": Runtime("qs::ColorQuantizer", "compat/color_quantizer.h", False),
+    "Quickshell.Io/Process": Runtime("qs::Process", "compat/process.h", False),
+    "Quickshell.Io/StdioCollector": Runtime("qs::StdioCollector", "compat/process.h", False),
+    "Quickshell.Io/SplitParser": Runtime("qs::SplitParser", "compat/process.h", False),
+    "Quickshell.Io/FileView": Runtime("qs::FileView", "compat/file_view.h", False),
+    "Quickshell.Io/JsonAdapter": Runtime("qs::JsonAdapter", "compat/file_view.h", False),
+    "Quickshell.Io/JsonObject": Runtime("qs::JsonObject", "compat/file_view.h", False),
+    "Quickshell.Io/IpcHandler": Runtime("qs::IpcHandler", "compat/ipc.h", False),
+    "Quickshell.Hyprland/GlobalShortcut": Runtime("qs::GlobalShortcut", "compat/hyprland.h", False),
+    "Quickshell.Services.Pipewire/PwObjectTracker": Runtime("qs::PwObjectTracker", "compat/pipewire.h", False),
     "Quickshell.Services.Notifications/NotificationServer": Runtime(
-        "NotificationServer", "compat/notifications.h", False
+        "qs::NotificationServer", "compat/notifications.h", False
     ),
 }
 
@@ -126,10 +145,10 @@ def namespace_parts(ref: ComponentRef) -> list[str]:
 
 
 def qualified_class(ref: ComponentRef) -> str:
-    parts = ["ii", *namespace_parts(ref), ref.path.stem]
-    if ref.inline:
-        parts.append(ref.inline)
-    return "::".join(parts)
+    """ii::<namespace>::File; an inline component is File_Inline at namespace scope (not a nested
+    class), so other headers can forward-declare it."""
+    name = f"{ref.path.stem}_{ref.inline}" if ref.inline else ref.path.stem
+    return "::".join(["ii", *namespace_parts(ref), name])
 
 
 def generated_header(ref: ComponentRef) -> str:

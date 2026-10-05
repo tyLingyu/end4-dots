@@ -6,13 +6,6 @@
   "expected": "bool",
   "code": "wallpaperPath.endsWith(\".mp4\") || wallpaperPath.endsWith(\".webm\") || wallpaperPath.endsWith(\".mkv\") || wallpaperPath.endsWith(\".avi\") || wallpaperPath.endsWith(\".mov\")"
  },
- "428f88029632": {
-  "cpp": null,
-  "kind": "binding (call mix with 4 arguments)",
-  "context": "root/colors.colLayer0Hover",
-  "expected": "Color",
-  "code": "ColorUtils.transparentize(ColorUtils.mix(colLayer0, colOnLayer0, 0.9, root.contentTransparency))"
- },
  "5b0333653881": {
   "cpp": null,
   "kind": "binding (optional chaining)",
@@ -47,13 +40,6 @@
   "context": "root.contentTransparency",
   "expected": "double",
   "code": "Config?.options.appearance.transparency.automatic ? autoContentTransparency : Config?.options.appearance.transparency.contentTransparency"
- },
- "bba929390938": {
-  "cpp": null,
-  "kind": "binding (call mix with 4 arguments)",
-  "context": "root/colors.colLayer0Active",
-  "expected": "Color",
-  "code": "ColorUtils.transparentize(ColorUtils.mix(colLayer0, colOnLayer0, 0.8, root.contentTransparency))"
  },
  "cc673afc055b": {
   "cpp": null,

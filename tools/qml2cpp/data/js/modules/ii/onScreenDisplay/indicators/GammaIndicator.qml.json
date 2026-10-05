@@ -8,7 +8,7 @@
  },
  "b91dd8cde912": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call tr)",
   "context": "rotateIcon.name",
   "expected": "std::string",
   "code": "Translation.tr(\"Gamma\")"

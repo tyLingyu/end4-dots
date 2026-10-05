@@ -12,11 +12,12 @@ import json
 import sys
 from pathlib import Path
 
-from .codegen import ComponentGen
+from .codegen import generate_file
 from .deps import closure
 from .jsexpr import Translator
 from .jsstore import JsStore
 from .registry import REPO, SHELL_ROOT, ComponentRef, Registry
+from . import structs
 from .tsys import TypeSystem
 from .typemap import generated_header
 
@@ -58,16 +59,21 @@ def main(argv: list[str]) -> int:
     tr = Translator(ts)
     totals = [0, 0]
     for path in files:
-        gen = ComponentGen(ts, tr, store, ComponentRef(path))
-        header, source = gen.generate()
-        totals[0] += gen.translated
-        totals[1] += gen.stubs
+        header, source, gens = generate_file(ts, tr, store, path)
+        translated, stubs = sum(g.translated for g in gens), sum(g.stubs for g in gens)
+        totals[0] += translated
+        totals[1] += stubs
         if args.command == "gen":
-            out_h = OUT / generated_header(gen.ref)
+            out_h = OUT / generated_header(ComponentRef(path))
             out_h.parent.mkdir(parents=True, exist_ok=True)
             out_h.write_text(header)
             out_h.with_suffix(".cpp").write_text(source)
-        print(f"{path.relative_to(SHELL_ROOT)}: {gen.translated} translated, {gen.stubs} to do", file=sys.stderr)
+        print(f"{path.relative_to(SHELL_ROOT)}: {translated} translated, {stubs} to do", file=sys.stderr)
+    if args.command == "gen":
+        header, unknown = structs.render(ts.var_types)
+        (OUT / structs.HEADER).write_text(header)
+        if unknown:
+            print(f"var-types: no C++ type yet for {', '.join(unknown)}", file=sys.stderr)
     store.save()
     print(f"total: {totals[0]} translated, {totals[1]} to do", file=sys.stderr)
     if args.command == "todo":

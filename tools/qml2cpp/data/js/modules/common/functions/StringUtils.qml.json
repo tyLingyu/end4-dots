@@ -3,105 +3,105 @@
   "cpp": null,
   "kind": "function",
   "context": "root.toTitleCase",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function toTitleCase(str) { return str.replace(/[-_]/g, \" \").replace(\n            /\\w\\S*/g,\n            function(txt) {\n            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();\n            }\n        ); }"
  },
  "1afb863a4824": {
   "cpp": null,
   "kind": "function",
   "context": "root.stringListContainsSubstring",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function stringListContainsSubstring(str, substrings) { for (let i = 0; i < substrings.length; ++i) {\n            if (str.includes(substrings[i])) {\n                return true;\n            }\n        }\n        return false; }"
  },
  "3638ac8a7439": {
   "cpp": null,
   "kind": "function",
   "context": "root.format",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function format(str, args) { return str.replace(/{(\\d+)}/g, (match, index) => typeof args[index] !== 'undefined' ? args[index] : match); }"
  },
  "3e6a8a4ae9d1": {
   "cpp": null,
   "kind": "function",
   "context": "root.getDomain",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function getDomain(url) { const match = url.match(/^(?:https?:\\/\\/)?(?:www\\.)?([^\\/]+)/);\n        return match ? match[1] : null; }"
  },
  "51380014e9bb": {
   "cpp": null,
   "kind": "function",
   "context": "root.friendlyTimeForSeconds",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function friendlyTimeForSeconds(seconds) { if (isNaN(seconds) || seconds < 0)\n            return \"0:00\";\n        seconds = Math.floor(seconds);\n        const h = Math.floor(seconds / 3600);\n        const m = Math.floor((seconds % 3600) / 60);\n        const s = seconds % 60;\n        if (h > 0) {\n            return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;\n        } else {\n            return `${m}:${s.toString().padStart(2, '0')}`;\n        } }"
  },
  "53e373058056": {
   "cpp": null,
   "kind": "function",
   "context": "root.cleanCliphistEntry",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function cleanCliphistEntry(str) { return str.replace(/^\\d+\\t/, \"\"); }"
  },
  "6d41b34bda4c": {
   "cpp": null,
   "kind": "function",
   "context": "root.splitMarkdownBlocks",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function splitMarkdownBlocks(markdown) { const regex = /```(\\w+)?\\n([\\s\\S]*?)```|<think>([\\s\\S]*?)<\\/think>/g;\n        /**\n         * @type {{type: \"text\" | \"think\" | \"code\"; content: string; lang: string | undefined; completed: boolean | undefined}[]}\n         */\n        let result = [];\n        let lastIndex = 0;\n        let match;\n        while ((match = regex.exec(markdown)) !== null) {\n            if (match.index > lastIndex) {\n                const text = markdown.slice(lastIndex, match.index);\n                if (text.trim()) {\n                    result.push({\n                        type: \"text\",\n                        content: text\n                    });\n                }\n            }\n            if (match[0].startsWith('```')) {\n                if (match[2] && match[2].trim()) {\n                    result.push({\n                        type: \"code\",\n                        lang: match[1] || \"\",\n                        content: match[2],\n                        completed: true\n                    });\n                }\n            } else if (match[0].startsWith('<think>')) {\n                if (match[3] && match[3].trim()) {\n                    result.push({\n                        type: \"think\",\n                        content: match[3],\n                        completed: true\n                    });\n                }\n            }\n            lastIndex = regex.lastIndex;\n        }\n        // Handle any remaining text after the last match\n        if (lastIndex < markdown.length) {\n            const text = markdown.slice(lastIndex);\n            // Check for unfinished <think> block\n            const thinkStart = text.indexOf('<think>');\n            const codeStart = text.indexOf('```');\n            if (thinkStart !== -1 && (codeStart === -1 || thinkStart < codeStart)) {\n                const beforeThink = text.slice(0, thinkStart);\n                if (beforeThink.trim()) {\n                    result.push({\n                        type: \"text\",\n                        content: beforeThink\n                    });\n                }\n                const thinkContent = text.slice(thinkStart + 7);\n                if (thinkContent.trim()) {\n                    result.push({\n                        type: \"think\",\n                        content: thinkContent,\n                        completed: false\n                    });\n                }\n            } else if (codeStart !== -1) {\n                const beforeCode = text.slice(0, codeStart);\n                if (beforeCode.trim()) {\n                    result.push({\n                        type: \"text\",\n                        content: beforeCode\n                    });\n                }\n                // Try to detect language after ```\n                const codeLangMatch = text.slice(codeStart + 3).match(/^(\\w+)?\\n/);\n                let lang = \"\";\n                let codeContentStart = codeStart + 3;\n                if (codeLangMatch) {\n                    lang = codeLangMatch[1] || \"\";\n                    codeContentStart += codeLangMatch[0].length;\n                } else if (text[codeStart + 3] === '\\n') {\n                    codeContentStart += 1;\n                }\n                const codeContent = text.slice(codeContentStart);\n                if (codeContent.trim()) {\n                    result.push({\n                        type: \"code\",\n                        lang,\n                        content: codeContent,\n                        completed: false\n                    });\n                }\n            } else if (text.trim()) {\n                result.push({\n                    type: \"text\",\n                    content: text\n                });\n            }\n        }\n        // console.log(JSON.stringify(result, null, 2));\n        return result; }"
  },
  "76fc584d93cb": {
   "cpp": null,
   "kind": "function",
   "context": "root.getBaseUrl",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function getBaseUrl(url) { const match = url.match(/^(https?:\\/\\/[^\\/]+)(\\/.*)?$/);\n        return match ? match[1] : null; }"
  },
  "8a072131d5fc": {
   "cpp": null,
   "kind": "function",
   "context": "root.wordWrap",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function wordWrap(str, maxLen) { if (!str)\n            return \"\";\n        let words = str.split(\" \");\n        let lines = [];\n        let current = \"\";\n        for (let i = 0; i < words.length; ++i) {\n            if ((current + (current.length > 0 ? \" \" : \"\") + words[i]).length > maxLen) {\n                if (current.length > 0)\n                    lines.push(current);\n                current = words[i];\n            } else {\n                current += (current.length > 0 ? \" \" : \"\") + words[i];\n            }\n        }\n        if (current.length > 0)\n            lines.push(current);\n        return lines.join(\"\\n\"); }"
  },
  "9186fa3a1027": {
   "cpp": null,
   "kind": "function",
   "context": "root.cleanPrefix",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function cleanPrefix(str, prefix) { if (str.startsWith(prefix)) {\n            return str.slice(prefix.length);\n        }\n        return str; }"
  },
  "a9a3a2dab265": {
   "cpp": null,
   "kind": "function",
   "context": "root.cleanOnePrefix",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function cleanOnePrefix(str, prefixes) { for (let i = 0; i < prefixes.length; ++i) {\n            if (str.startsWith(prefixes[i])) {\n                return str.slice(prefixes[i].length);\n            }\n        }\n        return str; }"
  },
  "c827f547bc42": {
   "cpp": null,
   "kind": "function",
   "context": "root.escapeBackslashes",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function escapeBackslashes(str) { return str.replace(/\\\\/g, '\\\\\\\\'); }"
  },
  "ce6589b8370a": {
   "cpp": null,
   "kind": "function",
   "context": "root.shellSingleQuoteEscape",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function shellSingleQuoteEscape(str) { return String(str)\n        // .replace(/\\\\/g, '\\\\\\\\')\n        .replace(/'/g, \"'\\\\''\"); }"
  },
  "ecd11d17506d": {
   "cpp": null,
   "kind": "function",
   "context": "root.cleanMusicTitle",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function cleanMusicTitle(title) { if (!title)\n            return \"\";\n        // Brackets\n        title = title.replace(/^ *\\([^)]*\\) */g, \" \"); // Round brackets\n        title = title.replace(/^ *\\[[^\\]]*\\] */g, \" \"); // Square brackets\n        title = title.replace(/^ *\\{[^\\}]*\\} */g, \" \"); // Curly brackets\n        // Japenis brackets\n        title = title.replace(/^ *【[^】]*】/, \"\"); // Touhou\n        title = title.replace(/^ *《[^》]*》/, \"\"); // ??\n        title = title.replace(/^ *「[^」]*」/, \"\"); // OP/ED thingie\n        title = title.replace(/^ *『[^』]*』/, \"\"); // OP/ED thingie\n\n        return title.trim(); }"
  },
  "fac6c2fc0273": {
   "cpp": null,
   "kind": "function",
   "context": "root.escapeHtml",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function escapeHtml(str) { if (typeof str !== 'string')\n            return str;\n        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;'); }"
  }
 }

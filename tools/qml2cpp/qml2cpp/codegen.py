@@ -6,14 +6,16 @@ compile error, with the entry recorded in data/js for AI to fill (jsstore.py).
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from . import dom
 from .jsexpr import NUMERIC, Scope, Translator, Untranslatable, Value
 from .jsstore import JsStore
 from .registry import SHELL_ROOT, BuiltinRef, ComponentRef
-from .tsys import GROUPS, LAYOUT_ATTACHED, AnonRef, AnyType, TypeSystem
-from .typemap import generated_header, namespace_parts, runtime_for
+from .tsys import ATTACHED, AnonRef, AnyType, TypeSystem
+from .structs import HEADER as STRUCTS_HEADER
+from .typemap import RUNTIME, generated_header, namespace_parts, qualified_class, runtime_for
 
 # Properties ii sets that have no effect in ii-shell's renderer.
 IGNORED = {"renderType", "antialiasing", "smooth", "font.hintingPreference", "layer.smooth", "linkColor"}
@@ -61,6 +63,8 @@ class ComponentGen:
     methods: list[str] = field(default_factory=list)
     definitions: list[str] = field(default_factory=list)
     objects: list[Emitted] = field(default_factory=list)
+    anon_emitted: list[Emitted] = field(default_factory=list)  # objects with their own class, factories included
+    pending_components: list[tuple[dom.QmlObject, Value, str]] = field(default_factory=list)
 
     def __post_init__(self):
         self.component = self.ts.registry.component(self.ref)
@@ -83,11 +87,21 @@ class ComponentGen:
             return runtime.cpp
         if isinstance(t, ComponentRef):
             self.includes.add(generated_header(t))
-            if t.path != self.ref.path:
-                ns = "::".join(["ii", *namespace_parts(t)])
-                self.forwards.add(f"namespace {ns} {{ class {t.path.stem}; }}")
+            if t.path != self.ref.path:  # classes of this file are declared at its top
+                ns, _, name = qualified_class(t).rpartition("::")
+                self.forwards.add(f"namespace {ns} {{ class {name}; }}")
             return "::" + self.ts.view(t).cpp_class
         return "::" + self.ts.view(t).cpp_class
+
+    def uses_type(self, cpp: str | None) -> None:
+        """Declarations a member type needs: var-types structs, Quickshell classes inside containers."""
+        for word in re.findall(r"[A-Za-z_][\w:]*", cpp or ""):
+            if word in self.ts.var_types.structs:
+                self.header_includes.add(STRUCTS_HEADER)
+            elif word.startswith("qs::"):
+                runtime = next((r for r in RUNTIME.values() if r.cpp == word), None)
+                if runtime is not None:
+                    self.header_includes.add(runtime.header)
 
     def is_visual(self, t: AnyType | None) -> bool:
         return t is not None and self.ts.view(t).is_visual
@@ -99,10 +113,22 @@ class ComponentGen:
         root_var = Value("this", f"{self.cls}*", self.ref)
         self.objects.append(Emitted(root_var, root, self.ref, root.id or "root"))
         self.ids: dict[str, Value] = {}
+        if self.ref.inline:
+            # Ids resolve through the creation context: ii creates inline components in their own
+            # file, so the file's root id names its main object; for a singleton, the instance.
+            outer = ComponentRef(self.ref.path)
+            outer_root = self.ts.registry.component(outer).root
+            if outer_root.id and self.ts.view(outer).is_singleton:
+                self.ids[outer_root.id] = Value(f"::{self.ts.view(outer).cpp_class}::instance()", None, outer, is_ref=True)
         if root.id:
             self.ids[root.id] = root_var
         self._children(root, root_var, self.ref, root.id or "root")
-        self._anon_objects(root, root_var, (), root.id or "root")
+        self._object_values(root, root_var, (), root.id or "root")
+
+    def emitted(self, e: Emitted) -> None:
+        self.objects.append(e)
+        if isinstance(e.type, AnonRef) and all(x.type != e.type for x in self.anon_emitted):
+            self.anon_emitted.append(e)
 
     def _children(self, obj: dom.QmlObject, parent: Value, parent_type: AnyType | None, path: str) -> None:
         counts: dict[str, int] = {}
@@ -111,12 +137,26 @@ class ComponentGen:
             index = counts.get(child.type_name, 0)
             counts[child.type_name] = index + 1
             child_path = f"{path}/{child.id or f'{child.type_name}.{index}'}"
+            if child.type_name == "Component":
+                self.component_child(child, child_path)
+                continue
+            default = self.ts.view(parent_type).default_property if parent_type is not None else None
+            default_prop = self.ts.prop(parent_type, default) if default else None
+            if default_prop is not None and default_prop.component_of is not None:
+                # Variants / Repeater / Instantiator: the child is the delegate, instantiated per model
+                # item with `required property modelData` set. Needs the stage 3 delegate runtime.
+                self.stub_line(child_path, f"{obj.type_name} {{ {child.type_name} {{ ... }} }}", "delegate (default component property)", "")
+                continue
             cls = self.class_of(child_type)
             if cls is None:
                 self.stub_line(child_path, f"object {child.type_name}", "object", "")
                 continue
-            make = "add" if self.is_visual(parent_type) and self.is_visual(child_type) else "create"
-            creator = f"{parent.cpp}->{make}<{cls}>()" if parent.cpp != "this" else f"{make}<{cls}>()"
+            content = self.ts.view(parent_type).content if parent_type is not None else None
+            if content and self.is_visual(child_type):
+                creator = f"{parent.member(content)}->add<{cls}>()"  # a window's visual children
+            else:
+                make = "add" if self.is_visual(parent_type) and self.is_visual(child_type) else "create"
+                creator = f"{parent.cpp}->{make}<{cls}>()" if parent.cpp != "this" else f"{make}<{cls}>()"
             if child.id and not self.factory_depth:
                 member = self.id_member(child.id)
                 self.members.append(f"{cls}* {member} = nullptr;")
@@ -130,29 +170,64 @@ class ComponentGen:
                 var = Value(name, f"{cls}*", child_type)
                 if child.id:
                     self.ids[child.id] = var
-            self.objects.append(Emitted(var, child, child_type, child_path))
+            self.emitted(Emitted(var, child, child_type, child_path))
             self._children(child, var, child_type, child_path)
-            self._anon_objects(child, var, child_type.path if isinstance(child_type, AnonRef) else (), child_path)
+            self._object_values(child, var, child_type.path if isinstance(child_type, AnonRef) else (), child_path)
 
-    def _anon_objects(self, obj: dom.QmlObject, var: Value, prefix: tuple[str, ...], path: str) -> None:
-        """`sizes: QtObject { ... }`: create the nested object and point the property at it."""
+    def _object_values(self, obj: dom.QmlObject, var: Value, prefix: tuple[str, ...], path: str) -> None:
+        """Bindings whose value is an object (`sizes: QtObject { ... }`, `mask: Region { ... }`):
+        create the object, owned by `var`, and point the property at it."""
         for b in obj.bindings:
-            if b.value.obj is None or b.is_on or var.cpp != "this" and not prefix:
+            if b.value.obj is None or b.is_on or b.is_signal_handler or b.name in IGNORED:
                 continue
-            anon = AnonRef(self.ref, prefix + (b.name,), b.value.obj.type_name)
-            prop = self.ts.prop(var.obj, b.name)
-            if prop is None or prop.object_type != anon:
-                continue
-            cls = self.class_of(anon)
-            self.counter += 1
-            name = f"o{self.counter}"
-            self.body.append(f"auto* {name} = {'create' if var.cpp == 'this' else var.cpp + '->create'}<{cls}>();")
-            self.body.append(f"{var.member(b.name)}.set({name});")
-            sub = Value(name, f"{cls}*", anon)
             child_path = f"{path}/{b.name}"
-            self.objects.append(Emitted(sub, b.value.obj, anon, child_path))
-            self._children(b.value.obj, sub, anon, child_path)
-            self._anon_objects(b.value.obj, sub, prefix + (b.name,), child_path)
+            prop = self.ts.prop(var.obj, b.name) if var.obj is not None and "." not in b.name else None
+            if prop is not None and prop.component_of is not None:
+                continue  # a component: its factory is made in phase 2
+            anon = AnonRef(self.ref, prefix + (b.name,), b.value.obj.type_name)
+            if prop is not None and prop.object_type == anon:
+                value_type = anon  # a property declared here with its value: the object's own class
+            elif prop is not None and prop.kind == "property" and prop.object_type is not None and prop.cpp_type:
+                value_type = self.ts.object_type(self.ref, b.value.obj)
+            else:
+                self.stub_line(child_path, f"{b.name}: {b.value.obj.type_name} {{ ... }}", "object value (no object property)", "")
+                continue
+            cls = self.class_of(value_type)
+            if cls is None:
+                self.stub_line(child_path, f"{b.name}: {b.value.obj.type_name} {{ ... }}", "object value (unknown type)", "")
+                continue
+            creator = f"{'create' if var.cpp == 'this' else var.cpp + '->create'}<{cls}>()"
+            vid = b.value.obj.id
+            if vid and not self.factory_depth:
+                name = self.id_member(vid)
+                self.members.append(f"{cls}* {name} = nullptr;")
+                self.body.append(f"{name} = {creator};")
+            else:
+                self.counter += 1
+                name = vid or f"o{self.counter}"
+                self.body.append(f"auto* {name} = {creator};")
+            setter = prop.access if var.cpp == "this" else var.member(prop.access)
+            self.body.append(f"{setter}.set({name});")
+            sub = Value(name, f"{cls}*", value_type)
+            if vid:
+                self.ids[vid] = sub
+            self.emitted(Emitted(sub, b.value.obj, value_type, child_path))
+            self._children(b.value.obj, sub, value_type, child_path)
+            self._object_values(b.value.obj, sub, value_type.path if isinstance(value_type, AnonRef) else (), child_path)
+
+    def component_child(self, child: dom.QmlObject, path: str) -> None:
+        """`Component { id: x; T { ... } }` among an object's children: a factory member `x`."""
+        inner = child.children[0] if len(child.children) == 1 else None
+        inner_type = self.ts.object_type(self.ref, inner) if inner is not None else None
+        cls = self.class_of(inner_type)
+        if not child.id or cls is None or self.factory_depth:
+            self.stub_line(path, f"Component {{ {inner.type_name if inner else ''} }}", "component (no id, unknown type or nested)", "")
+            return
+        member = self.id_member(child.id)
+        self.members.append(f"Component<{cls}> {member};")
+        self.header_includes.add("runtime/component.h")
+        self.ids[child.id] = Value(member, f"Component<{cls}>")
+        self.pending_components.append((child, Value(member, f"Component<{cls}>"), path))
 
     def id_member(self, id_name: str) -> str:
         return f"{id_name}Id" if id_name in self.view.props else id_name
@@ -162,12 +237,13 @@ class ComponentGen:
     def target(self, t: AnyType, name: str) -> tuple[str, str | None, str]:
         """(access, C++ type, kind) of a binding target, which may be dotted."""
         head, _, rest = name.partition(".")
-        if head == "Layout" and rest in LAYOUT_ATTACHED:
-            return f"layout().{rest}", LAYOUT_ATTACHED[rest], "property"
-        if rest and head in GROUPS and rest in GROUPS[head]:
-            access, cpp = GROUPS[head][rest]
+        if rest:
+            members = ATTACHED.get(head) or self.ts.view(t).groups.get(head)
+            if members is None or rest not in members:
+                raise Untranslatable(f"no property {name}")
+            access, cpp = members[rest]
             return access, cpp, "property"
-        prop = self.ts.prop(t, name) if not rest else None
+        prop = self.ts.prop(t, name)
         if prop is None:
             raise Untranslatable(f"no property {name}")
         return prop.access, prop.cpp_type, prop.kind
@@ -190,7 +266,7 @@ class ComponentGen:
             self.bind_object(e)
 
     def bind_object(self, e: Emitted) -> None:
-        if e.type is None:
+        if e.type is None or (isinstance(e.type, BuiltinRef) and e.type.name == "Connections"):
             return
         aliases = {p.name for p in self.component.root.properties if p.is_alias} if e is self.objects[0] else set()
         easing: dict[str, dom.Binding] = {}
@@ -198,11 +274,14 @@ class ComponentGen:
             if b.name in IGNORED or b.is_signal_handler or b.is_on or b.name in aliases:
                 continue  # aliases are wired in alias_wiring(); handlers and `on` objects come later
             if b.value.obj is not None:
-                prop = self.ts.prop(e.type, b.name)
+                prop = self.ts.prop(e.type, b.name) if "." not in b.name else None
                 if prop is not None and prop.component_of is not None:
                     self.component_factory(e, b, prop.access, prop.cpp_type)
-                continue
+                continue  # other object values were created (or stubbed) in phase 1
             if not b.value.script:
+                if b.value.objects:
+                    self.stub_line(f"{e.path}.{b.name}", f"{b.name}: [{', '.join(o.type_name for o in b.value.objects)}]",
+                                   "object list", "")
                 continue
             if b.name.startswith("easing."):
                 easing[b.name.removeprefix("easing.")] = b
@@ -215,11 +294,32 @@ class ComponentGen:
         return var.member(access) if var.cpp != "this" else access
 
     def component_factory(self, e: Emitted, b: dom.Binding, access: str, cpp_type: str) -> None:
-        """`x: Component { T { ... } }`: a factory lambda building the object tree and its bindings."""
-        inner = b.value.obj.children[0]
+        """`x: Component { T { ... } }`, or `sourceComponent: T { ... }` (an implicit component)."""
+        explicit = b.value.obj.type_name == "Component" and b.value.obj.children
+        inner = b.value.obj.children[0] if explicit else b.value.obj
+        lines = self.factory(inner, f"{e.path}.{b.name}")
+        if lines is not None:
+            self.body.append(f"{self.member_of(e.var, access)}.set({cpp_type}([=, this](Object& owner) {{")
+            self.body += [f"  {line}" for line in lines]
+            self.body.append("}));")
+
+    def component_members(self) -> None:
+        for child, member, path in self.pending_components:
+            lines = self.factory(child.children[0], path)
+            if lines is not None:
+                self.body.append(f"{member.cpp} = {member.type}([=, this](Object& owner) {{")
+                self.body += [f"  {line}" for line in lines]
+                self.body.append("});")
+
+    def factory(self, inner: dom.QmlObject, path: str) -> list[str] | None:
+        """The body of a factory lambda building `inner`'s object tree, bindings and handlers.
+        Ids inside are local to it, as a Component's ids are to its own context."""
         inner_type = self.ts.object_type(self.ref, inner)
         cls = self.class_of(inner_type)
-        saved_body, start = self.body, len(self.objects)
+        if cls is None:
+            self.stub_line(path, f"component {inner.type_name}", "component (unknown type)", "")
+            return None
+        saved_body, saved_ids, start = self.body, dict(self.ids), len(self.objects)
         self.body = []
         self.factory_depth += 1
         self.counter += 1
@@ -227,19 +327,18 @@ class ComponentGen:
         self.body.append(f"auto* {var.cpp} = owner.create<{cls}>();")
         if inner.id:
             self.ids[inner.id] = var
-        self.objects.append(Emitted(var, inner, inner_type, f"{e.path}.{b.name}"))
-        self._children(inner, var, inner_type, f"{e.path}.{b.name}")
+        self.emitted(Emitted(var, inner, inner_type, path))
+        self._children(inner, var, inner_type, path)
+        self._object_values(inner, var, inner_type.path if isinstance(inner_type, AnonRef) else (), path)
         created = self.objects[start:]
         for sub in created:
             self.bind_object(sub)
-        self.on_objects(created)
+        self.handlers(created)
         self.body += [f"{var.cpp}->complete();", f"return {var.cpp};"]
-        lines, self.body = self.body, saved_body
+        lines, self.body, self.ids = self.body, saved_body, saved_ids
         del self.objects[start:]
         self.factory_depth -= 1
-        self.body.append(f"{self.member_of(e.var, access)}.set({cpp_type}([=, this](Object& owner) {{")
-        self.body += [f"  {line}" for line in lines]
-        self.body.append("}));")
+        return lines
 
     def easing_binding(self, e: Emitted, parts: dict[str, dom.Binding]) -> None:
         """`easing.type` / `easing.bezierCurve` / `easing.overshoot` -> one Easing value."""
@@ -301,6 +400,9 @@ class ComponentGen:
             for child in obj.children:
                 child_type = self.ts.object_type(self.ref, child)
                 cls = self.class_of(child_type)
+                if cls is None:
+                    self.stub_line(f"{context}.Behavior", child.type_name, "behavior animation (unknown type)", "")
+                    continue
                 self.counter += 1
                 anim = Value(f"a{self.counter}", f"{cls}*", child_type)
                 self.body.append(f"auto* {anim.cpp} = {var.cpp}->setAnimation<{cls}>();")
@@ -359,15 +461,114 @@ class ComponentGen:
         self.translated += 1
         self.emit_assignment(setter, expr, label)
 
-    def handlers(self) -> None:
-        self.on_objects(self.objects)
-        for e in self.objects:
+    def handlers(self, objects: list[Emitted]) -> None:
+        """`on` objects, signal handlers, Connections and functions of the given objects."""
+        self.on_objects(objects)
+        for e in objects:
+            if isinstance(e.type, BuiltinRef) and e.type.name == "Connections":
+                self.connections(e)
+                continue
+            if isinstance(e.type, BuiltinRef) and e.type.name == "IpcHandler":
+                self.ipc_functions(e)
             for b in e.obj.bindings:
                 if b.is_signal_handler and b.value.script:
-                    self.stub_line(f"{e.path}.{b.name}", b.value.script.code, "handler", "void")
+                    self.handler(e, b)
             for m in e.obj.methods:
                 if m.kind == "function" and m.body is not None:
                     self.function(e, m)
+
+    def handler_body(self, context: str, script: dom.Script, scope: Scope, returns: str | None = None) -> list[str] | None:
+        """Statements of a handler or function body: mechanical, else from data/js, else a stub."""
+        try:
+            lines = self.tr.statements(script.ast, scope, returns)
+            self.translated += 1
+            return lines
+        except Untranslatable as err:
+            filled = self.stub_line(context, script.code, f"statements ({err})", returns or "void")
+            return filled.splitlines() if filled else None
+
+    def signal_target(self, e: Emitted, handler_name: str) -> tuple[str, list[tuple[str, str | None]]] | None:
+        """For `onFoo` on an object: (C++ signal expression, parameters)."""
+        if handler_name.startswith("Component."):
+            return self.member_of(e.var, "completed"), []
+        name = handler_name[2:3].lower() + handler_name[3:]
+        params = self.ts.signal(e.type, name)
+        if params is not None:
+            return self.member_of(e.var, name), params
+        if name.endswith("Changed") and (prop := self.ts.prop(e.type, name[: -len("Changed")])) is not None:
+            if prop.kind == "property":
+                return f"{self.member_of(e.var, prop.access)}.changed()", []
+        return None
+
+    def connect_lines(self, signal: str, params: list[tuple[str, str | None]], body: list[str], connect: str) -> list[str]:
+        decls = ", ".join(f"const {t}& {n}" for n, t in params)
+        return [f"{signal}.{connect}([=, this]({decls}) {{", *(f"  {line}" for line in body), "});"]
+
+    def handler(self, e: Emitted, b: dom.Binding) -> None:
+        context = f"{e.path}.{b.name}"
+        target = self.signal_target(e, b.name)
+        if target is None or any(t is None for _, t in target[1]):
+            self.stub_line(context, b.value.script.code, "handler (unknown signal)", "void")
+            return
+        signal, params = target
+        scope = self.scope_for(e)
+        scope.locals.update({n: Value(n, t) for n, t in params})
+        body = self.handler_body(context, b.value.script, scope)
+        if body is not None:
+            self.body += self.connect_lines(signal, params, body, "connectForever")
+
+    def connections(self, e: Emitted) -> None:
+        """`Connections { target: X; function onFoo() {...} }`: reconnect whenever the target changes."""
+        context = f"{e.path}.Connections"
+        target_binding = next((b for b in e.obj.bindings if b.name == "target" and b.value.script), None)
+        try:
+            if target_binding is None:
+                raise Untranslatable("no target")
+            target = self.tr.expression(target_binding.value.script.ast, self.scope_for(e))
+            if target.obj is None:
+                raise Untranslatable(f"target of type {target.type}")
+        except Untranslatable as err:
+            code = " ".join(e.obj.methods[0].body.code.split())[:60] if e.obj.methods else ""
+            self.stub_line(context, (target_binding.value.script.code if target_binding else "") + " | " + code,
+                           f"connections ({err})", "")
+            return
+        cls = self.class_of(target.obj)
+        pointer = f"&{target.cpp}" if target.is_ref else target.cpp
+        self.body.append(f'{e.var.cpp}->target.bind([=, this] {{ return static_cast<Object*>({pointer}); }}, "{self.cls}/Connections.target");')
+        lines = [f"{e.var.cpp}->setConnector([=, this](Object* object, std::vector<Connection>& out) {{",
+                 f"  auto* target = static_cast<{cls}*>(object);"]
+        typed = Emitted(Value("target", f"{cls}*", target.obj), e.obj, target.obj, e.path)
+        for m in e.obj.methods:
+            if m.kind != "function" or m.body is None:
+                continue
+            found = self.signal_target(typed, m.name)
+            if found is None:
+                self.stub_line(f"{context}.{m.name}", m.body.code, "connections handler (unknown signal)", "void")
+                continue
+            signal, params = found
+            scope = self.scope_for(e)
+            scope.locals.update({n: Value(n, t) for (n, t) in params})
+            body = self.handler_body(f"{context}.{m.name}", m.body, scope)
+            if body is not None:
+                lines += [f"  {line}" for line in self.connect_lines(f"out.push_back({signal}", params, body, "connect")]
+                lines[-1] = "  }));"
+        lines.append("});")
+        self.body += lines
+
+    def ipc_functions(self, e: Emitted) -> None:
+        """IpcHandler functions are commands of `qs ipc call <target> <function>`."""
+        for m in e.obj.methods:
+            if m.kind != "function" or m.body is None:
+                continue
+            context = f"{e.path}.{m.name}"
+            if m.parameters:
+                self.stub_line(context, f"function {m.name}({', '.join(n for n, _ in m.parameters)}) {{ {m.body.code} }}",
+                               "ipc function (parameters)", "")
+                continue
+            body = self.handler_body(context, m.body, self.scope_for(e))
+            if body is not None:
+                self.body += [f'{e.var.cpp}->addFunction("{m.name}", [=, this](const std::vector<std::string>&) -> std::string {{',
+                              *(f"  {line}" for line in body), "  return {};", "});"]
 
     def function(self, e: Emitted, m: dom.Method) -> None:
         """A JS function: a member function once data/js holds its signature and body."""
@@ -377,14 +578,24 @@ class ComponentGen:
         context = f"{e.path}.{m.name}"
         code = f"function {m.name}({params}) {{ {m.body.code} }}"
         expected = "signature (C++ declaration) + cpp (function body statements)"
-        key, body = self.store.get(self.ref.path, context, code, expected, "function")
-        entry = self.store.find(self.ref.path, context) or {}
-        if body is None or not entry.get("signature") or e is not self.objects[0]:
+        if e is not self.objects[0]:
+            if not (isinstance(e.type, BuiltinRef) and e.type.name in ("IpcHandler", "Connections")):
+                self.stub_line(context, code, "function of a child object", "")
+            return
+        signature = self.ts.function(self.ref, m.name) if self.ts.is_procedure(m) else None
+        if signature is not None and not (self.store.find(self.ref.path, context) or {}).get("signature"):
+            lines = self.handler_body(context, m.body, self.scope_for(e))
+            if lines is None:
+                return
+            body = "\n".join(lines)
+        else:
+            key, body = self.store.get(self.ref.path, context, code, expected, "function")
+            entry = self.store.find(self.ref.path, context) or {}
             if body is None or not entry.get("signature"):
                 self.stubs += 1
                 self.body.append(f'II_TODO_JS("{key}");  // function {context}')
-            return
-        signature = parse(entry["signature"])
+                return
+            signature = parse(entry["signature"])
         self.translated += 1
         self.methods.append(f"{signature.text};")
         self.definitions.append(f"  {signature.definition(f'{self.cls}::{m.name}')} {{")
@@ -396,8 +607,14 @@ class ComponentGen:
 
     def declared_members(self) -> list[str]:
         out = []
+        for m in self.component.root.methods:
+            if m.kind == "signal":
+                params = self.ts.signal(self.ref, m.name) or []
+                out.append(f"Signal<{', '.join(t or 'nlohmann::json' for _, t in params)}> {m.name};")
         for p in self.component.root.properties:
             prop = self.view.props[p.name]
+            self.class_of(prop.object_type)
+            self.uses_type(prop.cpp_type)
             if prop.kind == "alias":
                 if prop.alias_of and prop.alias_of[1] is None:
                     out.append(f"{prop.cpp_type or 'void*'} {p.name} = nullptr;  // alias {prop.alias_of[0]}")
@@ -418,91 +635,132 @@ class ComponentGen:
                 if target is not None:
                     self.body.append(f"{p.name} = {f'&{target.member(member)}' if member else target.cpp};")
 
-    def generate(self) -> tuple[str, str]:
-        self.tr.used.clear()
-        self.create_objects()
-        self.alias_wiring()
-        self.bind_properties()
-        self.handlers()
-        self.includes |= {generated_header(r) for r in self.tr.used}
-
-        base = self.class_of(self.view.base) or "Object"
-        rel = self.ref.path.relative_to(SHELL_ROOT)
-        ns = "::".join(["ii", *namespace_parts(self.ref)])
-        singleton = self.view.is_singleton
-        nested_decls = self.anon_classes()
-
-        header = [
-            "#pragma once",
-            f"// Generated by qml2cpp from {rel}.",
-            "",
-            *sorted(f'#include "{h}"' for h in self.header_includes | {"runtime/property.h"}),
-            "",
-            "#include <nlohmann/json.hpp>",
-            "",
-            "#include <string>",
-            "#include <vector>",
-            "",
-            *sorted(f for f in self.forwards),
-            "",
-            f"namespace {ns} {{",
-            "",
-            f"  class {self.cls} : public {base} {{",
-            "  public:",
-            *([f"    static {self.cls}& instance();", ""] if singleton else []),
-            *(f"    {line}" for line in nested_decls),
-            f"    {self.cls}();",
-            "",
-            *(f"    {m}" for m in self.declared_members()),
-            "",
-            *(f"    {m}" for m in self.methods),
-            *([""] if self.methods else []),
-            *(f"    {m}" for m in self.members),
-            "  };",
-            "",
-            f"}} // namespace {ns}",
-            "",
-        ]
-        source = [
-            f"// Generated by qml2cpp from {rel}.",
-            f'#include "{generated_header(self.ref)}"',
-            "",
-            *sorted(f'#include "{h}"' for h in self.includes - {generated_header(self.ref)}),
-            '#include "runtime/js.h"',
-            "",
-            f"namespace {ns} {{",
-            "",
-            *([f"  {self.cls}& {self.cls}::instance() {{",
-               f"    static {self.cls} object;",
-               "    object.complete();",
-               "    return object;",
-               "  }", ""] if singleton else []),
-            f"  {self.cls}::{self.cls}() {{",
-            *(f"    {line}" for line in self.body),
-            "  }",
-            "",
-            *self.definitions,
-            f"}} // namespace {ns}",
-            "",
-        ]
-        return "\n".join(header), "\n".join(source)
-
     def anon_classes(self) -> list[str]:
         """Nested classes for anonymous objects: property declarations only (bindings are set by
         the component constructor, which sees every id)."""
-        out: list[str] = [f"class {e.type.name};" for e in self.objects[1:] if isinstance(e.type, AnonRef)]
+        out: list[str] = [f"class {e.type.name};" for e in self.anon_emitted]
         if out:
             out.append("")
-        for e in self.objects[1:]:
-            if not isinstance(e.type, AnonRef):
-                continue
+        for e in self.anon_emitted:
             view = self.ts.view(e.type)
             base = self.class_of(view.base) or "Object"
             out.append(f"class {e.type.name} : public {base} {{")
             out.append("public:")
             for p in e.obj.properties:
                 prop = view.props[p.name]
+                self.class_of(prop.object_type)
+                self.uses_type(prop.cpp_type)
                 out.append(f"  Property<{prop.cpp_type or 'nlohmann::json /* TODO type */'}> {p.name};")
             out.append("};")
             out.append("")
         return out
+
+    def generate(self) -> None:
+        """Fill decl (the class definition) and defn (its out-of-class definitions)."""
+        self.tr.used.clear()
+        self.create_objects()
+        self.alias_wiring()
+        self.bind_properties()
+        self.component_members()
+        self.handlers(self.objects)
+        for r in self.tr.used:
+            if isinstance(r, ComponentRef):
+                self.includes.add(generated_header(r))
+            elif (runtime := runtime_for(r)) is not None:
+                self.includes.add(runtime.header)
+
+        base = self.class_of(self.view.base) or "Object"
+        singleton = self.view.is_singleton
+        nested_decls = self.anon_classes()
+        declared = self.declared_members()  # before the includes are read: registers the types used
+        self.decl = [
+            f"class {self.cls} : public {base} {{",
+            "public:",
+            *([f"  static {self.cls}& instance();", ""] if singleton else []),
+            *(f"  {line}" for line in nested_decls),
+            f"  {self.cls}();",
+            "",
+            *(f"  {m}" for m in declared),
+            "",
+            *(f"  {m}" for m in self.methods),
+            *([""] if self.methods else []),
+            *(f"  {m}" for m in self.members),
+            "};",
+        ]
+        self.defn = [
+            *([f"{self.cls}& {self.cls}::instance() {{",
+               f"  static {self.cls} object;",
+               "  object.complete();",
+               "  return object;",
+               "}", ""] if singleton else []),
+            f"{self.cls}::{self.cls}() {{",
+            *(f"  {line}" for line in self.body),
+            "}",
+            "",
+            *(line[2:] if line.startswith("  ") else line for line in self.definitions),
+        ]
+
+
+def generate_file(ts: TypeSystem, tr: Translator, store: JsStore, path) -> tuple[str, str, list[ComponentGen]]:
+    """Header and source for one QML file: its inline components (bases first), then its component."""
+    qml = ts.registry.file(path)
+    refs = [ComponentRef(path, name) for name in qml.inline_components]
+    ordered: list[ComponentRef] = []
+
+    def visit(ref: ComponentRef) -> None:
+        if ref in ordered:
+            return
+        base = ts.view(ref).base
+        if isinstance(base, ComponentRef) and base in refs:
+            visit(base)
+        ordered.append(ref)
+
+    for ref in refs:
+        visit(ref)
+    gens = [ComponentGen(ts, tr, store, ref) for ref in [*ordered, ComponentRef(path)]]
+    for gen in gens:
+        gen.generate()
+
+    main = gens[-1]
+    rel = path.relative_to(SHELL_ROOT)
+    ns = "::".join(["ii", *namespace_parts(main.ref)])
+    own = {f"namespace {ns} {{ class {g.cls}; }}" for g in gens}
+    header_includes = set().union(*(g.header_includes for g in gens)) | {"runtime/property.h"}
+    includes = set().union(*(g.includes for g in gens)) - {generated_header(main.ref)}
+    forwards = set().union(*(g.forwards for g in gens)) - own
+    indent = lambda lines: [f"  {line}" if line else "" for line in lines]
+    header = [
+        "#pragma once",
+        f"// Generated by qml2cpp from {rel}.",
+        "",
+        *sorted(f'#include "{h}"' for h in header_includes),
+        "",
+        "#include <nlohmann/json.hpp>",
+        "",
+        "#include <string>",
+        "#include <vector>",
+        "",
+        *sorted(forwards),
+        "",
+        f"namespace {ns} {{",
+        "",
+        *indent([f"class {g.cls};" for g in gens]),
+        "",
+    ]
+    source = [
+        f"// Generated by qml2cpp from {rel}.",
+        f'#include "{generated_header(main.ref)}"',
+        "",
+        *sorted(f'#include "{h}"' for h in includes),
+        '#include "runtime/js.h"',
+        "",
+        f"namespace {ns} {{",
+        "",
+    ]
+    for g in gens:
+        header += [*indent(g.decl), ""]
+        source += indent(g.defn)
+    header += [f"}} // namespace {ns}", ""]
+    source += [f"}} // namespace {ns}", ""]
+    strip = lambda lines: "\n".join(line.rstrip() for line in lines)
+    return strip(header), strip(source), gens

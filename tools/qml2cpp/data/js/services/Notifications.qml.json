@@ -1,56 +1,98 @@
 {
- "07fff823562e": {
+ "08bdfadf8ae2": {
   "cpp": null,
-  "kind": "object",
-  "context": "root/notifTimerComponent",
-  "expected": "",
-  "code": "object Component"
+  "kind": "statements (FunctionExpression)",
+  "context": "root.timeoutAll",
+  "expected": "void",
+  "code": "root.popupList.forEach((notif) => {\n            root.timeout(notif.notificationId);\n        })\n        root.popupList.forEach((notif) => {\n            notif.popup = false;\n        });"
+ },
+ "0a2f2c4db99e": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.urgency",
+  "expected": "std::string",
+  "code": "notification?.urgency.toString() ?? \"normal\""
  },
  "0fd2ef1c9257": {
   "cpp": null,
   "kind": "function",
   "context": "root.notifToString",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function notifToString(notif) { return JSON.stringify(notifToJSON(notif), null, 2); }"
  },
  "11a53cc61e98": {
   "cpp": null,
-  "kind": "handler",
+  "kind": "statements (FunctionExpression)",
   "context": "root/notifFileView.onLoaded",
   "expected": "void",
   "code": "{\n            const fileContents = notifFileView.text()\n            root.list = JSON.parse(fileContents).map((notif) => {\n                return notifComponent.createObject(root, {\n                    \"notificationId\": notif.notificationId,\n                    \"actions\": [], // Notification actions are meaningless if they're not tracked by the server or the sender is dead\n                    \"appIcon\": notif.appIcon,\n                    \"appName\": notif.appName,\n                    \"body\": notif.body,\n                    \"image\": notif.image,\n                    \"summary\": notif.summary,\n                    \"time\": notif.time,\n                    \"urgency\": notif.urgency,\n                });\n            });\n            // Find largest notificationId\n            let maxId = 0\n            root.list.forEach((notif) => {\n                maxId = Math.max(maxId, notif.notificationId)\n            })\n\n            console.log(\"[Notifications] File loaded\")\n            root.idOffset = maxId\n            root.initDone()\n        }"
  },
  "1f3fb544f6bb": {
   "cpp": null,
-  "kind": "binding (no property path)",
+  "kind": "binding (name Qt)",
   "context": "root/notifFileView.path",
-  "expected": "",
+  "expected": "std::string",
   "code": "Qt.resolvedUrl(filePath)"
+ },
+ "28fb1e5b53c1": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.appIcon",
+  "expected": "std::string",
+  "code": "notification?.appIcon ?? \"\""
+ },
+ "2997733936f6": {
+  "cpp": null,
+  "kind": "statements (call discardNotification)",
+  "context": "wrapper.onNotificationChanged",
+  "expected": "void",
+  "code": "{\n            if (notification === null) {\n                root.discardNotification(notificationId);\n            }\n        }"
  },
  "30050b0d847d": {
   "cpp": null,
   "kind": "function",
   "context": "root.stringifyList",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function stringifyList(list) { return JSON.stringify(list.map((notif) => notifToJSON(notif)), null, 2); }"
+ },
+ "31d2eec71b8e": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.image",
+  "expected": "std::string",
+  "code": "notification?.image ?? \"\""
  },
  "32d5d2348c52": {
   "cpp": null,
-  "kind": "handler",
+  "kind": "statements (FunctionExpression)",
   "context": "root/notifFileView.onLoadFailed",
   "expected": "void",
   "code": "(error) => {\n            if(error == FileViewError.FileNotFound) {\n                console.log(\"[Notifications] File not found, creating new file.\")\n                root.list = []\n                notifFileView.setText(stringifyList(root.list));\n            } else {\n                console.log(\"[Notifications] Error loading file: \" + error)\n            }\n        }"
+ },
+ "37a18e0e4878": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.appName",
+  "expected": "std::string",
+  "code": "notification?.appName ?? \"\""
+ },
+ "39442913f91e": {
+  "cpp": null,
+  "kind": "binding (FunctionExpression)",
+  "context": "wrapper.actions",
+  "expected": "std::vector<nlohmann::json>",
+  "code": "notification?.actions.map((action) => ({\n            \"identifier\": action.identifier,\n            \"text\": action.text,\n        })) ?? []"
  },
  "4bc6b1e92390": {
   "cpp": null,
   "kind": "function",
   "context": "root.timeoutNotification",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function timeoutNotification(id) { const index = root.list.findIndex((notif) => notif.notificationId === id);\n        if (root.list[index] != null)\n            root.list[index].popup = false;\n        root.timeout(id); }"
  },
  "523395cfc60f": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call groupsForList)",
   "context": "root.groupsByAppName",
   "expected": "std::map<std::string, NotifGroup>",
   "code": "groupsForList(root.list)"
@@ -59,78 +101,78 @@
   "cpp": null,
   "kind": "function",
   "context": "root.appNameListForGroups",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function appNameListForGroups(groups) { return Object.keys(groups).sort((a, b) => {\n            // Sort by time, descending\n            return groups[b].time - groups[a].time;\n        }); }"
- },
- "53f890d7c4b8": {
-  "cpp": null,
-  "kind": "function",
-  "context": "root.discardAllNotifications",
-  "expected": "",
-  "code": "function discardAllNotifications() { root.list = []\n        triggerListChange()\n        notifFileView.setText(stringifyList(root.list));\n        notifServer.trackedNotifications.values.forEach((notif) => {\n            notif.dismiss()\n        })\n        root.discardAll(); }"
  },
  "564a4b2f3f6c": {
   "cpp": null,
   "kind": "function",
   "context": "root.notifToJSON",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function notifToJSON(notif) { return {\n            \"notificationId\": notif.notificationId,\n            \"actions\": notif.actions,\n            \"appIcon\": notif.appIcon,\n            \"appName\": notif.appName,\n            \"body\": notif.body,\n            \"image\": notif.image,\n            \"summary\": notif.summary,\n            \"time\": notif.time,\n            \"urgency\": notif.urgency,\n        } }"
  },
  "59371aa43195": {
   "cpp": null,
   "kind": "function",
   "context": "root.attemptInvokeAction",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function attemptInvokeAction(id, notifIdentifier) { console.log(\"[Notifications] Attempting to invoke action with identifier: \" + notifIdentifier + \" for notification ID: \" + id);\n        const notifServerIndex = notifServer.trackedNotifications.values.findIndex((notif) => notif.id + root.idOffset === id);\n        console.log(\"Notification server index: \" + notifServerIndex);\n        if (notifServerIndex !== -1) {\n            const notifServerNotif = notifServer.trackedNotifications.values[notifServerIndex];\n            const action = notifServerNotif.actions.find((action) => action.identifier === notifIdentifier);\n            // console.log(\"Action found: \" + JSON.stringify(action));\n            action.invoke()\n        } \n        else {\n            console.log(\"Notification not found in server: \" + id)\n        }\n        root.discardNotification(id); }"
- },
- "63b576c01b25": {
-  "cpp": null,
-  "kind": "function",
-  "context": "root.triggerListChange",
-  "expected": "",
-  "code": "function triggerListChange() { root.list = root.list.slice(0) }"
  },
  "63e1b7cc9ab0": {
   "cpp": null,
   "kind": "function",
   "context": "root.discardNotification",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function discardNotification(id) { console.log(\"[Notifications] Discarding notification with ID: \" + id);\n        const index = root.list.findIndex((notif) => notif.notificationId === id);\n        const notifServerIndex = notifServer.trackedNotifications.values.findIndex((notif) => notif.id + root.idOffset === id);\n        if (index !== -1) {\n            root.list.splice(index, 1);\n            notifFileView.setText(stringifyList(root.list));\n            triggerListChange()\n        }\n        if (notifServerIndex !== -1) {\n            notifServer.trackedNotifications.values[notifServerIndex].dismiss()\n        }\n        root.discard(id); }"
+ },
+ "69111679113d": {
+  "cpp": null,
+  "kind": "statements (FunctionExpression)",
+  "context": "root.onTriggered",
+  "expected": "void",
+  "code": "() => {\n            const index = root.list.findIndex((notif) => notif.notificationId === notificationId);\n            const notifObject = root.list[index];\n            print(\"[Notifications] Notification timer triggered for ID: \" + notificationId + \", transient: \" + notifObject?.isTransient);\n            if (notifObject.isTransient) root.discardNotification(notificationId);\n            else root.timeoutNotification(notificationId);\n            destroy()\n        }"
  },
  "6c783b3f9587": {
   "cpp": null,
   "kind": "function",
   "context": "root.cancelTimeout",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function cancelTimeout(id) { const index = root.list.findIndex((notif) => notif.notificationId === id);\n        if (root.list[index] != null)\n            root.list[index].timer.stop(); }"
- },
- "761dd05cc257": {
-  "cpp": null,
-  "kind": "handler",
-  "context": "root.Component.onCompleted",
-  "expected": "void",
-  "code": "{\n        refresh()\n    }"
  },
  "7be35f76e395": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call groupsForList)",
   "context": "root.popupGroupsByAppName",
   "expected": "std::map<std::string, NotifGroup>",
   "code": "groupsForList(root.popupList)"
  },
+ "7d2bca30db5a": {
+  "cpp": null,
+  "kind": "statements (call slice)",
+  "context": "root.triggerListChange",
+  "expected": "void",
+  "code": "root.list = root.list.slice(0)"
+ },
+ "81a5e043a798": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.body",
+  "expected": "std::string",
+  "code": "notification?.body ?? \"\""
+ },
  "89fdb8f410b3": {
   "cpp": null,
-  "kind": "handler",
+  "kind": "statements (FunctionExpression)",
   "context": "root.onListChanged",
   "expected": "void",
   "code": "{\n        // Update latest time for each app\n        root.list.forEach((notif) => {\n            if (!root.latestTimeForApp[notif.appName] || notif.time > root.latestTimeForApp[notif.appName]) {\n                root.latestTimeForApp[notif.appName] = Math.max(root.latestTimeForApp[notif.appName] || 0, notif.time);\n            }\n        });\n        // Remove apps that no longer have notifications\n        Object.keys(root.latestTimeForApp).forEach((appName) => {\n            if (!root.list.some((notif) => notif.appName === appName)) {\n                delete root.latestTimeForApp[appName];\n            }\n        });\n    }"
  },
- "91d858311380": {
+ "8ce8d987fb6a": {
   "cpp": null,
-  "kind": "function",
-  "context": "root.markAllRead",
-  "expected": "",
-  "code": "function markAllRead() { root.unread = 0; }"
+  "kind": "statements (call stringifyList)",
+  "context": "root.discardAllNotifications",
+  "expected": "void",
+  "code": "root.list = []\n        triggerListChange()\n        notifFileView.setText(stringifyList(root.list));\n        notifServer.trackedNotifications.values.forEach((notif) => {\n            notif.dismiss()\n        })\n        root.discardAll();"
  },
  "98c8b3544db9": {
   "cpp": null,
@@ -139,26 +181,19 @@
   "expected": "std::map<std::string, double>",
   "code": "({})"
  },
- "999b4866fcb0": {
+ "a4a207059d8a": {
   "cpp": null,
-  "kind": "function",
-  "context": "root.timeoutAll",
-  "expected": "",
-  "code": "function timeoutAll() { root.popupList.forEach((notif) => {\n            root.timeout(notif.notificationId);\n        })\n        root.popupList.forEach((notif) => {\n            notif.popup = false;\n        }); }"
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.isTransient",
+  "expected": "bool",
+  "code": "notification?.hints.transient ?? false"
  },
  "b56545e8881e": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call appNameListForGroups)",
   "context": "root.appNameList",
   "expected": "std::vector<std::string>",
   "code": "appNameListForGroups(root.groupsByAppName)"
- },
- "b6ca82c5b38f": {
-  "cpp": null,
-  "kind": "function",
-  "context": "root.refresh",
-  "expected": "",
-  "code": "function refresh() { notifFileView.reload() }"
  },
  "ba39bc1f6285": {
   "cpp": null,
@@ -167,11 +202,18 @@
   "expected": "bool",
   "code": "(GlobalStates?.sidebarRightOpen ?? false) || silent"
  },
+ "ba6fa307fab3": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.summary",
+  "expected": "std::string",
+  "code": "notification?.summary ?? \"\""
+ },
  "dd67837015fd": {
   "cpp": null,
   "kind": "function",
   "context": "root.groupsForList",
-  "expected": "",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function groupsForList(list) { const groups = {};\n        list.forEach((notif) => {\n            if (!groups[notif.appName]) {\n                groups[notif.appName] = {\n                    appName: notif.appName,\n                    appIcon: notif.appIcon,\n                    notifications: [],\n                    time: 0\n                };\n            }\n            groups[notif.appName].notifications.push(notif);\n            // Always set to the latest time in the group\n            groups[notif.appName].time = latestTimeForApp[notif.appName] || notif.time;\n        });\n        return groups; }"
  },
  "ddbd7f837f94": {
@@ -181,23 +223,16 @@
   "expected": "std::vector<Notif*>",
   "code": "list.filter((notif) => notif.popup);"
  },
- "e7eaef43e174": {
-  "cpp": null,
-  "kind": "object",
-  "context": "root/notifComponent",
-  "expected": "",
-  "code": "object Component"
- },
  "f1e5f83a7219": {
   "cpp": null,
-  "kind": "handler",
+  "kind": "handler (unknown signal)",
   "context": "root/notifServer.onNotification",
   "expected": "void",
   "code": "(notification) => {\n            notification.tracked = true\n            const newNotifObject = notifComponent.createObject(root, {\n                \"notificationId\": notification.id + root.idOffset,\n                \"notification\": notification,\n                \"time\": Date.now(),\n            });\n\t\t\troot.list = [...root.list, newNotifObject];\n\n            // Popup\n            if (!root.popupInhibited) {\n                newNotifObject.popup = true;\n                if (notification.expireTimeout != 0) {\n                    newNotifObject.timer = notifTimerComponent.createObject(root, {\n                        \"notificationId\": newNotifObject.notificationId,\n                        \"interval\": notification.expireTimeout < 0 ? (Config?.options.notifications.timeout ?? 7000) : notification.expireTimeout,\n                    });\n                }\n                root.unread++;\n            }\n            root.notify(newNotifObject);\n            // console.log(notifToString(newNotifObject));\n            notifFileView.setText(stringifyList(root.list));\n        }"
  },
  "f519b21155b9": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call appNameListForGroups)",
   "context": "root.popupAppNameList",
   "expected": "std::vector<std::string>",
   "code": "appNameListForGroups(root.popupGroupsByAppName)"

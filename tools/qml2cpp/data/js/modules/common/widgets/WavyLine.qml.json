@@ -8,7 +8,7 @@
  },
  "bf3c11cdac05": {
   "cpp": null,
-  "kind": "handler",
+  "kind": "statements (call getContext)",
   "context": "root.onPaint",
   "expected": "void",
   "code": "{\n        var ctx = getContext(\"2d\");\n        ctx.clearRect(0, 0, width, height);\n\n        var amplitude = root.lineWidth * root.amplitudeMultiplier;\n        var frequency = root.frequency;\n        var phase = Date.now() / 400.0;\n        var centerY = height / 2;\n\n        ctx.strokeStyle = root.color;\n        ctx.lineWidth = root.lineWidth;\n        ctx.lineCap = \"round\";\n        ctx.beginPath();\n        for (var x = ctx.lineWidth / 2; x <= root.width - ctx.lineWidth / 2; x += 1) {\n            var waveY = centerY + amplitude * Math.sin(frequency * 2 * Math.PI * x / root.fullLength + phase);\n            if (x === 0)\n                ctx.moveTo(x, waveY);\n            else\n                ctx.lineTo(x, waveY);\n        }\n        ctx.stroke();\n    }"

@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from . import dom
 from .qmltypes import TypeInfo
 from .registry import BuiltinRef, ComponentRef, Registry, TypeRef
-from .typemap import QML_BASIC, QT_CPP, VarTypes, qualified_class, runtime_for
+from .typemap import QML_BASIC, QT_CPP, RUNTIME, VarTypes, qualified_class, runtime_for
 
 
 @dataclass(frozen=True)
@@ -54,56 +54,88 @@ class TypeView:
     props: dict[str, Prop] = field(default_factory=dict)
     is_visual: bool = False
     is_singleton: bool = False
+    groups: dict[str, dict[str, tuple[str, str]]] = field(default_factory=dict)
+    content: str | None = None  # where children go when the type is a window: "contentItem()"
+    default_property: str | None = None
+
+    def inherit(self, base: "TypeView") -> None:
+        self.props.update(base.props)
+        self.is_visual, self.groups, self.content = base.is_visual, base.groups, base.content
+        self.default_property = base.default_property
 
 
-# Grouped properties of built-in types, as the runtime exposes them.
-GROUPS: dict[str, dict[str, tuple[str, str]]] = {
-    "anchors": {
-        "fill": ("anchors().fill", "Item*"),
-        "centerIn": ("anchors().centerIn", "Item*"),
-        "left": ("anchors().left", "AnchorLine"),
-        "right": ("anchors().right", "AnchorLine"),
-        "horizontalCenter": ("anchors().horizontalCenter", "AnchorLine"),
-        "top": ("anchors().top", "AnchorLine"),
-        "bottom": ("anchors().bottom", "AnchorLine"),
-        "verticalCenter": ("anchors().verticalCenter", "AnchorLine"),
-        "margins": ("anchors().margins", "double"),
-        "leftMargin": ("anchors().leftMargin", "double"),
-        "rightMargin": ("anchors().rightMargin", "double"),
-        "topMargin": ("anchors().topMargin", "double"),
-        "bottomMargin": ("anchors().bottomMargin", "double"),
-        "horizontalCenterOffset": ("anchors().horizontalCenterOffset", "double"),
-        "verticalCenterOffset": ("anchors().verticalCenterOffset", "double"),
-        "alignWhenCentered": ("anchors().alignWhenCentered", "bool"),
+_ITEM_ANCHORS = {
+    "fill": ("anchors().fill", "Item*"),
+    "centerIn": ("anchors().centerIn", "Item*"),
+    "left": ("anchors().left", "AnchorLine"),
+    "right": ("anchors().right", "AnchorLine"),
+    "horizontalCenter": ("anchors().horizontalCenter", "AnchorLine"),
+    "top": ("anchors().top", "AnchorLine"),
+    "bottom": ("anchors().bottom", "AnchorLine"),
+    "verticalCenter": ("anchors().verticalCenter", "AnchorLine"),
+    "margins": ("anchors().margins", "double"),
+    "leftMargin": ("anchors().leftMargin", "double"),
+    "rightMargin": ("anchors().rightMargin", "double"),
+    "topMargin": ("anchors().topMargin", "double"),
+    "bottomMargin": ("anchors().bottomMargin", "double"),
+    "horizontalCenterOffset": ("anchors().horizontalCenterOffset", "double"),
+    "verticalCenterOffset": ("anchors().verticalCenterOffset", "double"),
+    "alignWhenCentered": ("anchors().alignWhenCentered", "bool"),
+}
+
+_EDGES = ("left", "right", "top", "bottom")
+
+# Grouped properties, by the .qmltypes class declaring the group, as the runtime exposes them:
+# group -> member -> (access from an object pointer, C++ type).
+GROUPS: dict[str, dict[str, dict[str, tuple[str, str]]]] = {
+    "QQuickItem": {"anchors": _ITEM_ANCHORS},
+    "QQuickRectangle": {"border": {"width": ("border.width", "double"), "color": ("border.color", "Color")}},
+    "QQuickText": {
+        "font": {
+            "family": ("font.family", "std::string"),
+            "pixelSize": ("font.pixelSize", "double"),
+            "pointSize": ("font.pointSize", "double"),
+            "weight": ("font.weight", "int"),
+            "bold": ("font.bold", "bool"),
+            "italic": ("font.italic", "bool"),
+            "variableAxes": ("font.variableAxes", "std::map<std::string, double>"),
+        }
     },
-    "border": {"width": ("border.width", "double"), "color": ("border.color", "Color")},
-    "font": {
-        "family": ("font.family", "std::string"),
-        "pixelSize": ("font.pixelSize", "double"),
-        "pointSize": ("font.pointSize", "double"),
-        "weight": ("font.weight", "int"),
-        "bold": ("font.bold", "bool"),
-        "italic": ("font.italic", "bool"),
-        "variableAxes": ("font.variableAxes", "std::map<std::string, double>"),
+    # Quickshell windows: `anchors` says which screen edges a panel sticks to, `margins` its
+    # distance from them (compat/panel_window.h).
+    "PanelWindowInterface": {
+        "anchors": {e: (f"anchors.{e}", "bool") for e in _EDGES},
+        "margins": {e: (f"margins.{e}", "int") for e in _EDGES},
     },
 }
 
-# `Layout.*` attached properties.
-LAYOUT_ATTACHED = {
-    "fillWidth": "std::optional<bool>",
-    "fillHeight": "std::optional<bool>",
-    "minimumWidth": "double",
-    "minimumHeight": "double",
-    "preferredWidth": "double",
-    "preferredHeight": "double",
-    "maximumWidth": "double",
-    "maximumHeight": "double",
-    "alignment": "int",
-    "margins": "double",
-    "leftMargin": "double",
-    "rightMargin": "double",
-    "topMargin": "double",
-    "bottomMargin": "double",
+# Attached properties (`Layout.fillWidth: true`): attached type -> member -> (access, C++ type).
+ATTACHED: dict[str, dict[str, tuple[str, str]]] = {
+    "Layout": {
+        name: (f"layout().{name}", cpp)
+        for name, cpp in {
+            "fillWidth": "std::optional<bool>",
+            "fillHeight": "std::optional<bool>",
+            "minimumWidth": "double",
+            "minimumHeight": "double",
+            "preferredWidth": "double",
+            "preferredHeight": "double",
+            "maximumWidth": "double",
+            "maximumHeight": "double",
+            "alignment": "int",
+            "margins": "double",
+            "leftMargin": "double",
+            "rightMargin": "double",
+            "topMargin": "double",
+            "bottomMargin": "double",
+        }.items()
+    },
+    # On a PanelWindow (`namespace` is a C++ keyword).
+    "WlrLayershell": {
+        "layer": ("layershell.layer", "qs::WlrLayer"),
+        "namespace": ("layershell.nameSpace", "std::string"),
+        "keyboardFocus": ("layershell.keyboardFocus", "qs::WlrKeyboardFocus"),
+    },
 }
 
 
@@ -133,19 +165,67 @@ class TypeSystem:
     def prop(self, ref: AnyType, name: str) -> Prop | None:
         return self.view(ref).props.get(name)
 
+    def signal(self, ref: AnyType | None, name: str) -> list[tuple[str, str | None]] | None:
+        """Parameters (name, C++ type) of a signal of a type, or None if it has no such signal."""
+        while ref is not None:
+            if isinstance(ref, BuiltinRef):
+                for info in self.registry.builtins.chain(self.registry.builtin_info(ref)):
+                    if name in info.signals:
+                        return [(n, self._qt_type(t.rstrip("*"), t.endswith("*"))[0] if t else None) for n, t in info.signals[name]]
+                return None
+            obj = self.registry.component(ref).root if isinstance(ref, ComponentRef) else self.anon_object(ref)
+            owner = ref if isinstance(ref, ComponentRef) else ref.owner
+            for m in obj.methods:
+                if m.kind == "signal" and m.name == name:
+                    return [(n, self._declared_type(owner, dom.PropertyDef(n, t or "var"))[0]) for n, t in m.parameters]
+            ref = self.view(ref).base
+        return None
+
     def function(self, ref: AnyType, name: str):
         """The C++ signature of a JS function on a component (or its bases), once translated."""
         from .signature import parse
 
         while isinstance(ref, ComponentRef) and self.store is not None:
             root = self.registry.component(ref).root
-            if any(m.name == name and m.kind == "function" for m in root.methods):
+            method = next((m for m in root.methods if m.name == name and m.kind == "function"), None)
+            if method is not None:
                 entry = self.store.find(ref.path, f"{root.id or 'root'}.{name}")
                 if entry and entry.get("signature"):
                     return parse(entry["signature"])
+                if self.is_procedure(method):
+                    return parse(f"void {name}()")
                 return None
             ref = self.view(ref).base
         return None
+
+    def builtin_method(self, ref: AnyType, name: str, nargs: int):
+        """The signature of a method of a built-in type (from .qmltypes, or a typed function of a
+        type implemented in QML) taking `nargs` arguments, if its types are all known."""
+        from .signature import Signature
+
+        while ref is not None and not isinstance(ref, BuiltinRef):
+            ref = self.view(ref).base
+        if ref is None:
+            return None
+        for info in self.registry.builtins.chain(self.registry.builtin_info(ref)):
+            for params, returns in info.overloads.get(name, []):
+                if len(params) != nargs:
+                    continue
+                types = [self._qt_type(t.rstrip("*"), t.endswith("*"))[0] for _, t in params]
+                ret = self._qt_type(returns.rstrip("*"), returns.endswith("*"))[0]
+                if ret is None or any(t is None for t in types):
+                    continue
+                cpp_params = [(t, n or f"a{i}", None) for i, ((n, _), t) in enumerate(zip(params, types))]
+                text = f"{ret} {name}({', '.join(f'{t} {n}' for t, n, _ in cpp_params)})"
+                return Signature(ret, name, cpp_params, text)
+        return None
+
+    @staticmethod
+    def is_procedure(method: dom.Method) -> bool:
+        """No parameters and no value returned: the signature is `void name()` without any AI."""
+        if method.parameters or method.body is None or method.body.ast is None:
+            return method.body is not None and not method.parameters and method.body.ast is None
+        return not any(n.kind == "ReturnStatement" and n.children for n in method.body.ast.walk())
 
     def resolve(self, file: ComponentRef, type_name: str) -> AnyType | None:
         return self.registry.resolve_type(file.path, type_name)
@@ -163,6 +243,11 @@ class TypeSystem:
     # ── Built-in types ───────────────────────────────────────────────────────
 
     def _qt_type(self, cpp: str, is_pointer: bool) -> tuple[str | None, AnyType | None]:
+        if cpp.endswith("::Enum"):
+            # Quickshell's enums are namespaces holding `enum Enum`: WlrLayer::Enum -> qs::WlrLayer.
+            return "qs::" + cpp.removesuffix("::Enum").rsplit("::", 1)[-1], None
+        if is_pointer and cpp == "QQmlComponent":
+            return "Component<Object>", None  # sourceComponent, delegate: an implicit component
         if is_pointer:
             for info in self.registry.builtins.by_cpp.values():
                 if info.cpp_name == cpp and info.exports:
@@ -178,15 +263,45 @@ class TypeSystem:
         runtime = runtime_for(ref)
         view = TypeView(ref, runtime.cpp if runtime else f"/*{ref}*/", None, is_visual=bool(runtime and runtime.visual))
         view.is_singleton = info.is_singleton
-        for t in reversed(list(self.registry.builtins.chain(info))):
+        view.content = runtime.content if runtime else None
+        chain = list(reversed(list(self.registry.builtins.chain(info))))
+        for t in chain:
             for p in t.properties.values():
+                if p.cpp_type == "QQuickAnchorLine":  # `parent.left`: the runtime's Item::leftLine()
+                    view.props[p.name] = Prop(p.name, "AnchorLine", f"{p.name}Line()", kind="value", readonly=True, owner=ref)
+                    continue
                 cpp, obj = self._qt_type(p.cpp_type, p.is_pointer)
+                if p.is_list and cpp is None:  # object lists don't say isPointer: Quickshell.screens
+                    cpp, obj = self._qt_type(p.cpp_type, True)
+                if p.is_list and cpp is not None:
+                    cpp = f"std::vector<{cpp}>"
                 view.props[p.name] = Prop(p.name, cpp, p.name, object_type=obj, is_list=p.is_list,
-                                          readonly=p.is_readonly, owner=ref)
-        for group, members in GROUPS.items():
-            if group in view.props:
-                view.props[group] = Prop(group, None, group, kind="group", owner=ref)
+                                          readonly=p.is_readonly, owner=ref,
+                                          component_of=ref if cpp == "Component<Object>" else None)
+        groups: dict[str, dict[str, tuple[str, str]]] = {}
+        for t in chain:
+            groups.update(GROUPS.get(t.cpp_name, {}))
+            view.default_property = t.default_property or view.default_property
+        view.groups = groups
+        for group in groups:
+            view.props[group] = Prop(group, None, group, kind="group", owner=ref)
         return view
+
+    def _type_of_cpp(self, owner: ComponentRef, cpp: str) -> AnyType | None:
+        """The QML type behind an object pointer type of var-types.json: qs::ShellScreen*, ii::Item*, Notif*."""
+        if not cpp.endswith("*"):
+            return None
+        name = cpp[:-1].strip()
+        if name.startswith(("qs::", "ii::")):
+            wanted = name.removeprefix("ii::")
+            for key, runtime in RUNTIME.items():
+                if runtime.cpp == wanted:
+                    module, _, qml = key.rpartition("/")
+                    info = self.registry.builtins.lookup(module, qml)
+                    if info is not None:
+                        return BuiltinRef(module, qml, info.cpp_name)
+            return None
+        return self.resolve(owner, name)
 
     # ── Components ───────────────────────────────────────────────────────────
 
@@ -195,7 +310,11 @@ class TypeSystem:
         if name in QML_BASIC:
             return QML_BASIC[name], None
         if name == "var":
-            return self.var_types.lookup(owner, p.name) or "nlohmann::json", None
+            cpp = self.var_types.lookup(owner, p.name) or "nlohmann::json"
+            ref = self._type_of_cpp(owner, cpp)
+            if isinstance(ref, ComponentRef):
+                cpp = f"::{qualified_class(ref)}*"  # var-types writes components by their bare name
+            return cpp, ref
         if name.startswith("list<") and name.endswith(">"):
             inner, ref = self._declared_type(owner, dom.PropertyDef(p.name, name[5:-1]))
             return (f"std::vector<{inner}>" if inner else None), ref
@@ -219,10 +338,11 @@ class TypeSystem:
                 view.props[p.name] = Prop(p.name, f"Component<{inner_cls}>" if inner_cls else None, p.name,
                                           object_type=None, owner=view.ref, component_of=inner)
                 continue
-            # `property QtObject sizes` bound to `sizes: QtObject { ... }`: use the concrete object.
+            # `property QtObject sizes` bound to `sizes: QtObject { ... }`: use the concrete object,
+            # with a class of its own when it declares properties.
             if nested is not None and (cpp is None or p.type_name in ("QtObject", "var") or ref is not None):
-                ref = AnonRef(owner, path + (p.name,), nested.type_name)
-                cpp = f"{self.view(ref).cpp_class}*"
+                ref = AnonRef(owner, path + (p.name,), nested.type_name) if nested.properties else self.resolve(owner, nested.type_name)
+                cpp = f"{self.view(ref).cpp_class}*" if ref is not None else None
             view.props[p.name] = Prop(p.name, cpp, p.name, object_type=ref, is_list=p.is_list,
                                       readonly=p.is_readonly, owner=view.ref)
 
@@ -231,9 +351,7 @@ class TypeSystem:
         base = self.resolve(ref, component.root.type_name)
         view = TypeView(ref, qualified_class(ref), base)
         if base is not None:
-            base_view = self.view(base)
-            view.props.update(base_view.props)
-            view.is_visual = base_view.is_visual
+            view.inherit(self.view(base))
         view.is_singleton = self.registry.is_singleton(ref)
         self._add_declared(view, ref, component.root, ())
         self._resolve_aliases(view, ref, component.root)
@@ -275,9 +393,7 @@ class TypeSystem:
         base = self.resolve(ref.owner, obj.type_name)
         view = TypeView(ref, f"{qualified_class(ref.owner)}::{ref.name}", base)
         if base is not None:
-            base_view = self.view(base)
-            view.props.update(base_view.props)
-            view.is_visual = base_view.is_visual
+            view.inherit(self.view(base))
         self._add_declared(view, ref.owner, obj, ref.path)
         return view
 

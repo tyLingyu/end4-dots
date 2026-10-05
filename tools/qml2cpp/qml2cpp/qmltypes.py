@@ -94,6 +94,9 @@ class TypeInfo:
     attached_type: str | None
     is_singleton: bool
     default_property: str | None
+    # Every overload of each method: (parameters, return type); "void" when none is given.
+    overloads: dict[str, list[tuple[list[tuple[str, str]], str]]] = field(default_factory=dict)
+    qml_file: Path | None = None  # a type implemented in QML (qmldir `Name ver File.qml`)
 
 
 class BuiltinTypes:
@@ -126,6 +129,7 @@ class BuiltinTypes:
                 self.by_cpp[cpp] = TypeInfo(
                     cpp_name=cpp, prototype=template, exports={module: name}, properties={}, signals={}, methods={},
                     enums={}, attached_type=None, is_singleton=words[0] == "singleton", default_property=None,
+                    qml_file=None if template else qmldir.parent / words[-1],
                 )
                 self.by_module.setdefault(module, {})[name] = cpp
 
@@ -167,6 +171,8 @@ class BuiltinTypes:
                 elif member.kind in ("Signal", "Method"):
                     params = [(p.fields.get("name", ""), p.fields.get("type", "")) for p in member.children]
                     (info.signals if member.kind == "Signal" else info.methods)[f["name"]] = params
+                    if member.kind == "Method":
+                        info.overloads.setdefault(f["name"], []).append((params, f.get("type", "void")))
                 elif member.kind == "Enum":
                     info.enums[f["name"]] = list(f.get("values", []))
             self.by_cpp[info.cpp_name] = info
@@ -202,8 +208,40 @@ class BuiltinTypes:
         seen = set()
         while info is not None and info.cpp_name not in seen:
             seen.add(info.cpp_name)
+            self._read_composite(info)
             yield info
             info = self.by_cpp.get(info.prototype) if info.prototype else None
+
+    # QML property types -> the C++ names .qmltypes uses, for types implemented in QML.
+    _QML_TO_QT = {"bool": "bool", "int": "int", "real": "double", "double": "double", "string": "QString",
+                  "url": "QUrl", "color": "QColor", "var": "QVariant", "": "QVariant"}
+
+    def _read_composite(self, info: TypeInfo) -> None:
+        """A type implemented in QML (Quickshell's FileView over the C++ FileViewInternal): its
+        prototype, properties, signals and typed functions, read from the file itself."""
+        if info.qml_file is None:
+            return
+        from . import dom
+
+        path, info.qml_file = info.qml_file, None
+        qml = dom.load(path)
+        root = qml.component.root
+        module = next(iter(info.exports))
+        for uri in [module, *(i.uri for i in qml.imports if not i.is_directory)]:
+            base = self.lookup(uri, root.type_name)
+            if base is not None:
+                info.prototype = base.cpp_name
+                break
+        for p in root.properties:
+            qt = self._QML_TO_QT.get(p.type_name)
+            if qt is not None:
+                info.properties[p.name] = TypeProperty(p.name, qt, False, p.is_list, p.is_readonly)
+        for m in root.methods:
+            params = [(n, self._QML_TO_QT.get(t, "")) for n, t in m.parameters]
+            if m.kind == "signal":
+                info.signals[m.name] = params
+            elif m.returns is not None and all(t for _, t in params):
+                info.overloads.setdefault(m.name, []).append((params, self._QML_TO_QT.get(m.returns, "")))
 
     def property(self, info: TypeInfo, name: str) -> TypeProperty | None:
         for t in self.chain(info):

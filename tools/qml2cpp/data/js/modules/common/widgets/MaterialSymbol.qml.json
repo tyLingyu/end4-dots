@@ -27,16 +27,9 @@
   "expected": "std::map<std::string, double>",
   "code": "{ \n            \"FILL\": truncatedFill,\n            // \"wght\": font.weight,\n            // \"GRAD\": 0,\n            \"opsz\": iconSize,\n        }"
  },
- "a635b6d6d626": {
-  "cpp": null,
-  "kind": "binding (name Font)",
-  "context": "root.font.weight",
-  "expected": "int",
-  "code": "Font.Normal + (Font.DemiBold - Font.Normal) * truncatedFill"
- },
  "d08245d9fcbd": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call toFixed)",
   "context": "root.truncatedFill",
   "expected": "double",
   "code": "fill.toFixed(1)"

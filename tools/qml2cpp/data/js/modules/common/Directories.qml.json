@@ -43,17 +43,10 @@
  },
  "375c9de70238": {
   "cpp": null,
-  "kind": "handler",
+  "kind": "statements (TemplateLiteral)",
   "context": "root.Component.onCompleted",
   "expected": "void",
   "code": "{\n        Quickshell.execDetached([\"mkdir\", \"-p\", `${shellConfig}`])\n        Quickshell.execDetached([\"mkdir\", \"-p\", `${favicons}`])\n        Quickshell.execDetached([\"bash\", \"-c\", `rm -rf '${coverArt}'; mkdir -p '${coverArt}'`])\n        Quickshell.execDetached([\"bash\", \"-c\", `rm -rf '${latexOutput}'; mkdir -p '${latexOutput}'`])\n        Quickshell.execDetached([\"bash\", \"-c\", `rm -rf '${cliphistDecode}'; mkdir -p '${cliphistDecode}'`])\n        Quickshell.execDetached([\"mkdir\", \"-p\", `${userActions}`])\n        Quickshell.execDetached([\"rm\", \"-rf\", `${tempImages}`])\n    }"
- },
- "3c9db646bd01": {
-  "cpp": null,
-  "kind": "binding (call)",
-  "context": "root.assetsPath",
-  "expected": "std::string",
-  "code": "Quickshell.shellPath(\"assets\")"
  },
  "46edff9cc44c": {
   "cpp": null,
@@ -68,13 +61,6 @@
   "context": "root.videos",
   "expected": "std::string",
   "code": "StandardPaths.standardLocations(StandardPaths.MoviesLocation)[0]"
- },
- "53d7b2e42750": {
-  "cpp": null,
-  "kind": "binding (call)",
-  "context": "root.scriptPath",
-  "expected": "std::string",
-  "code": "Quickshell.shellPath(\"scripts\")"
  },
  "6be9431e03bf": {
   "cpp": null,

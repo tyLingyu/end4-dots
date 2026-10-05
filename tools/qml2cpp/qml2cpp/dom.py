@@ -48,6 +48,7 @@ class Method:
     kind: str  # "function" or "signal"
     parameters: list[tuple[str, str]]  # (name, type name; "" when untyped)
     body: Script | None
+    returns: str | None = None  # `function f(): string`: the annotated return type
 
 
 @dataclass
@@ -177,6 +178,7 @@ def _object(node: dict) -> QmlObject:
             kind="signal" if m.get("methodType") == 0 else "function",
             parameters=[(p.get("name", ""), p.get("typeName", "")) for p in m.get("parameters", [])],
             body=_script(m.get("body")),
+            returns=(m.get("typeName") or None) if m.get("returnType") else None,
         )
         for defs in node.get("methods", {}).values()
         for m in defs

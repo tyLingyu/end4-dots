@@ -1,7 +1,7 @@
 {
  "1621bb9a4985": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call tr)",
   "context": "root.name",
   "expected": "std::string",
   "code": "Translation.tr(\"Brightness\")"
@@ -22,7 +22,7 @@
  },
  "aba9e634eafb": {
   "cpp": null,
-  "kind": "binding (call)",
+  "kind": "binding (call getMonitorForScreen)",
   "context": "root.brightnessMonitor",
   "expected": "BrightnessMonitor*",
   "code": "Brightness.getMonitorForScreen(focusedScreen)"
