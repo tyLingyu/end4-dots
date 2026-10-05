@@ -1,0 +1,90 @@
+{
+ "01c599fce092": {
+  "cpp": "return qt::hsla(qt::hslHue(color2), qt::hslSaturation(color2), qt::hslLightness(color1), color1.a);",
+  "kind": "function",
+  "context": "root.adaptToAccent",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function adaptToAccent(color1, color2) { var c1 = Qt.color(color1);\n        var c2 = Qt.color(color2);\n\n        var hue = c2.hslHue;\n        var sat = c2.hslSaturation;\n        var light = c1.hslLightness;\n        var alpha = c1.a;\n\n        return Qt.hsla(hue, sat, light, alpha); }",
+  "signature": "Color adaptToAccent(Color color1, Color color2)"
+ },
+ "3de7012325fc": {
+  "cpp": "return std::min(1.0, std::max(0.0, x));",
+  "kind": "function",
+  "context": "root.clamp01",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function clamp01(x) { return Math.min(1, Math.max(0, x)); }",
+  "signature": "double clamp01(double x)"
+ },
+ "46fbf4b1ca39": {
+  "cpp": "return qt::hslLightness(color) < 0.5;",
+  "kind": "function",
+  "context": "root.isDark",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function isDark(color) { var c = Qt.color(color);\n        return c.hslLightness < 0.5; }",
+  "signature": "bool isDark(Color color)"
+ },
+ "4acef4e8136b": {
+  "cpp": "const double invA = 1.0 - overlayOpacity;\nconst double r = (targetColor.r - baseColor.r * invA) / overlayOpacity;\nconst double g = (targetColor.g - baseColor.g * invA) / overlayOpacity;\nconst double b = (targetColor.b - baseColor.b * invA) / overlayOpacity;\nreturn qt::rgba(clamp01(r), clamp01(g), clamp01(b), overlayOpacity);",
+  "kind": "function",
+  "context": "root.solveOverlayColor",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function solveOverlayColor(baseColor, targetColor, overlayOpacity) { const bc = Qt.color(baseColor);\n        const tc = Qt.color(targetColor);\n        let invA = 1.0 - overlayOpacity;\n\n        let r = (tc.r - bc.r * invA) / overlayOpacity;\n        let g = (tc.g - bc.g * invA) / overlayOpacity;\n        let b = (tc.b - bc.b * invA) / overlayOpacity;\n\n        return Qt.rgba(clamp01(r), clamp01(g), clamp01(b), overlayOpacity); }",
+  "signature": "Color solveOverlayColor(Color baseColor, Color targetColor, double overlayOpacity)"
+ },
+ "55878c62e9b2": {
+  "cpp": "return colorWithLightness(color1, qt::hslLightness(color2));",
+  "kind": "function",
+  "context": "root.colorWithLightnessOf",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function colorWithLightnessOf(color1, color2) { var c2 = Qt.color(color2);\n        return colorWithLightness(color1, c2.hslLightness); }",
+  "signature": "Color colorWithLightnessOf(Color color1, Color color2)"
+ },
+ "7f62f9ca5287": {
+  "cpp": "return qt::rgba(color.r, color.g, color.b, color.a * (1 - percentage));",
+  "kind": "function",
+  "context": "root.transparentize",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function transparentize(color, percentage) { var c = Qt.color(color);\n        return Qt.rgba(c.r, c.g, c.b, c.a * (1 - percentage)); }",
+  "signature": "Color transparentize(Color color, double percentage = 1)"
+ },
+ "85fa969e58bb": {
+  "cpp": "const double p = percentage;\nreturn qt::rgba(p * color1.r + (1 - p) * color2.r, p * color1.g + (1 - p) * color2.g,\n                p * color1.b + (1 - p) * color2.b, p * color1.a + (1 - p) * color2.a);",
+  "kind": "function",
+  "context": "root.mix",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function mix(color1, color2, percentage) { var c1 = Qt.color(color1);\n        var c2 = Qt.color(color2);\n        return Qt.rgba(percentage * c1.r + (1 - percentage) * c2.r, percentage * c1.g + (1 - percentage) * c2.g, percentage * c1.b + (1 - percentage) * c2.b, percentage * c1.a + (1 - percentage) * c2.a); }",
+  "signature": "Color mix(Color color1, Color color2, double percentage = 0.5)"
+ },
+ "9bcb795b010a": {
+  "cpp": "return qt::rgba(color.r, color.g, color.b, std::max(0.0, std::min(1.0, alpha)));",
+  "kind": "function",
+  "context": "root.applyAlpha",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function applyAlpha(color, alpha) { var c = Qt.color(color);\n        var a = Math.max(0, Math.min(1, alpha));\n        return Qt.rgba(c.r, c.g, c.b, a); }",
+  "signature": "Color applyAlpha(Color color, double alpha)"
+ },
+ "c301327b243a": {
+  "cpp": "return qt::hsva(qt::hsvHue(color1), qt::hsvSaturation(color2), qt::hsvValue(color1), color1.a);",
+  "kind": "function",
+  "context": "root.colorWithSaturationOf",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function colorWithSaturationOf(color1, color2) { var c1 = Qt.color(color1);\n        var c2 = Qt.color(color2);\n\n        var hue = c1.hsvHue;\n        var sat = c2.hsvSaturation;\n        var val = c1.hsvValue;\n        var alpha = c1.a;\n\n        return Qt.hsva(hue, sat, val, alpha); }",
+  "signature": "Color colorWithSaturationOf(Color color1, Color color2)"
+ },
+ "e23b0d0b2510": {
+  "cpp": "return qt::hsla(qt::hslHue(color), qt::hslSaturation(color), lightness, color.a);",
+  "kind": "function",
+  "context": "root.colorWithLightness",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function colorWithLightness(color, lightness) { var c = Qt.color(color);\n        return Qt.hsla(c.hslHue, c.hslSaturation, lightness, c.a); }",
+  "signature": "Color colorWithLightness(Color color, double lightness)"
+ },
+ "ed6004f21215": {
+  "cpp": "return qt::hsva(qt::hsvHue(color2), qt::hsvSaturation(color1), qt::hsvValue(color1), color1.a);",
+  "kind": "function",
+  "context": "root.colorWithHueOf",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function colorWithHueOf(color1, color2) { var c1 = Qt.color(color1);\n        var c2 = Qt.color(color2);\n\n        // Qt.color hsvHue/hsvSaturation/hsvValue/alpha return 0-1\n        var hue = c2.hsvHue;\n        var sat = c1.hsvSaturation;\n        var val = c1.hsvValue;\n        var alpha = c1.a;\n\n        return Qt.hsva(hue, sat, val, alpha); }",
+  "signature": "Color colorWithHueOf(Color color1, Color color2)"
+ }
+}

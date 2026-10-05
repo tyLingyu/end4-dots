@@ -1,0 +1,23 @@
+{
+ "723ab1460358": {
+  "cpp": null,
+  "kind": "binding (call)",
+  "context": "osdValues.name",
+  "expected": "std::string",
+  "code": "Translation.tr(\"Volume\")"
+ },
+ "88e119fe0372": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "osdValues.value",
+  "expected": "double",
+  "code": "Audio.sink?.audio.volume ?? 0"
+ },
+ "fc65b734904e": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "osdValues.icon",
+  "expected": "std::string",
+  "code": "Audio.sink?.audio.muted ? \"volume_off\" : \"volume_up\""
+ }
+}

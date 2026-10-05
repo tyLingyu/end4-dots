@@ -1,0 +1,30 @@
+{
+ "3565a8d67a3b": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/Timer.0.onTriggered",
+  "expected": "void",
+  "code": "{\n            getUsername.running = true\n            fileOsRelease.reload()\n            const textOsRelease = fileOsRelease.text()\n\n            // Extract the friendly name (PRETTY_NAME field, fallback to NAME)\n            const prettyNameMatch = textOsRelease.match(/^PRETTY_NAME=\"(.+?)\"/m)\n            const nameMatch = textOsRelease.match(/^NAME=\"(.+?)\"/m)\n            distroName = prettyNameMatch ? prettyNameMatch[1] : (nameMatch ? nameMatch[1].replace(/Linux/i, \"\").trim() : \"Unknown\")\n\n            // Extract the ID\n            const idMatch = textOsRelease.match(/^ID=\"?(.+?)\"?$/m)\n            distroId = idMatch ? idMatch[1] : \"unknown\"\n\n            // Extract additional URLs and logo\n            const homeUrlMatch = textOsRelease.match(/^HOME_URL=\"(.+?)\"/m)\n            homeUrl = homeUrlMatch ? homeUrlMatch[1] : \"\"\n            const documentationUrlMatch = textOsRelease.match(/^DOCUMENTATION_URL=\"(.+?)\"/m)\n            documentationUrl = documentationUrlMatch ? documentationUrlMatch[1] : \"\"\n            const supportUrlMatch = textOsRelease.match(/^SUPPORT_URL=\"(.+?)\"/m)\n            supportUrl = supportUrlMatch ? supportUrlMatch[1] : \"\"\n            const bugReportUrlMatch = textOsRelease.match(/^BUG_REPORT_URL=\"(.+?)\"/m)\n            bugReportUrl = bugReportUrlMatch ? bugReportUrlMatch[1] : \"\"\n            const privacyPolicyUrlMatch = textOsRelease.match(/^PRIVACY_POLICY_URL=\"(.+?)\"/m)\n            privacyPolicyUrl = privacyPolicyUrlMatch ? privacyPolicyUrlMatch[1] : \"\"\n            const logoFieldMatch = textOsRelease.match(/^LOGO=\"?(.+?)\"?$/m)\n            logo = logoFieldMatch ? logoFieldMatch[1] : \"\"\n\n            // Update the distroIcon property based on distroId\n            switch (distroId) {\n                case \"artix\":\n                case \"arch\": distroIcon = \"arch-symbolic\"; break;\n                case \"manjaro\": distroIcon = \"manjaro-symbolic\"; break;\n                case \"endeavouros\": distroIcon = \"endeavouros-symbolic\"; break;\n                case \"cachyos\": distroIcon = \"cachyos-symbolic\"; break;\n                case \"nixos\": distroIcon = \"nixos-symbolic\"; break;\n                case \"fedora\": distroIcon = \"fedora-symbolic\"; break;\n                case \"linuxmint\":\n                case \"ubuntu\":\n                case \"zorin\":\n                case \"popos\": distroIcon = \"ubuntu-symbolic\"; break;\n                case \"debian\":\n                case \"raspbian\":\n                case \"kali\": distroIcon = \"debian-symbolic\"; break;\n                case \"funtoo\":\n                case \"gentoo\": distroIcon = \"gentoo-symbolic\"; break;\n                default: distroIcon = \"linux-symbolic\"; break;\n            }\n            if (textOsRelease.toLowerCase().includes(\"nyarch\")) {\n                distroIcon = \"nyarch-symbolic\"\n            }\n\n            if (logo.trim().length === 0) {\n                logo = distroIcon\n            }\n\n        }"
+ },
+ "3d6c8262795f": {
+  "cpp": null,
+  "kind": "binding (no property path)",
+  "context": "root/fileOsRelease.path",
+  "expected": "",
+  "code": "\"/etc/os-release\""
+ },
+ "afae9a0a87ca": {
+  "cpp": null,
+  "kind": "binding (cannot assign std::vector<std::string> to std::string)",
+  "context": "root/getUsername.command",
+  "expected": "std::string",
+  "code": "[\"whoami\"]"
+ },
+ "eb1f8ec49ab5": {
+  "cpp": null,
+  "kind": "binding (cannot assign std::vector<std::string> to std::string)",
+  "context": "root/getDesktopEnvironment.command",
+  "expected": "std::string",
+  "code": "[\"bash\", \"-c\", \"echo $XDG_CURRENT_DESKTOP,$WAYLAND_DISPLAY\"]"
+ }
+}

@@ -1,0 +1,156 @@
+{
+ "0737f07890e8": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/ddcProc.onExited",
+  "expected": "void",
+  "code": "root.ddcDetectFinished()"
+ },
+ "1fd79b4ad5af": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root/Variants.0/screenScope.screenshotPath",
+  "expected": "std::string",
+  "code": "`${root.screenshotDir}/screenshot-${screenName}.png`"
+ },
+ "249b4e35bd5f": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.ddcDetectFinished",
+  "expected": "",
+  "code": "function ddcDetectFinished() { initializeMonitor(0); }"
+ },
+ "2573e36d98d0": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root/Variants.0/screenScope/screenshotProc.command",
+  "expected": "std::string",
+  "code": "[\"bash\", \"-c\",\n                    `mkdir -p '${StringUtils.shellSingleQuoteEscape(root.screenshotDir)}'`\n                    + ` && grim -o '${StringUtils.shellSingleQuoteEscape(screenScope.screenName)}' -`\n                    + ` | magick png:- -colorspace Gray -format \"%[fx:mean*100]\" info:`\n                ]"
+ },
+ "2ccda1eceedf": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.decreaseBrightness",
+  "expected": "",
+  "code": "function decreaseBrightness() { const focusedName = Hyprland.focusedMonitor.name;\n        const monitor = monitors.find(m => focusedName === m.screen.name);\n        if (monitor && monitor.brightness > 0) \n            monitor.setBrightness(monitor.brightness - 0.05);\n        // if brightness is 0, then decrease gamma\n        else {\n            Hyprsunset.setGamma(Hyprsunset.gamma - 5);\n        } }"
+ },
+ "2dfa9f343ee5": {
+  "cpp": null,
+  "kind": "binding (member name of qs::ShellScreen*)",
+  "context": "root/Variants.0/screenScope.screenName",
+  "expected": "std::string",
+  "code": "modelData.name"
+ },
+ "2fc9adda5120": {
+  "cpp": null,
+  "kind": "binding (name Hyprland)",
+  "context": "root/Variants.0/screenScope/Connections.0.target",
+  "expected": "Object*",
+  "code": "Hyprland"
+ },
+ "38d4cf39b947": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root.onMonitorsChanged",
+  "expected": "void",
+  "code": "{\n        ddcMonitors = [];\n        ddcProc.running = true;\n    }"
+ },
+ "473dcc30751b": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/GlobalShortcut.0.onPressed",
+  "expected": "void",
+  "code": "root.increaseBrightness()"
+ },
+ "4a71924592a5": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.increaseBrightness",
+  "expected": "",
+  "code": "function increaseBrightness() { if (Hyprsunset.gamma !== 100) {\n            Hyprsunset.setGamma(Hyprsunset.gamma + 5);\n            return;\n        }\n\n        const focusedName = Hyprland.focusedMonitor.name;\n        const monitor = monitors.find(m => focusedName === m.screen.name);\n        if (monitor)\n            monitor.setBrightness(monitor.brightness + 0.05); }"
+ },
+ "4d24c3e4e0ec": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.brightnessMultiplierForLightness",
+  "expected": "",
+  "code": "function brightnessMultiplierForLightness(x) { return (6.600135 + 216.360356 * Math.pow(Math.E, -0.0811129189 * x)) / 100.0; }"
+ },
+ "4f948543bdf3": {
+  "cpp": null,
+  "kind": "binding (cannot assign std::vector<std::string> to std::string)",
+  "context": "root/ddcProc.command",
+  "expected": "std::string",
+  "code": "[\"ddcutil\", \"detect\", \"--brief\"]"
+ },
+ "51d8f084b1b8": {
+  "cpp": null,
+  "kind": "binding (name Quickshell)",
+  "context": "root/Variants.0.model",
+  "expected": "nlohmann::json",
+  "code": "Quickshell.screens"
+ },
+ "6dec34a9d73c": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/Variants.0/screenScope/screenshotTimer.onTriggered",
+  "expected": "void",
+  "code": "{\n                    screenshotProc.running = false;\n                    screenshotProc.running = true;\n                }"
+ },
+ "7acc5dc0ae24": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/IpcHandler.0.decrement",
+  "expected": "",
+  "code": "function decrement() { onPressed: root.decreaseBrightness() }"
+ },
+ "7e5cd8ac16e4": {
+  "cpp": null,
+  "kind": "binding (FunctionExpression)",
+  "context": "root.monitors",
+  "expected": "std::vector<ii::services::Brightness::BrightnessMonitor*>",
+  "code": "Quickshell.screens.map(screen => monitorComp.createObject(root, {\n        screen\n    }))"
+ },
+ "85e7546cbb3c": {
+  "cpp": null,
+  "kind": "object",
+  "context": "root/monitorComp",
+  "expected": "",
+  "code": "object Component"
+ },
+ "8eddc15ba906": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.getMonitorForScreen",
+  "expected": "",
+  "code": "function getMonitorForScreen(screen) { return monitors.find(m => m.screen === screen); }"
+ },
+ "9b3aec3538ca": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/GlobalShortcut.1.onPressed",
+  "expected": "void",
+  "code": "root.decreaseBrightness()"
+ },
+ "b3b87a779fc0": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/IpcHandler.0.increment",
+  "expected": "",
+  "code": "function increment() { onPressed: root.increaseBrightness() }"
+ },
+ "c52b589119e5": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.initializeMonitor",
+  "expected": "",
+  "code": "function initializeMonitor(i) { if (i >= monitors.length)\n            return;\n        monitors[i].initialize(); }"
+ },
+ "d8694dd47e60": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/Variants.0/screenScope/Connections.0.onRawEvent",
+  "expected": "",
+  "code": "function onRawEvent(event) { if ([\"activewindowv2\", \"windowtitlev2\"].includes(event.name)) {\n                        screenshotTimer.interval = root.contentSwitchDelay;\n                        screenshotTimer.restart();\n                    } else if ([\"workspacev2\"].includes(event.name)) {\n                        screenshotTimer.interval = root.workspaceAnimationDelay;\n                        screenshotTimer.restart();\n                    } }"
+ }
+}

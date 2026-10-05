@@ -1,0 +1,44 @@
+{
+ "0eb50a02afdc": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root.Component.onCompleted",
+  "expected": "void",
+  "code": "{\n        textAnimationBehavior.originalX = root.x;\n        textAnimationBehavior.originalY = root.y;\n    }"
+ },
+ "5e341eead4b5": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.font.pixelSize",
+  "expected": "double",
+  "code": "Appearance?.font.pixelSize.small ?? 15"
+ },
+ "87865d43110b": {
+  "cpp": null,
+  "kind": "binding (call)",
+  "context": "root.shouldUseNumberFont",
+  "expected": "bool",
+  "code": "/^\\d+$/.test(root.text)"
+ },
+ "bd0e4c47ae80": {
+  "cpp": null,
+  "kind": "binding (target type unknown)",
+  "context": "root.verticalAlignment",
+  "expected": "",
+  "code": "Text.AlignVCenter"
+ },
+ "f3ae49038e9f": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.color",
+  "expected": "Color",
+  "code": "Appearance?.m3colors.m3onBackground ?? \"black\""
+ },
+ "f6ae251a47da": {
+  "cpp": null,
+  "kind": "binding (ObjectPattern)",
+  "context": "root.font.variableAxes",
+  "expected": "std::map<std::string, double>",
+  "code": "shouldUseNumberFont ? ({}) : Appearance.font.variableAxes.main"
+ }
+}

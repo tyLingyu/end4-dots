@@ -1,0 +1,128 @@
+{
+ "151ddcaa7c31": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/Connections.3.onSinkProtectionTriggered",
+  "expected": "",
+  "code": "function onSinkProtectionTriggered(reason) { root.protectionMessage = reason;\n            root.currentIndicator = \"volume\";\n            root.triggerOsd(); }"
+ },
+ "205a43bf6b5f": {
+  "cpp": null,
+  "kind": "binding (cannot assign None to Object*)",
+  "context": "root/Connections.0.target",
+  "expected": "Object*",
+  "code": "Brightness"
+ },
+ "29fd3e99659b": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/GlobalShortcut.0.onPressed",
+  "expected": "void",
+  "code": "{\n            root.triggerOsd();\n        }"
+ },
+ "35f360c2c480": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root/Connections.2.target",
+  "expected": "Object*",
+  "code": "Audio.sink?.audio ?? null"
+ },
+ "409d30b9e704": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/Connections.0.onBrightnessChanged",
+  "expected": "",
+  "code": "function onBrightnessChanged() { root.protectionMessage = \"\";\n            root.currentIndicator = \"brightness\";\n            root.triggerOsd(); }"
+ },
+ "4446919618c9": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/GlobalShortcut.1.onPressed",
+  "expected": "void",
+  "code": "{\n            GlobalStates.osdVolumeOpen = false;\n        }"
+ },
+ "6f9b9a419100": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/Connections.1.onGammaChangeAttempt",
+  "expected": "",
+  "code": "function onGammaChangeAttempt() { root.protectionMessage = \"\";\n            root.currentIndicator = \"gamma\";\n            root.triggerOsd(); }"
+ },
+ "7abb7236a9ac": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/osdTimeout.onTriggered",
+  "expected": "void",
+  "code": "{\n            GlobalStates.osdVolumeOpen = false;\n            root.protectionMessage = \"\";\n        }"
+ },
+ "8644b63028fb": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/Connections.2.onMutedChanged",
+  "expected": "",
+  "code": "function onMutedChanged() { if (!Audio.ready)\n                return;\n            root.currentIndicator = \"volume\";\n            root.triggerOsd(); }"
+ },
+ "aa7aef141245": {
+  "cpp": null,
+  "kind": "binding (FunctionExpression)",
+  "context": "root.focusedScreen",
+  "expected": "qs::ShellScreen*",
+  "code": "Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)"
+ },
+ "b260f9ae856f": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/IpcHandler.0.toggle",
+  "expected": "",
+  "code": "function toggle() { GlobalStates.osdVolumeOpen = !GlobalStates.osdVolumeOpen; }"
+ },
+ "b783b06c40de": {
+  "cpp": null,
+  "kind": "binding (ObjectPattern)",
+  "context": "root.indicators",
+  "expected": "std::vector<OsdIndicator>",
+  "code": "[\n        {\n            id: \"volume\",\n            sourceUrl: \"indicators/VolumeIndicator.qml\"\n        },\n        {\n            id: \"brightness\",\n            sourceUrl: \"indicators/BrightnessIndicator.qml\"\n        },\n        {\n            id: \"gamma\",\n            sourceUrl: \"indicators/GammaIndicator.qml\"\n        },\n    ]"
+ },
+ "e0bf0fc07ebd": {
+  "cpp": null,
+  "kind": "binding (cannot assign None to Object*)",
+  "context": "root/Connections.3.target",
+  "expected": "Object*",
+  "code": "Audio"
+ },
+ "e18647c09f5d": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.triggerOsd",
+  "expected": "",
+  "code": "function triggerOsd() { GlobalStates.osdVolumeOpen = true;\n        osdTimeout.restart(); }"
+ },
+ "ec99a6f3e6ce": {
+  "cpp": null,
+  "kind": "binding (cannot assign None to Object*)",
+  "context": "root/Connections.1.target",
+  "expected": "Object*",
+  "code": "Hyprsunset"
+ },
+ "f0dddb766bab": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/IpcHandler.0.hide",
+  "expected": "",
+  "code": "function hide() { GlobalStates.osdVolumeOpen = false; }"
+ },
+ "f7fefd492415": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/Connections.2.onVolumeChanged",
+  "expected": "",
+  "code": "function onVolumeChanged() { if (!Audio.ready)\n                return;\n            root.currentIndicator = \"volume\";\n            root.triggerOsd(); }"
+ },
+ "f939abfc5fc3": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/IpcHandler.0.trigger",
+  "expected": "",
+  "code": "function trigger() { root.triggerOsd(); }"
+ }
+}

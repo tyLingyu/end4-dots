@@ -1,0 +1,30 @@
+{
+ "1621bb9a4985": {
+  "cpp": null,
+  "kind": "binding (call)",
+  "context": "root.name",
+  "expected": "std::string",
+  "code": "Translation.tr(\"Brightness\")"
+ },
+ "61eb7e8ab9bb": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.value",
+  "expected": "double",
+  "code": "root.brightnessMonitor?.brightness ?? 50"
+ },
+ "aa7aef141245": {
+  "cpp": null,
+  "kind": "binding (FunctionExpression)",
+  "context": "root.focusedScreen",
+  "expected": "qs::ShellScreen*",
+  "code": "Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)"
+ },
+ "aba9e634eafb": {
+  "cpp": null,
+  "kind": "binding (call)",
+  "context": "root.brightnessMonitor",
+  "expected": "BrightnessMonitor*",
+  "code": "Brightness.getMonitorForScreen(focusedScreen)"
+ }
+}

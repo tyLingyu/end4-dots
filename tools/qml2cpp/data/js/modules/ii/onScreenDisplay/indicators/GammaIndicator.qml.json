@@ -1,0 +1,16 @@
+{
+ "aebc704dddce": {
+  "cpp": null,
+  "kind": "binding (operator ??)",
+  "context": "rotateIcon.value",
+  "expected": "double",
+  "code": "Hyprsunset.gamma / 100 ?? 0.5"
+ },
+ "b91dd8cde912": {
+  "cpp": null,
+  "kind": "binding (call)",
+  "context": "rotateIcon.name",
+  "expected": "std::string",
+  "code": "Translation.tr(\"Gamma\")"
+ }
+}

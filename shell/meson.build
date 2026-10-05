@@ -248,6 +248,7 @@ foreach _t : [
   ['property', 'tests/runtime/property_test.cpp'],
   ['item', 'tests/runtime/item_test.cpp'],
   ['easing', 'tests/runtime/easing_test.cpp'],
+  ['color', 'tests/runtime/color_test.cpp'],
   ['animation', 'tests/runtime/animation_test.cpp'],
   ['diff', 'tests/diff/diff_test.cpp'],
 ]

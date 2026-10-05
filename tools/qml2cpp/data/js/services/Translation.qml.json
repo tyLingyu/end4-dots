@@ -1,0 +1,79 @@
+{
+ "0d0c81d117d9": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root.onLanguageCodeChanged",
+  "expected": "void",
+  "code": "{\n        print(\"[Translation] Language changed to\", root.languageCode);\n        translationFileView.languageCode = root.languageCode;\n        generatedTranslationFileView.languageCode = root.languageCode;\n        translationFileView.reread();\n        generatedTranslationFileView.reread();\n    }"
+ },
+ "57c016bbc4c0": {
+  "cpp": null,
+  "kind": "binding (Block)",
+  "context": "root.allAvailableLanguages",
+  "expected": "std::vector<std::string>",
+  "code": "{\n        const combined = new Set([...root.availableLanguages, ...root.availableGeneratedLanguages]);\n        return Array.from(combined).sort();\n    }"
+ },
+ "6914e02933c0": {
+  "cpp": null,
+  "kind": "binding (ObjectPattern)",
+  "context": "root.translations",
+  "expected": "std::map<std::string, std::string>",
+  "code": "({})"
+ },
+ "73c643974253": {
+  "cpp": null,
+  "kind": "binding (ObjectPattern)",
+  "context": "root.generatedTranslations",
+  "expected": "std::map<std::string, std::string>",
+  "code": "({})"
+ },
+ "7ab64b391cc4": {
+  "cpp": null,
+  "kind": "binding (Block)",
+  "context": "root.languageCode",
+  "expected": "std::string",
+  "code": "{\n        var configLang = Config?.options.language.ui ?? \"auto\";\n\n        if (configLang !== \"auto\")\n            return configLang;\n\n        return Qt.locale().name;\n    }"
+ },
+ "81e228a10466": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/generatedTranslationFileView.onContentLoaded",
+  "expected": "void",
+  "code": "(data) => {\n            root.generatedTranslations = data;\n            root.isLoading = false;\n        }"
+ },
+ "8722a40a5efc": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/scanLanguagesProcess.onLanguagesScanned",
+  "expected": "void",
+  "code": "(languages) => {\n            root.availableLanguages = [...languages];\n        }"
+ },
+ "9143522293c0": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.tr",
+  "expected": "",
+  "code": "function tr(text) { if (!text) return \"\";\n        var key = text.toString();\n        if (root.isLoading || (!root?.translations?.hasOwnProperty(key) && !root?.generatedTranslations?.hasOwnProperty(key)))\n            return key;\n        \n        // Normal cases\n        var translation = root.translations[key] || root.generatedTranslations[key] || key;\n        // print(key, \"-> [\", root.translations[key], root.generatedTranslations[key], key, \"] ->\", translation);\n        if (translation.endsWith(root.translationKeepSuffix)) {\n            translation = translation.substring(0, translation.length - root.translationKeepSuffix.length).trim();\n        }\n        return translation; }"
+ },
+ "a6889c6fd486": {
+  "cpp": null,
+  "kind": "binding (call)",
+  "context": "root.translationsDir",
+  "expected": "std::string",
+  "code": "Quickshell.shellPath(\"translations\")"
+ },
+ "c5289e41b32a": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/scanGeneratedLanguagesProcess.onLanguagesScanned",
+  "expected": "void",
+  "code": "(languages) => {\n            root.availableGeneratedLanguages = [...languages];\n        }"
+ },
+ "d5a8165c27a2": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/translationFileView.onContentLoaded",
+  "expected": "void",
+  "code": "(data) => {\n            root.translations = data;\n            root.isLoading = false;\n        }"
+ }
+}

@@ -1,0 +1,16 @@
+{
+ "43ba7e61483e": {
+  "cpp": null,
+  "kind": "binding (member radius of ii::Item*)",
+  "context": "root.radius",
+  "expected": "double",
+  "code": "target.radius"
+ },
+ "87846338f33d": {
+  "cpp": null,
+  "kind": "binding (call)",
+  "context": "root.offset",
+  "expected": "",
+  "code": "Qt.vector2d(0.0, 1.0)"
+ }
+}

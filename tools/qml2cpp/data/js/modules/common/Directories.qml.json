@@ -1,0 +1,212 @@
+{
+ "01f76a8a44ef": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.shellConfig",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.config}/illogical-impulse`)"
+ },
+ "1d5ba4309cc3": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.shellConfigPath",
+  "expected": "std::string",
+  "code": "`${Directories.shellConfig}/${Directories.shellConfigName}`"
+ },
+ "204de1661bf5": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.userAvatarPathAccountsService",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`/var/lib/AccountsService/icons/${SystemInfo.username}`)"
+ },
+ "259a2ce665df": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.music",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.MusicLocation)[0]"
+ },
+ "346a191011a3": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.generatedMaterialThemePath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.state}/user/generated/colors.json`)"
+ },
+ "36914237e1ab": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.state",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.StateLocation)[0]"
+ },
+ "375c9de70238": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root.Component.onCompleted",
+  "expected": "void",
+  "code": "{\n        Quickshell.execDetached([\"mkdir\", \"-p\", `${shellConfig}`])\n        Quickshell.execDetached([\"mkdir\", \"-p\", `${favicons}`])\n        Quickshell.execDetached([\"bash\", \"-c\", `rm -rf '${coverArt}'; mkdir -p '${coverArt}'`])\n        Quickshell.execDetached([\"bash\", \"-c\", `rm -rf '${latexOutput}'; mkdir -p '${latexOutput}'`])\n        Quickshell.execDetached([\"bash\", \"-c\", `rm -rf '${cliphistDecode}'; mkdir -p '${cliphistDecode}'`])\n        Quickshell.execDetached([\"mkdir\", \"-p\", `${userActions}`])\n        Quickshell.execDetached([\"rm\", \"-rf\", `${tempImages}`])\n    }"
+ },
+ "3c9db646bd01": {
+  "cpp": null,
+  "kind": "binding (call)",
+  "context": "root.assetsPath",
+  "expected": "std::string",
+  "code": "Quickshell.shellPath(\"assets\")"
+ },
+ "46edff9cc44c": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.userAvatarPathRicersAndWeirdSystems2",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.home}.face.icon`)"
+ },
+ "52ddc612c9f4": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.videos",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.MoviesLocation)[0]"
+ },
+ "53d7b2e42750": {
+  "cpp": null,
+  "kind": "binding (call)",
+  "context": "root.scriptPath",
+  "expected": "std::string",
+  "code": "Quickshell.shellPath(\"scripts\")"
+ },
+ "6be9431e03bf": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.favicons",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.cache}/media/favicons`)"
+ },
+ "7d3a74563163": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.userAvatarPathRicersAndWeirdSystems",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.home}.face`)"
+ },
+ "98fba5c11d24": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.recordScriptPath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.scriptPath}/videos/record.sh`)"
+ },
+ "9b96469c282c": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.latexOutput",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.cache}/media/latex`)"
+ },
+ "a17cb5ca8b6f": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.coverArt",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.cache}/media/coverart`)"
+ },
+ "a3c7907bb082": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.conflictCachePath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.cache}/conflict-killer`)"
+ },
+ "c079d1e07099": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.config",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.ConfigLocation)[0]"
+ },
+ "c0efe1c0f2f9": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.home",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]"
+ },
+ "c3011fa00a8a": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.notesPath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.state}/user/notes.txt`)"
+ },
+ "d2153003993c": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.userActions",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.shellConfig}/actions`)"
+ },
+ "d87a751b1792": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.downloads",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.DownloadLocation)[0]"
+ },
+ "daf0a737017d": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.notificationsPath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.cache}/notifications/notifications.json`)"
+ },
+ "ddc6d14bed02": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.wallpaperSwitchScriptPath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/switchwall.sh`)"
+ },
+ "e6b2030d2ff2": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.genericCache",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.GenericCacheLocation)[0]"
+ },
+ "e7af3967874d": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.cliphistDecode",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`/tmp/quickshell/media/cliphist`)"
+ },
+ "eab4acd8c2b0": {
+  "cpp": null,
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.todoPath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.state}/user/todo.json`)"
+ },
+ "f0fc6f2bcc5e": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.cache",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.CacheLocation)[0]"
+ },
+ "f7e08f850711": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.documents",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]"
+ },
+ "faf724030160": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.pictures",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]"
+ }
+}

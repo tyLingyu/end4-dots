@@ -1,0 +1,79 @@
+"""qml2cpp: translate ii's QML into C++ for ii-shell.
+
+  python3 -m qml2cpp deps <qml...>            dependency closure of the given files
+  python3 -m qml2cpp gen  <qml...> [--deps]   generate C++ into shell/src/ii (with --deps: the closure)
+  python3 -m qml2cpp todo <qml...>            JavaScript still waiting for a translation
+  python3 -m qml2cpp fill <qml> <json>        store translations: {context: {"cpp": ..., "signature": ...}}
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+from .codegen import ComponentGen
+from .deps import closure
+from .jsexpr import Translator
+from .jsstore import JsStore
+from .registry import REPO, SHELL_ROOT, ComponentRef, Registry
+from .tsys import TypeSystem
+from .typemap import generated_header
+
+OUT = REPO / "shell/src"
+
+
+def _paths(args: list[str]) -> list[Path]:
+    return [Path(a).resolve() if Path(a).is_absolute() or Path(a).exists() else (SHELL_ROOT / a).resolve() for a in args]
+
+
+def main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(prog="qml2cpp")
+    parser.add_argument("command", choices=["deps", "gen", "todo", "fill"])
+    parser.add_argument("files", nargs="+")
+    parser.add_argument("--deps", action="store_true", help="include the dependency closure")
+    args = parser.parse_args(argv)
+
+    registry = Registry()
+    if args.command == "fill":
+        qml, translations = _paths(args.files[:1])[0], json.loads(Path(args.files[1]).read_text())
+        store = JsStore()
+        unknown = store.fill(qml, translations)
+        store._used[str(qml.relative_to(SHELL_ROOT))] = set(store._data(str(qml.relative_to(SHELL_ROOT))))
+        store.save()
+        for context in unknown:
+            print(f"no recorded entry for {context}", file=sys.stderr)
+        return 1 if unknown else 0
+    files = _paths(args.files)
+    if args.command == "deps" or args.deps:
+        refs = closure(registry, files).components
+        files = sorted({r.path for r in refs})
+    if args.command == "deps":
+        for f in files:
+            print(f.relative_to(SHELL_ROOT))
+        return 0
+
+    store = JsStore()
+    ts = TypeSystem(registry, store)
+    tr = Translator(ts)
+    totals = [0, 0]
+    for path in files:
+        gen = ComponentGen(ts, tr, store, ComponentRef(path))
+        header, source = gen.generate()
+        totals[0] += gen.translated
+        totals[1] += gen.stubs
+        if args.command == "gen":
+            out_h = OUT / generated_header(gen.ref)
+            out_h.parent.mkdir(parents=True, exist_ok=True)
+            out_h.write_text(header)
+            out_h.with_suffix(".cpp").write_text(source)
+        print(f"{path.relative_to(SHELL_ROOT)}: {gen.translated} translated, {gen.stubs} to do", file=sys.stderr)
+    store.save()
+    print(f"total: {totals[0]} translated, {totals[1]} to do", file=sys.stderr)
+    if args.command == "todo":
+        print(json.dumps(store.pending(), indent=1, ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

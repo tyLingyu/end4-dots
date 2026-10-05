@@ -1,0 +1,79 @@
+{
+ "1989fc5e246e": {
+  "cpp": null,
+  "kind": "binding (call endsWith)",
+  "context": "root/wallColorQuant.wallpaperIsVideo",
+  "expected": "bool",
+  "code": "wallpaperPath.endsWith(\".mp4\") || wallpaperPath.endsWith(\".webm\") || wallpaperPath.endsWith(\".mkv\") || wallpaperPath.endsWith(\".avi\") || wallpaperPath.endsWith(\".mov\")"
+ },
+ "428f88029632": {
+  "cpp": null,
+  "kind": "binding (call mix with 4 arguments)",
+  "context": "root/colors.colLayer0Hover",
+  "expected": "Color",
+  "code": "ColorUtils.transparentize(ColorUtils.mix(colLayer0, colOnLayer0, 0.9, root.contentTransparency))"
+ },
+ "5b0333653881": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.wallpaperVibrancy",
+  "expected": "double",
+  "code": "(wallColorQuant.colors[0]?.hslSaturation + wallColorQuant.colors[0]?.hslLightness) / 2"
+ },
+ "8117d8194b6e": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.backgroundTransparency",
+  "expected": "double",
+  "code": "Config?.options.appearance.transparency.enable ? Config?.options.appearance.transparency.automatic ? autoBackgroundTransparency : Config?.options.appearance.transparency.backgroundTransparency : 0"
+ },
+ "91beb11e3f75": {
+  "cpp": null,
+  "kind": "binding (name Qt)",
+  "context": "root/wallColorQuant.source",
+  "expected": "std::string",
+  "code": "Qt.resolvedUrl(wallpaperIsVideo ? Config.options.background.thumbnailPath : Config.options.background.wallpaperPath)"
+ },
+ "9a906c7019e4": {
+  "cpp": null,
+  "kind": "binding (ObjectPattern)",
+  "context": "root/font/variableAxes.main",
+  "expected": "std::map<std::string, double>",
+  "code": "({\n                \"wght\": 450,\n                \"wdth\": 100,\n            })"
+ },
+ "a39535b97963": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.contentTransparency",
+  "expected": "double",
+  "code": "Config?.options.appearance.transparency.automatic ? autoContentTransparency : Config?.options.appearance.transparency.contentTransparency"
+ },
+ "bba929390938": {
+  "cpp": null,
+  "kind": "binding (call mix with 4 arguments)",
+  "context": "root/colors.colLayer0Active",
+  "expected": "Color",
+  "code": "ColorUtils.transparentize(ColorUtils.mix(colLayer0, colOnLayer0, 0.8, root.contentTransparency))"
+ },
+ "cc673afc055b": {
+  "cpp": null,
+  "kind": "binding (ObjectPattern)",
+  "context": "root/font/variableAxes.numbers",
+  "expected": "std::map<std::string, double>",
+  "code": "({\n                \"wght\": 450,\n            })"
+ },
+ "d3040177591c": {
+  "cpp": null,
+  "kind": "binding (Block)",
+  "context": "root.autoBackgroundTransparency",
+  "expected": "double",
+  "code": "{ // y = 0.5768x^2 - 0.759x + 0.2896\n        let x = wallpaperVibrancy\n        let y = 0.5768 * (x * x) - 0.759 * (x) + 0.2896\n        return Math.max(0, Math.min(0.22, y)) - 0.12 * (m3colors.darkmode ? 0 : 1)\n    }"
+ },
+ "f8e1145e7257": {
+  "cpp": null,
+  "kind": "binding (ObjectPattern)",
+  "context": "root/font/variableAxes.title",
+  "expected": "std::map<std::string, double>",
+  "code": "({ // Slightly bold weight for title\n                \"wght\": 550, // Weight (Lowered to compensate for increased grade)\n            })"
+ }
+}

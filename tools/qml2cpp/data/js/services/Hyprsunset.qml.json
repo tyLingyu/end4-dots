@@ -1,0 +1,170 @@
+{
+ "087deffc3e3c": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.ensureState",
+  "expected": "",
+  "code": "function ensureState() { if (!root.automatic || root.manualActive !== undefined)\n            return;\n        if (root.shouldBeOn) {\n            root.enableTemperature();\n        } else {\n            root.disableTemperature();\n        } }"
+ },
+ "197faac60203": {
+  "cpp": null,
+  "kind": "binding (cannot assign std::vector<std::string> to std::string)",
+  "context": "root/fetchProc.command",
+  "expected": "std::string",
+  "code": "[\"bash\", \"-c\", \"hyprctl hyprsunset temperature\"]"
+ },
+ "2d8655ad7512": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.toMinute",
+  "expected": "int",
+  "code": "Number(to.split(\":\")[1])"
+ },
+ "34a16b3c18a7": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.to",
+  "expected": "std::string",
+  "code": "Config.options?.light?.night?.to ?? \"06:30\""
+ },
+ "416ab02a5a3f": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.colorTemperature",
+  "expected": "int",
+  "code": "Config.options?.light?.night?.colorTemperature ?? 5000"
+ },
+ "45c07506806f": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root.onClockMinuteChanged",
+  "expected": "void",
+  "code": "reEvaluate()"
+ },
+ "4b0524082430": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root.onShouldBeOnChanged",
+  "expected": "void",
+  "code": "ensureState()"
+ },
+ "4b6302d02b9b": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root.onAutomaticChanged",
+  "expected": "void",
+  "code": "{\n        root.manualActive = undefined;\n        root.firstEvaluation = true;\n        reEvaluate();\n    }"
+ },
+ "52e5deefca06": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.toHour",
+  "expected": "int",
+  "code": "Number(to.split(\":\")[0])"
+ },
+ "57d298057efd": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.startHyprsunset",
+  "expected": "",
+  "code": "function startHyprsunset() { Quickshell.execDetached([\"bash\", \"-c\", `pidof hyprsunset || hyprsunset`]); }"
+ },
+ "6026f9790108": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.load",
+  "expected": "",
+  "code": "function load() { root.startHyprsunset();\n        root.ensureState(); }"
+ },
+ "736d77897eaf": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.toggleTemperature",
+  "expected": "",
+  "code": "function toggleTemperature(active) { if (root.manualActive === undefined) {\n            root.manualActive = root.temperatureActive;\n            root.manualActiveHour = root.clockHour;\n            root.manualActiveMinute = root.clockMinute;\n        }\n\n        root.manualActive = active !== undefined ? active : !root.manualActive;\n        if (root.manualActive) {\n            root.enableTemperature();\n        } else {\n            root.disableTemperature();\n        } }"
+ },
+ "80ec13754607": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.setGamma",
+  "expected": "",
+  "code": "function setGamma(gamma) { root.gamma = Math.max(root.gammaLowerLimit, Math.min(100, gamma));\n\n        root.gammaChangeAttempt();\n\n        root.startHyprsunset();\n        Quickshell.execDetached([\"bash\", \"-c\", `hyprctl hyprsunset gamma ${root.gamma}`]); }"
+ },
+ "8789aabcbc2d": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.automatic",
+  "expected": "bool",
+  "code": "Config.options?.light?.night?.automatic && (Config?.ready ?? true)"
+ },
+ "8a0d3286143f": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root/Connections.0.onColorTemperatureChanged",
+  "expected": "",
+  "code": "function onColorTemperatureChanged() { if (!root.temperatureActive) return;\n            Quickshell.execDetached([\"hyprctl\", \"hyprsunset\", \"temperature\", `${Config.options.light.night.colorTemperature}`]); }"
+ },
+ "922f3e00b119": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.disableTemperature",
+  "expected": "",
+  "code": "function disableTemperature() { root.temperatureActive = false;\n        // console.log(\"[Hyprsunset] Disabling\");\n        Quickshell.execDetached([\"bash\", \"-c\", `hyprctl hyprsunset temperature ${root.defaultColorTemperature}`]); }"
+ },
+ "94c917e65183": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.enableTemperature",
+  "expected": "",
+  "code": "function enableTemperature() { root.temperatureActive = true;\n\n        // console.log(\"[Hyprsunset] Enabling\");\n        root.startHyprsunset();\n        Quickshell.execDetached([\"bash\", \"-c\", `hyprctl hyprsunset temperature ${root.colorTemperature}`]); }"
+ },
+ "9ab84924788c": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.fromMinute",
+  "expected": "int",
+  "code": "Number(from.split(\":\")[1])"
+ },
+ "9d07f21fab39": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.inBetween",
+  "expected": "",
+  "code": "function inBetween(t, from, to) { if (from < to) {\n            return (t >= from && t <= to);\n        } else {\n            // Wrapped around midnight\n            return (t >= from || t <= to);\n        } }"
+ },
+ "a76c94d35b52": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/updateHyprsunset.onTriggered",
+  "expected": "void",
+  "code": "{\n            root.ensureState();\n            root.setGamma(root.gamma);\n        }"
+ },
+ "bc928a411746": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.from",
+  "expected": "std::string",
+  "code": "Config.options?.light?.night?.from ?? \"19:00\""
+ },
+ "bee03d7dbcd2": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.fetchState",
+  "expected": "",
+  "code": "function fetchState() { fetchProc.running = true; }"
+ },
+ "c384be238741": {
+  "cpp": null,
+  "kind": "function",
+  "context": "root.reEvaluate",
+  "expected": "",
+  "code": "function reEvaluate() { const t = clockHour * 60 + clockMinute;\n        const from = fromHour * 60 + fromMinute;\n        const to = toHour * 60 + toMinute;\n        const manualActive = manualActiveHour * 60 + manualActiveMinute;\n\n        if (root.manualActive !== undefined && (inBetween(from, manualActive, t) || inBetween(to, manualActive, t))) {\n            root.manualActive = undefined;\n        }\n        root.shouldBeOn = inBetween(t, from, to);\n        if (firstEvaluation) {\n            firstEvaluation = false;\n            root.ensureState();\n        } }"
+ },
+ "c4a9566f6bf5": {
+  "cpp": null,
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.fromHour",
+  "expected": "int",
+  "code": "Number(from.split(\":\")[0])"
+ }
+}

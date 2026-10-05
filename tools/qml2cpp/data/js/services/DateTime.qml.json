@@ -1,0 +1,58 @@
+{
+ "11bbc4842c4f": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.date",
+  "expected": "std::string",
+  "code": "Qt.locale().toString(clock.date, Config.options?.time.dateWithYearFormat ?? \"dd/MM/yyyy\")"
+ },
+ "1ef52b5764c8": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/Timer.0.onTriggered",
+  "expected": "void",
+  "code": "{\n            fileUptime.reload();\n            const textUptime = fileUptime.text();\n            const uptimeSeconds = Number(textUptime.split(\" \")[0] ?? 0);\n\n            // Convert seconds to days, hours, and minutes\n            const days = Math.floor(uptimeSeconds / 86400);\n            const hours = Math.floor((uptimeSeconds % 86400) / 3600);\n            const minutes = Math.floor((uptimeSeconds % 3600) / 60);\n\n            // Build the formatted uptime string\n            let formatted = \"\";\n            if (days > 0)\n                formatted += `${days}d`;\n            if (hours > 0)\n                formatted += `${formatted ? \", \" : \"\"}${hours}h`;\n            if (minutes > 0 || !formatted)\n                formatted += `${formatted ? \", \" : \"\"}${minutes}m`;\n            uptime = formatted;\n            interval = Config.options?.resources?.updateInterval ?? 3000;\n        }"
+ },
+ "2415a534b215": {
+  "cpp": null,
+  "kind": "binding (Block)",
+  "context": "root/clock.precision",
+  "expected": "",
+  "code": "{\n            if (Config.options.time.secondPrecision || GlobalStates.screenLocked)\n                return SystemClock.Seconds;\n            return SystemClock.Minutes;\n        }"
+ },
+ "9b0e67c0cf38": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.time",
+  "expected": "std::string",
+  "code": "Qt.locale().toString(clock.date, Config.options?.time.format ?? \"hh:mm\")"
+ },
+ "abf189d7a39a": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.shortDate",
+  "expected": "std::string",
+  "code": "Qt.locale().toString(clock.date, Config.options?.time.shortDateFormat ?? \"dd/MM\")"
+ },
+ "d4af22d441ae": {
+  "cpp": null,
+  "kind": "binding (no property path)",
+  "context": "root/fileUptime.path",
+  "expected": "",
+  "code": "\"/proc/uptime\""
+ },
+ "e4d759ba3661": {
+  "cpp": null,
+  "kind": "binding (call)",
+  "context": "root.collapsedCalendarFormat",
+  "expected": "std::string",
+  "code": "Qt.locale().toString(clock.date, \"dddd, MMMM dd\")"
+ },
+ "f733626063b8": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.longDate",
+  "expected": "std::string",
+  "code": "Qt.locale().toString(clock.date, Config.options?.time.dateFormat ?? \"dddd, dd/MM\")"
+ }
+}

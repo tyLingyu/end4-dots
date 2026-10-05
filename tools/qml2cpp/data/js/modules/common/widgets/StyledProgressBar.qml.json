@@ -1,0 +1,30 @@
+{
+ "0a652afb4676": {
+  "cpp": null,
+  "kind": "behavior animation (optional chaining)",
+  "context": "root.waveAmplitudeMultiplier.Behavior.animation",
+  "expected": "",
+  "code": "Appearance?.animation.elementMoveFast.numberAnimation.createObject(this)"
+ },
+ "115e9be3eb17": {
+  "cpp": null,
+  "kind": "behavior animation (optional chaining)",
+  "context": "root.value.Behavior.animation",
+  "expected": "",
+  "code": "Appearance?.animation.elementMoveEnter.numberAnimation.createObject(this)"
+ },
+ "5221471a421e": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.highlightColor",
+  "expected": "Color",
+  "code": "Appearance?.colors.colPrimary ?? \"#685496\""
+ },
+ "d3c7df42476e": {
+  "cpp": null,
+  "kind": "binding (optional chaining)",
+  "context": "root.trackColor",
+  "expected": "Color",
+  "code": "Appearance?.m3colors.m3secondaryContainer ?? \"#F1D3F9\""
+ }
+}
