@@ -9,6 +9,9 @@ from .registry import SHELL_ROOT, BuiltinRef, ComponentRef
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 
+# Untyped values: JSON whose objects keep insertion order, as JS objects do (runtime/js.h).
+JSON = "js::Json"
+
 # QML property type names.
 QML_BASIC = {
     "real": "double",
@@ -36,14 +39,15 @@ QT_CPP = {
     "QString": "std::string",
     "QUrl": "std::string",
     "QColor": "Color",
-    "QVariant": "nlohmann::json",
-    "QJSValue": "nlohmann::json",
+    "QVariant": JSON,
+    "QJSValue": JSON,
     "QStringList": "std::vector<std::string>",
     "QPointF": "Point",
     "QSizeF": "Size",
     "QRectF": "Rect",
     "QDateTime": "DateTime",
     "QRect": "Rect",
+    "QVector2D": "Point",
     "QProcess::ExitStatus": "int",
     "void": "void",
     # Enums (Text.AlignHCenter etc.) as the runtime stores them.
@@ -170,4 +174,5 @@ class VarTypes:
 
     def lookup(self, ref: ComponentRef, name: str) -> str | None:
         rel = str(ref.path.relative_to(SHELL_ROOT))
-        return self.by_location.get((rel, name))
+        cpp = self.by_location.get((rel, name))
+        return cpp.replace("nlohmann::json", JSON) if cpp else None

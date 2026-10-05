@@ -4,41 +4,47 @@
   "kind": "binding (optional chaining)",
   "context": "root.iconSize",
   "expected": "double",
-  "code": "Appearance?.font.pixelSize.small ?? 16"
+  "code": "Appearance?.font.pixelSize.small ?? 16",
+  "form": "expression"
  },
  "7880e8f23a3a": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root.fill.Behavior/NumberAnimation.duration",
   "expected": "int",
-  "code": "Appearance?.animation.elementMoveFast.duration ?? 200"
+  "code": "Appearance?.animation.elementMoveFast.duration ?? 200",
+  "form": "expression"
  },
  "8f851e58f4d5": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root.font.family",
   "expected": "std::string",
-  "code": "Appearance?.font.family.iconMaterial ?? \"Material Symbols Rounded\""
+  "code": "Appearance?.font.family.iconMaterial ?? \"Material Symbols Rounded\"",
+  "form": "expression"
  },
  "99289ff0c4e9": {
   "cpp": null,
   "kind": "binding (ObjectPattern)",
   "context": "root.font.variableAxes",
   "expected": "std::map<std::string, double>",
-  "code": "{ \n            \"FILL\": truncatedFill,\n            // \"wght\": font.weight,\n            // \"GRAD\": 0,\n            \"opsz\": iconSize,\n        }"
+  "code": "{ \n            \"FILL\": truncatedFill,\n            // \"wght\": font.weight,\n            // \"GRAD\": 0,\n            \"opsz\": iconSize,\n        }",
+  "form": "expression"
  },
  "d08245d9fcbd": {
   "cpp": null,
   "kind": "binding (call toFixed)",
   "context": "root.truncatedFill",
   "expected": "double",
-  "code": "fill.toFixed(1)"
+  "code": "fill.toFixed(1)",
+  "form": "expression"
  },
  "fe4b6ec040bb": {
   "cpp": null,
   "kind": "easing (optional chaining)",
   "context": "root.fill.Behavior/NumberAnimation.easing",
   "expected": "Easing",
-  "code": "easing.bezierCurve: Appearance?.animation.elementMoveFast.bezierCurve ?? [0.34, 0.80, 0.34, 1.00, 1, 1]; easing.type: Appearance?.animation.elementMoveFast.type ?? Easing.BezierSpline"
+  "code": "easing.bezierCurve: Appearance?.animation.elementMoveFast.bezierCurve ?? [0.34, 0.80, 0.34, 1.00, 1, 1]; easing.type: Appearance?.animation.elementMoveFast.type ?? Easing.BezierSpline",
+  "form": "statements"
  }
 }

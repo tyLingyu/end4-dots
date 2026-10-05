@@ -4,62 +4,71 @@
   "kind": "binding (call endsWith)",
   "context": "root/wallColorQuant.wallpaperIsVideo",
   "expected": "bool",
-  "code": "wallpaperPath.endsWith(\".mp4\") || wallpaperPath.endsWith(\".webm\") || wallpaperPath.endsWith(\".mkv\") || wallpaperPath.endsWith(\".avi\") || wallpaperPath.endsWith(\".mov\")"
+  "code": "wallpaperPath.endsWith(\".mp4\") || wallpaperPath.endsWith(\".webm\") || wallpaperPath.endsWith(\".mkv\") || wallpaperPath.endsWith(\".avi\") || wallpaperPath.endsWith(\".mov\")",
+  "form": "expression"
  },
  "5b0333653881": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root.wallpaperVibrancy",
   "expected": "double",
-  "code": "(wallColorQuant.colors[0]?.hslSaturation + wallColorQuant.colors[0]?.hslLightness) / 2"
+  "code": "(wallColorQuant.colors[0]?.hslSaturation + wallColorQuant.colors[0]?.hslLightness) / 2",
+  "form": "expression"
  },
  "8117d8194b6e": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root.backgroundTransparency",
   "expected": "double",
-  "code": "Config?.options.appearance.transparency.enable ? Config?.options.appearance.transparency.automatic ? autoBackgroundTransparency : Config?.options.appearance.transparency.backgroundTransparency : 0"
+  "code": "Config?.options.appearance.transparency.enable ? Config?.options.appearance.transparency.automatic ? autoBackgroundTransparency : Config?.options.appearance.transparency.backgroundTransparency : 0",
+  "form": "expression"
  },
  "91beb11e3f75": {
   "cpp": null,
   "kind": "binding (name Qt)",
   "context": "root/wallColorQuant.source",
   "expected": "std::string",
-  "code": "Qt.resolvedUrl(wallpaperIsVideo ? Config.options.background.thumbnailPath : Config.options.background.wallpaperPath)"
+  "code": "Qt.resolvedUrl(wallpaperIsVideo ? Config.options.background.thumbnailPath : Config.options.background.wallpaperPath)",
+  "form": "expression"
  },
  "9a906c7019e4": {
   "cpp": null,
   "kind": "binding (ObjectPattern)",
   "context": "root/font/variableAxes.main",
   "expected": "std::map<std::string, double>",
-  "code": "({\n                \"wght\": 450,\n                \"wdth\": 100,\n            })"
+  "code": "({\n                \"wght\": 450,\n                \"wdth\": 100,\n            })",
+  "form": "expression"
  },
  "a39535b97963": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root.contentTransparency",
   "expected": "double",
-  "code": "Config?.options.appearance.transparency.automatic ? autoContentTransparency : Config?.options.appearance.transparency.contentTransparency"
+  "code": "Config?.options.appearance.transparency.automatic ? autoContentTransparency : Config?.options.appearance.transparency.contentTransparency",
+  "form": "expression"
  },
  "cc673afc055b": {
   "cpp": null,
   "kind": "binding (ObjectPattern)",
   "context": "root/font/variableAxes.numbers",
   "expected": "std::map<std::string, double>",
-  "code": "({\n                \"wght\": 450,\n            })"
+  "code": "({\n                \"wght\": 450,\n            })",
+  "form": "expression"
  },
  "d3040177591c": {
   "cpp": null,
   "kind": "binding (Block)",
   "context": "root.autoBackgroundTransparency",
   "expected": "double",
-  "code": "{ // y = 0.5768x^2 - 0.759x + 0.2896\n        let x = wallpaperVibrancy\n        let y = 0.5768 * (x * x) - 0.759 * (x) + 0.2896\n        return Math.max(0, Math.min(0.22, y)) - 0.12 * (m3colors.darkmode ? 0 : 1)\n    }"
+  "code": "{ // y = 0.5768x^2 - 0.759x + 0.2896\n        let x = wallpaperVibrancy\n        let y = 0.5768 * (x * x) - 0.759 * (x) + 0.2896\n        return Math.max(0, Math.min(0.22, y)) - 0.12 * (m3colors.darkmode ? 0 : 1)\n    }",
+  "form": "expression"
  },
  "f8e1145e7257": {
   "cpp": null,
   "kind": "binding (ObjectPattern)",
   "context": "root/font/variableAxes.title",
   "expected": "std::map<std::string, double>",
-  "code": "({ // Slightly bold weight for title\n                \"wght\": 550, // Weight (Lowered to compensate for increased grade)\n            })"
+  "code": "({ // Slightly bold weight for title\n                \"wght\": 550, // Weight (Lowered to compensate for increased grade)\n            })",
+  "form": "expression"
  }
 }

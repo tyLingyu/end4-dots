@@ -4,34 +4,39 @@
   "kind": "function",
   "context": "root.folderNameForPath",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function folderNameForPath(str) { if (typeof str !== \"string\") return \"\";\n        const trimmed = trimFileProtocol(str);\n        // Remove trailing slash if present\n        const noTrailing = trimmed.endsWith(\"/\") ? trimmed.slice(0, -1) : trimmed;\n        if (!noTrailing) return \"\";\n        return noTrailing.split(/[\\\\/]/).pop(); }"
+  "code": "function folderNameForPath(str) { if (typeof str !== \"string\") return \"\";\n        const trimmed = trimFileProtocol(str);\n        // Remove trailing slash if present\n        const noTrailing = trimmed.endsWith(\"/\") ? trimmed.slice(0, -1) : trimmed;\n        if (!noTrailing) return \"\";\n        return noTrailing.split(/[\\\\/]/).pop(); }",
+  "form": "function"
  },
  "3d499fa8bc5b": {
   "cpp": null,
   "kind": "function",
   "context": "root.trimFileExt",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function trimFileExt(str) { if (typeof str !== \"string\") return \"\";\n        const trimmed = trimFileProtocol(str);\n        const lastDot = trimmed.lastIndexOf(\".\");\n        if (lastDot > -1 && lastDot > trimmed.lastIndexOf(\"/\")) {\n            return trimmed.slice(0, lastDot);\n        }\n        return trimmed; }"
+  "code": "function trimFileExt(str) { if (typeof str !== \"string\") return \"\";\n        const trimmed = trimFileProtocol(str);\n        const lastDot = trimmed.lastIndexOf(\".\");\n        if (lastDot > -1 && lastDot > trimmed.lastIndexOf(\"/\")) {\n            return trimmed.slice(0, lastDot);\n        }\n        return trimmed; }",
+  "form": "function"
  },
  "62ae7355c3d2": {
   "cpp": null,
   "kind": "function",
   "context": "root.parentDirectory",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function parentDirectory(str) { if (typeof str !== \"string\") return \"\";\n        const trimmed = trimFileProtocol(str);\n        const parts = trimmed.split(/[\\\\/]/);\n        if (parts.length <= 1) return \"\";\n        parts.pop();\n        return parts.join(\"/\"); }"
+  "code": "function parentDirectory(str) { if (typeof str !== \"string\") return \"\";\n        const trimmed = trimFileProtocol(str);\n        const parts = trimmed.split(/[\\\\/]/);\n        if (parts.length <= 1) return \"\";\n        parts.pop();\n        return parts.join(\"/\"); }",
+  "form": "function"
  },
  "66c49aa7cac3": {
   "cpp": null,
   "kind": "function",
   "context": "root.fileNameForPath",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function fileNameForPath(str) { if (typeof str !== \"string\") return \"\";\n        const trimmed = trimFileProtocol(str);\n        return trimmed.split(/[\\\\/]/).pop(); }"
+  "code": "function fileNameForPath(str) { if (typeof str !== \"string\") return \"\";\n        const trimmed = trimFileProtocol(str);\n        return trimmed.split(/[\\\\/]/).pop(); }",
+  "form": "function"
  },
  "c3fc528c209e": {
   "cpp": null,
   "kind": "function",
   "context": "root.trimFileProtocol",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function trimFileProtocol(str) { let s = str;\n        if (typeof s !== \"string\") s = str.toString(); // Convert to string if it's an url or whatever\n        return s.startsWith(\"file://\") ? s.slice(7) : s; }"
+  "code": "function trimFileProtocol(str) { let s = str;\n        if (typeof s !== \"string\") s = str.toString(); // Convert to string if it's an url or whatever\n        return s.startsWith(\"file://\") ? s.slice(7) : s; }",
+  "form": "function"
  }
 }

@@ -3,133 +3,152 @@
   "cpp": null,
   "kind": "binding (array of mixed types)",
   "context": "root/PwObjectTracker.0.objects",
-  "expected": "",
-  "code": "[sink, source]"
+  "expected": "std::vector<Object*>",
+  "code": "[sink, source]",
+  "form": "expression"
  },
  "16e937926a90": {
   "cpp": null,
   "kind": "binding (call devices)",
   "context": "root.inputDevices",
-  "expected": "std::vector<nlohmann::json>",
-  "code": "root.devices(false)"
+  "expected": "std::vector<js::Json>",
+  "code": "root.devices(false)",
+  "form": "expression"
  },
  "246f81dfa5d9": {
   "cpp": null,
   "kind": "function",
   "context": "root.playSystemSound",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function playSystemSound(soundName) { const ogaPath = `/usr/share/sounds/${root.audioTheme}/stereo/${soundName}.oga`;\n        const oggPath = `/usr/share/sounds/${root.audioTheme}/stereo/${soundName}.ogg`;\n\n        // Try playing .oga first\n        let command = [\n            \"ffplay\",\n            \"-nodisp\",\n            \"-autoexit\",\n            ogaPath\n        ];\n        Quickshell.execDetached(command);\n\n        // Also try playing .ogg (ffplay will just fail silently if file doesn't exist)\n        command = [\n            \"ffplay\",\n            \"-nodisp\",\n            \"-autoexit\",\n            oggPath\n        ];\n        Quickshell.execDetached(command); }"
+  "code": "function playSystemSound(soundName) { const ogaPath = `/usr/share/sounds/${root.audioTheme}/stereo/${soundName}.oga`;\n        const oggPath = `/usr/share/sounds/${root.audioTheme}/stereo/${soundName}.ogg`;\n\n        // Try playing .oga first\n        let command = [\n            \"ffplay\",\n            \"-nodisp\",\n            \"-autoexit\",\n            ogaPath\n        ];\n        Quickshell.execDetached(command);\n\n        // Also try playing .ogg (ffplay will just fail silently if file doesn't exist)\n        command = [\n            \"ffplay\",\n            \"-nodisp\",\n            \"-autoexit\",\n            oggPath\n        ];\n        Quickshell.execDetached(command); }",
+  "form": "function"
  },
  "284b0a9c5ab4": {
   "cpp": null,
   "kind": "function",
   "context": "root.friendlyDeviceName",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function friendlyDeviceName(node) { return (node.nickname || node.description || Translation.tr(\"Unknown\")); }"
+  "code": "function friendlyDeviceName(node) { return (node.nickname || node.description || Translation.tr(\"Unknown\")); }",
+  "form": "function"
  },
  "31b00562a49f": {
   "cpp": null,
   "kind": "function of a child object",
   "context": "root/Connections.0.onVolumeChanged",
   "expected": "",
-  "code": "function onVolumeChanged() { if (!Config.options.audio.protection.enable) return;\n            const newVolume = sink.audio.volume;\n            // when resuming from suspend, we should not write volume to avoid pipewire volume reset issues\n            if (isNaN(newVolume) || newVolume === undefined || newVolume === null) {\n                lastReady = false;\n                lastVolume = 0;\n                return;\n            }\n            if (!lastReady) {\n                lastVolume = newVolume;\n                lastReady = true;\n                return;\n            }\n            const maxAllowedIncrease = Config.options.audio.protection.maxAllowedIncrease / 100; \n            const maxAllowed = Config.options.audio.protection.maxAllowed / 100;\n\n            if (newVolume - lastVolume > maxAllowedIncrease) {\n                sink.audio.volume = lastVolume;\n                root.sinkProtectionTriggered(Translation.tr(\"Illegal increment\"));\n            } else if (newVolume > maxAllowed || newVolume > root.hardMaxValue) {\n                root.sinkProtectionTriggered(Translation.tr(\"Exceeded max allowed\"));\n                sink.audio.volume = Math.min(lastVolume, maxAllowed);\n            }\n            lastVolume = sink.audio.volume; }"
+  "code": "function onVolumeChanged() { if (!Config.options.audio.protection.enable) return;\n            const newVolume = sink.audio.volume;\n            // when resuming from suspend, we should not write volume to avoid pipewire volume reset issues\n            if (isNaN(newVolume) || newVolume === undefined || newVolume === null) {\n                lastReady = false;\n                lastVolume = 0;\n                return;\n            }\n            if (!lastReady) {\n                lastVolume = newVolume;\n                lastReady = true;\n                return;\n            }\n            const maxAllowedIncrease = Config.options.audio.protection.maxAllowedIncrease / 100; \n            const maxAllowed = Config.options.audio.protection.maxAllowed / 100;\n\n            if (newVolume - lastVolume > maxAllowedIncrease) {\n                sink.audio.volume = lastVolume;\n                root.sinkProtectionTriggered(Translation.tr(\"Illegal increment\"));\n            } else if (newVolume > maxAllowed || newVolume > root.hardMaxValue) {\n                root.sinkProtectionTriggered(Translation.tr(\"Exceeded max allowed\"));\n                sink.audio.volume = Math.min(lastVolume, maxAllowed);\n            }\n            lastVolume = sink.audio.volume; }",
+  "form": "statements"
  },
  "3fd133da2bf4": {
   "cpp": null,
   "kind": "statements (double || double)",
   "context": "root.incrementVolume",
-  "expected": "void",
-  "code": "const currentVolume = Audio.value;\n        const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;\n        Audio.sink.audio.volume = Math.min(1, Audio.sink.audio.volume + step);"
+  "expected": "handler body, parameters ()",
+  "code": "const currentVolume = Audio.value;\n        const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;\n        Audio.sink.audio.volume = Math.min(1, Audio.sink.audio.volume + step);",
+  "form": "body"
  },
  "48dad7246dce": {
   "cpp": null,
   "kind": "function",
   "context": "root.appNodes",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function appNodes(isSink) { return Pipewire.nodes.values.filter((node) => { // Should be list<PwNode> but it breaks ScriptModel\n            return root.correctType(node, isSink) && node.isStream\n        }) }"
+  "code": "function appNodes(isSink) { return Pipewire.nodes.values.filter((node) => { // Should be list<PwNode> but it breaks ScriptModel\n            return root.correctType(node, isSink) && node.isStream\n        }) }",
+  "form": "function"
  },
  "6f9ceacd83de": {
   "cpp": null,
   "kind": "function",
   "context": "root.setDefaultSource",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function setDefaultSource(node) { Pipewire.preferredDefaultAudioSource = node; }"
+  "code": "function setDefaultSource(node) { Pipewire.preferredDefaultAudioSource = node; }",
+  "form": "function"
  },
  "8afd27fde103": {
   "cpp": null,
   "kind": "binding (call appNodes)",
   "context": "root.inputAppNodes",
-  "expected": "std::vector<nlohmann::json>",
-  "code": "root.appNodes(false)"
+  "expected": "std::vector<js::Json>",
+  "code": "root.appNodes(false)",
+  "form": "expression"
  },
  "9930085c3075": {
   "cpp": null,
   "kind": "function",
   "context": "root.setDefaultSink",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function setDefaultSink(node) { Pipewire.preferredDefaultAudioSink = node; }"
+  "code": "function setDefaultSink(node) { Pipewire.preferredDefaultAudioSink = node; }",
+  "form": "function"
  },
  "9e86fd7ee8e6": {
   "cpp": null,
   "kind": "statements (double || double)",
   "context": "root.decrementVolume",
-  "expected": "void",
-  "code": "const currentVolume = Audio.value;\n        const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;\n        Audio.sink.audio.volume -= step;"
+  "expected": "handler body, parameters ()",
+  "code": "const currentVolume = Audio.value;\n        const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;\n        Audio.sink.audio.volume -= step;",
+  "form": "body"
  },
  "afbccaf8b69f": {
   "cpp": null,
   "kind": "function",
   "context": "root.correctType",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function correctType(node, isSink) { return (node.isSink === isSink) && node.audio }"
+  "code": "function correctType(node, isSink) { return (node.isSink === isSink) && node.audio }",
+  "form": "function"
  },
  "afeda1a03fd6": {
   "cpp": null,
   "kind": "binding (call devices)",
   "context": "root.outputDevices",
-  "expected": "std::vector<nlohmann::json>",
-  "code": "root.devices(true)"
+  "expected": "std::vector<js::Json>",
+  "code": "root.devices(true)",
+  "form": "expression"
  },
  "b047529a251a": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root.value",
   "expected": "double",
-  "code": "sink?.audio.volume ?? 0"
+  "code": "sink?.audio.volume ?? 0",
+  "form": "expression"
  },
  "b284ce2426a3": {
   "cpp": null,
   "kind": "binding (call appNodes)",
   "context": "root.outputAppNodes",
-  "expected": "std::vector<nlohmann::json>",
-  "code": "root.appNodes(true)"
+  "expected": "std::vector<js::Json>",
+  "code": "root.appNodes(true)",
+  "form": "expression"
  },
  "b8721d6d8a69": {
   "cpp": null,
   "kind": "function",
   "context": "root.appNodeDisplayName",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function appNodeDisplayName(node) { return (node.properties[\"application.name\"] || node.description || node.name) }"
+  "code": "function appNodeDisplayName(node) { return (node.properties[\"application.name\"] || node.description || node.name) }",
+  "form": "function"
  },
  "b8bdaf09a0aa": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root.ready",
   "expected": "bool",
-  "code": "Pipewire.defaultAudioSink?.ready ?? false"
+  "code": "Pipewire.defaultAudioSink?.ready ?? false",
+  "form": "expression"
  },
  "da202cc06215": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root/Connections.0.target",
   "expected": "Object*",
-  "code": "sink?.audio ?? null"
+  "code": "sink?.audio ?? null",
+  "form": "expression"
  },
  "dae08063d66b": {
   "cpp": null,
   "kind": "function",
   "context": "root.devices",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function devices(isSink) { return Pipewire.nodes.values.filter(node => {\n            return root.correctType(node, isSink) && !node.isStream\n        }) }"
+  "code": "function devices(isSink) { return Pipewire.nodes.values.filter(node => {\n            return root.correctType(node, isSink) && !node.isStream\n        }) }",
+  "form": "function"
  }
 }

@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from . import dom
 from .qmltypes import TypeInfo
 from .registry import BuiltinRef, ComponentRef, Registry, TypeRef
-from .typemap import QML_BASIC, QT_CPP, RUNTIME, VarTypes, qualified_class, runtime_for
+from .typemap import JSON, QML_BASIC, QT_CPP, RUNTIME, VarTypes, qualified_class, runtime_for
 
 
 @dataclass(frozen=True)
@@ -243,6 +243,12 @@ class TypeSystem:
     # ── Built-in types ───────────────────────────────────────────────────────
 
     def _qt_type(self, cpp: str, is_pointer: bool) -> tuple[str | None, AnyType | None]:
+        if cpp == "QObjectList":
+            return "std::vector<Object*>", None
+        if cpp.startswith("QList<") and cpp.endswith(">"):  # QList<QuickshellScreenInfo*>
+            inner = cpp[len("QList<"):-1].strip()
+            element, ref = self._qt_type(inner.rstrip("*").strip(), inner.endswith("*"))
+            return (f"std::vector<{element}>" if element else None), ref
         if cpp.endswith("::Enum"):
             # Quickshell's enums are namespaces holding `enum Enum`: WlrLayer::Enum -> qs::WlrLayer.
             return "qs::" + cpp.removesuffix("::Enum").rsplit("::", 1)[-1], None
@@ -310,7 +316,7 @@ class TypeSystem:
         if name in QML_BASIC:
             return QML_BASIC[name], None
         if name == "var":
-            cpp = self.var_types.lookup(owner, p.name) or "nlohmann::json"
+            cpp = self.var_types.lookup(owner, p.name) or JSON
             ref = self._type_of_cpp(owner, cpp)
             if isinstance(ref, ComponentRef):
                 cpp = f"::{qualified_class(ref)}*"  # var-types writes components by their bare name

@@ -15,7 +15,7 @@ from .jsstore import JsStore
 from .registry import SHELL_ROOT, BuiltinRef, ComponentRef
 from .tsys import ATTACHED, AnonRef, AnyType, TypeSystem
 from .structs import HEADER as STRUCTS_HEADER
-from .typemap import RUNTIME, generated_header, namespace_parts, qualified_class, runtime_for
+from .typemap import JSON, RUNTIME, generated_header, namespace_parts, qualified_class, runtime_for
 
 # Properties ii sets that have no effect in ii-shell's renderer.
 IGNORED = {"renderType", "antialiasing", "smooth", "font.hintingPreference", "layer.smooth", "linkColor"}
@@ -98,6 +98,8 @@ class ComponentGen:
         for word in re.findall(r"[A-Za-z_][\w:]*", cpp or ""):
             if word in self.ts.var_types.structs:
                 self.header_includes.add(STRUCTS_HEADER)
+            elif word == JSON:
+                self.header_includes.add("runtime/js.h")
             elif word.startswith("qs::"):
                 runtime = next((r for r in RUNTIME.values() if r.cpp == word), None)
                 if runtime is not None:
@@ -252,10 +254,16 @@ class ComponentGen:
         root = self.objects[0].var
         return Scope(self.ref, e.var if e.var.cpp != "this" else root, root, ids=dict(self.ids))
 
-    def stub_line(self, context: str, code: str, kind: str, expected: str) -> str:
-        key, cpp = self.store.get(self.ref.path, context, code, expected, kind)
+    def stub_line(self, context: str, code: str, kind: str, expected: str, form: str = "statements") -> str:
+        """JavaScript the translator can't do: its translation from data/js, else a stub.
+        form "statements": C++ statements put where the stub is (in the constructor or factory);
+        "expression": a C++ expression of type `expected`, returned to the caller to wrap;
+        "body": statements of a handler body (`expected` says its parameters), returned."""
+        key, cpp = self.store.get(self.ref.path, context, code, expected, kind, form)
         if cpp is not None:
             self.translated += 1
+            if form == "statements":
+                self.body += cpp.splitlines()
             return cpp
         self.stubs += 1
         self.body.append(f'II_TODO_JS("{key}");  // {kind} {context}: {" ".join(code.split())[:100]}')
@@ -334,7 +342,7 @@ class ComponentGen:
         for sub in created:
             self.bind_object(sub)
         self.handlers(created)
-        self.body += [f"{var.cpp}->complete();", f"return {var.cpp};"]
+        self.body.append(f"return {var.cpp};")  # Component::createObject() completes it
         lines, self.body, self.ids = self.body, saved_body, saved_ids
         del self.objects[start:]
         self.factory_depth -= 1
@@ -431,7 +439,8 @@ class ComponentGen:
             if not (component.type or "").startswith("Component<"):
                 raise Untranslatable(f"createObject on {component.type}")
         except Untranslatable as err:
-            filled = self.stub_line(f"{be.path}.animation", b.value.script.code, f"behavior animation ({err})", "")
+            filled = self.stub_line(f"{be.path}.animation", b.value.script.code, f"behavior animation ({err})",
+                                    "Animation* (created by this code, owned by the Behavior)", "expression")
             if filled:
                 self.body.append(f"{be.var.cpp}->adoptAnimation({filled});")
             return
@@ -454,8 +463,12 @@ class ComponentGen:
                 raise Untranslatable("target type unknown")
             expr = self.tr.coerce(value, cpp_type)
         except Untranslatable as err:
-            filled = self.stub_line(context, b.value.script.code, f"binding ({err})", cpp_type or "")
-            if filled:
+            filled = self.stub_line(context, b.value.script.code, f"binding ({err})", cpp_type or "", "expression")
+            if filled and "return " in filled:  # a lambda body (a JS block binding)
+                self.body.append(f"{setter}bind([=, this]() -> {cpp_type} {{")
+                self.body += [f"  {line}" for line in filled.splitlines()]
+                self.body.append(f'}}, "{label}");')
+            elif filled:
                 self.body.append(f'{setter}bind([=, this] {{ return {filled}; }}, "{label}");')
             return
         self.translated += 1
@@ -477,14 +490,14 @@ class ComponentGen:
                 if m.kind == "function" and m.body is not None:
                     self.function(e, m)
 
-    def handler_body(self, context: str, script: dom.Script, scope: Scope, returns: str | None = None) -> list[str] | None:
-        """Statements of a handler or function body: mechanical, else from data/js, else a stub."""
+    def handler_body(self, context: str, script: dom.Script, scope: Scope, params: str = "") -> list[str] | None:
+        """Statements of a handler body: mechanical, else from data/js, else a stub."""
         try:
-            lines = self.tr.statements(script.ast, scope, returns)
+            lines = self.tr.statements(script.ast, scope)
             self.translated += 1
             return lines
         except Untranslatable as err:
-            filled = self.stub_line(context, script.code, f"statements ({err})", returns or "void")
+            filled = self.stub_line(context, script.code, f"statements ({err})", f"handler body, parameters ({params})", "body")
             return filled.splitlines() if filled else None
 
     def signal_target(self, e: Emitted, handler_name: str) -> tuple[str, list[tuple[str, str | None]]] | None:
@@ -513,7 +526,7 @@ class ComponentGen:
         signal, params = target
         scope = self.scope_for(e)
         scope.locals.update({n: Value(n, t) for n, t in params})
-        body = self.handler_body(context, b.value.script, scope)
+        body = self.handler_body(context, b.value.script, scope, ", ".join(f"const {t}& {n}" for n, t in params))
         if body is not None:
             self.body += self.connect_lines(signal, params, body, "connectForever")
 
@@ -548,7 +561,9 @@ class ComponentGen:
             signal, params = found
             scope = self.scope_for(e)
             scope.locals.update({n: Value(n, t) for (n, t) in params})
-            body = self.handler_body(f"{context}.{m.name}", m.body, scope)
+            scope.locals["target"] = Value("target", f"{cls}*", target.obj)
+            body = self.handler_body(f"{context}.{m.name}", m.body, scope,
+                                     ", ".join(f"const {t}& {n}" for n, t in params) + f"; `target` is the {cls}*")
             if body is not None:
                 lines += [f"  {line}" for line in self.connect_lines(f"out.push_back({signal}", params, body, "connect")]
                 lines[-1] = "  }));"
@@ -589,7 +604,7 @@ class ComponentGen:
                 return
             body = "\n".join(lines)
         else:
-            key, body = self.store.get(self.ref.path, context, code, expected, "function")
+            key, body = self.store.get(self.ref.path, context, code, expected, "function", "function")
             entry = self.store.find(self.ref.path, context) or {}
             if body is None or not entry.get("signature"):
                 self.stubs += 1
@@ -610,7 +625,8 @@ class ComponentGen:
         for m in self.component.root.methods:
             if m.kind == "signal":
                 params = self.ts.signal(self.ref, m.name) or []
-                out.append(f"Signal<{', '.join(t or 'nlohmann::json' for _, t in params)}> {m.name};")
+                out.append(f"Signal<{', '.join(t or JSON for _, t in params)}> {m.name};")
+                self.uses_type(JSON if any(t is None for _, t in params) else None)
         for p in self.component.root.properties:
             prop = self.view.props[p.name]
             self.class_of(prop.object_type)
@@ -622,7 +638,8 @@ class ComponentGen:
                     target = ".".join(x for x in (prop.alias_of or ("?", "?")) if x)
                     out.append(f"Property<{prop.cpp_type or 'void'}>* {p.name} = nullptr;  // alias {target}")
             else:
-                cpp = prop.cpp_type or "nlohmann::json /* TODO type */"
+                cpp = prop.cpp_type or f"{JSON} /* TODO type */"
+                self.uses_type(cpp)
                 out.append(f"Property<{cpp}> {p.name};")
         return out
 
@@ -650,7 +667,8 @@ class ComponentGen:
                 prop = view.props[p.name]
                 self.class_of(prop.object_type)
                 self.uses_type(prop.cpp_type)
-                out.append(f"  Property<{prop.cpp_type or 'nlohmann::json /* TODO type */'}> {p.name};")
+                out.append(f"  Property<{prop.cpp_type or JSON + ' /* TODO type */'}> {p.name};")
+                self.uses_type(prop.cpp_type or JSON)
             out.append("};")
             out.append("")
         return out
@@ -734,8 +752,6 @@ def generate_file(ts: TypeSystem, tr: Translator, store: JsStore, path) -> tuple
         f"// Generated by qml2cpp from {rel}.",
         "",
         *sorted(f'#include "{h}"' for h in header_includes),
-        "",
-        "#include <nlohmann/json.hpp>",
         "",
         "#include <string>",
         "#include <vector>",

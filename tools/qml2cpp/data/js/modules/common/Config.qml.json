@@ -4,48 +4,55 @@
   "kind": "binding (call replace)",
   "context": "root/configFileView/configOptionsJsonAdapter/screenRecord.savePath",
   "expected": "std::string",
-  "code": "Directories.videos.replace(\"file://\",\"\")"
+  "code": "Directories.videos.replace(\"file://\",\"\")",
+  "form": "expression"
  },
  "5217b7614509": {
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "root/configFileView.onLoadFailed",
-  "expected": "void",
-  "code": "error => {\n            if (error == FileViewError.FileNotFound) {\n                writeAdapter();\n            }\n        }"
+  "expected": "handler body, parameters (const qs::FileViewError& error)",
+  "code": "error => {\n            if (error == FileViewError.FileNotFound) {\n                writeAdapter();\n            }\n        }",
+  "form": "body"
  },
  "86b61c4aea90": {
   "cpp": null,
   "kind": "function",
   "context": "root.migrateRenamedOptions",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function migrateRenamedOptions(fileText) { let json;\n        try {\n            json = JSON.parse(fileText);\n        } catch (e) {\n            return;\n        }\n        // notifications.monitor -> notifications.forceMonitor\n        const oldMonitor = json?.notifications?.monitor;\n        if (oldMonitor && !json.notifications.forceMonitor) {\n            root.options.notifications.forceMonitor.enable = oldMonitor.enable ?? false;\n            root.options.notifications.forceMonitor.name = oldMonitor.name ?? \"\";\n        } }"
+  "code": "function migrateRenamedOptions(fileText) { let json;\n        try {\n            json = JSON.parse(fileText);\n        } catch (e) {\n            return;\n        }\n        // notifications.monitor -> notifications.forceMonitor\n        const oldMonitor = json?.notifications?.monitor;\n        if (oldMonitor && !json.notifications.forceMonitor) {\n            root.options.notifications.forceMonitor.enable = oldMonitor.enable ?? false;\n            root.options.notifications.forceMonitor.name = oldMonitor.name ?? \"\";\n        } }",
+  "form": "function"
  },
  "c7b1389dbf74": {
   "cpp": null,
   "kind": "function",
   "context": "root.setNestedValue",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function setNestedValue(nestedKey, value) { let keys = nestedKey.split(\".\");\n        let obj = root.options;\n        let parents = [obj];\n\n        // Traverse and collect parent objects\n        for (let i = 0; i < keys.length - 1; ++i) {\n            if (!obj[keys[i]] || typeof obj[keys[i]] !== \"object\") {\n                obj[keys[i]] = {};\n            }\n            obj = obj[keys[i]];\n            parents.push(obj);\n        }\n\n        // Convert value to correct type using JSON.parse when safe\n        let convertedValue = value;\n        if (typeof value === \"string\") {\n            let trimmed = value.trim();\n            if (trimmed === \"true\" || trimmed === \"false\" || !isNaN(Number(trimmed))) {\n                try {\n                    convertedValue = JSON.parse(trimmed);\n                } catch (e) {\n                    convertedValue = value;\n                }\n            }\n        }\n\n        obj[keys[keys.length - 1]] = convertedValue; }"
+  "code": "function setNestedValue(nestedKey, value) { let keys = nestedKey.split(\".\");\n        let obj = root.options;\n        let parents = [obj];\n\n        // Traverse and collect parent objects\n        for (let i = 0; i < keys.length - 1; ++i) {\n            if (!obj[keys[i]] || typeof obj[keys[i]] !== \"object\") {\n                obj[keys[i]] = {};\n            }\n            obj = obj[keys[i]];\n            parents.push(obj);\n        }\n\n        // Convert value to correct type using JSON.parse when safe\n        let convertedValue = value;\n        if (typeof value === \"string\") {\n            let trimmed = value.trim();\n            if (trimmed === \"true\" || trimmed === \"false\" || !isNaN(Number(trimmed))) {\n                try {\n                    convertedValue = JSON.parse(trimmed);\n                } catch (e) {\n                    convertedValue = value;\n                }\n            }\n        }\n\n        obj[keys[keys.length - 1]] = convertedValue; }",
+  "form": "function"
  },
  "e0a04d56aab9": {
   "cpp": null,
   "kind": "statements (call text)",
   "context": "root/configFileView.onLoaded",
-  "expected": "void",
-  "code": "{\n            root.migrateRenamedOptions(text());\n            root.ready = true;\n        }"
+  "expected": "handler body, parameters ()",
+  "code": "{\n            root.migrateRenamedOptions(text());\n            root.ready = true;\n        }",
+  "form": "body"
  },
  "e77f4badf1fe": {
   "cpp": null,
   "kind": "binding (ObjectPattern)",
   "context": "root/configFileView/configOptionsJsonAdapter/sidebar/quickToggles/android.toggles",
-  "expected": "std::vector<nlohmann::json>",
-  "code": "[\n                            { \"size\": 2, \"type\": \"network\" },\n                            { \"size\": 2, \"type\": \"bluetooth\" },\n                            { \"size\": 1, \"type\": \"idleInhibitor\" },\n                            { \"size\": 1, \"type\": \"mic\" },\n                            { \"size\": 2, \"type\": \"audio\" },\n                            { \"size\": 2, \"type\": \"nightLight\" },\n                            { \"size\": 1, \"type\": \"powerProfile\" },\n                            { \"size\": 1, \"type\": \"cloudflareWarp\" },\n                            { \"size\": 1, \"type\": \"screenSnip\" },\n                            { \"size\": 1, \"type\": \"colorPicker\" },\n                            { \"size\": 1, \"type\": \"musicRecognition\" }\n                        ]"
+  "expected": "std::vector<js::Json>",
+  "code": "[\n                            { \"size\": 2, \"type\": \"network\" },\n                            { \"size\": 2, \"type\": \"bluetooth\" },\n                            { \"size\": 1, \"type\": \"idleInhibitor\" },\n                            { \"size\": 1, \"type\": \"mic\" },\n                            { \"size\": 2, \"type\": \"audio\" },\n                            { \"size\": 2, \"type\": \"nightLight\" },\n                            { \"size\": 1, \"type\": \"powerProfile\" },\n                            { \"size\": 1, \"type\": \"cloudflareWarp\" },\n                            { \"size\": 1, \"type\": \"screenSnip\" },\n                            { \"size\": 1, \"type\": \"colorPicker\" },\n                            { \"size\": 1, \"type\": \"musicRecognition\" }\n                        ]",
+  "form": "expression"
  },
  "f93fbcb8f01c": {
   "cpp": null,
   "kind": "binding (TemplateLiteral)",
   "context": "root/configFileView/configOptionsJsonAdapter/apps.volumeMixer",
   "expected": "std::string",
-  "code": "`~/.config/hypr/hyprland/scripts/launch_first_available.sh \"pavucontrol-qt\" \"pavucontrol\"`"
+  "code": "`~/.config/hypr/hyprland/scripts/launch_first_available.sh \"pavucontrol-qt\" \"pavucontrol\"`",
+  "form": "expression"
  }
 }

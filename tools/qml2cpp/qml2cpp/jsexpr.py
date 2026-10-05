@@ -79,7 +79,7 @@ class Translator:
             return f"qmlColor({value.cpp[len('std::string('):-1]})"
         if target == "std::string" and value.type in NUMERIC:
             return f"jsString({value.cpp})"
-        if target == "std::vector<nlohmann::json>" and value.type and value.cpp.startswith(f"{value.type}{{"):
+        if target == "std::vector<js::Json>" and value.type and value.cpp.startswith(f"{value.type}{{"):
             return target + value.cpp[len(value.type):]  # an array literal for a list<var>
         if target.endswith("*") and value.type == "std::nullptr_t":
             return "nullptr"

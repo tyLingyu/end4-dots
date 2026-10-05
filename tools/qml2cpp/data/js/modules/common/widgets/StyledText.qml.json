@@ -3,42 +3,48 @@
   "cpp": null,
   "kind": "statements (name textAnimationBehavior)",
   "context": "root.Component.onCompleted",
-  "expected": "void",
-  "code": "{\n        textAnimationBehavior.originalX = root.x;\n        textAnimationBehavior.originalY = root.y;\n    }"
+  "expected": "handler body, parameters ()",
+  "code": "{\n        textAnimationBehavior.originalX = root.x;\n        textAnimationBehavior.originalY = root.y;\n    }",
+  "form": "body"
  },
  "5e341eead4b5": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root.font.pixelSize",
   "expected": "double",
-  "code": "Appearance?.font.pixelSize.small ?? 15"
+  "code": "Appearance?.font.pixelSize.small ?? 15",
+  "form": "expression"
  },
  "605830e573a4": {
   "cpp": null,
   "kind": "binding (name root)",
   "context": "root.target",
   "expected": "Object*",
-  "code": "root"
+  "code": "root",
+  "form": "expression"
  },
  "87865d43110b": {
   "cpp": null,
   "kind": "binding (RegExpLiteral)",
   "context": "root.shouldUseNumberFont",
   "expected": "bool",
-  "code": "/^\\d+$/.test(root.text)"
+  "code": "/^\\d+$/.test(root.text)",
+  "form": "expression"
  },
  "f3ae49038e9f": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root.color",
   "expected": "Color",
-  "code": "Appearance?.m3colors.m3onBackground ?? \"black\""
+  "code": "Appearance?.m3colors.m3onBackground ?? \"black\"",
+  "form": "expression"
  },
  "f6ae251a47da": {
   "cpp": null,
   "kind": "binding (ObjectPattern)",
   "context": "root.font.variableAxes",
   "expected": "std::map<std::string, double>",
-  "code": "shouldUseNumberFont ? ({}) : Appearance.font.variableAxes.main"
+  "code": "shouldUseNumberFont ? ({}) : Appearance.font.variableAxes.main",
+  "form": "expression"
  }
 }

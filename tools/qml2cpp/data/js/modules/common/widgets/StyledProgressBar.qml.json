@@ -3,28 +3,32 @@
   "cpp": null,
   "kind": "behavior animation (optional chaining)",
   "context": "root.waveAmplitudeMultiplier.Behavior.animation",
-  "expected": "",
-  "code": "Appearance?.animation.elementMoveFast.numberAnimation.createObject(this)"
+  "expected": "Animation* (created by this code, owned by the Behavior)",
+  "code": "Appearance?.animation.elementMoveFast.numberAnimation.createObject(this)",
+  "form": "expression"
  },
  "115e9be3eb17": {
   "cpp": null,
   "kind": "behavior animation (optional chaining)",
   "context": "root.value.Behavior.animation",
-  "expected": "",
-  "code": "Appearance?.animation.elementMoveEnter.numberAnimation.createObject(this)"
+  "expected": "Animation* (created by this code, owned by the Behavior)",
+  "code": "Appearance?.animation.elementMoveEnter.numberAnimation.createObject(this)",
+  "form": "expression"
  },
  "5221471a421e": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root.highlightColor",
   "expected": "Color",
-  "code": "Appearance?.colors.colPrimary ?? \"#685496\""
+  "code": "Appearance?.colors.colPrimary ?? \"#685496\"",
+  "form": "expression"
  },
  "d3c7df42476e": {
   "cpp": null,
   "kind": "binding (optional chaining)",
   "context": "root.trackColor",
   "expected": "Color",
-  "code": "Appearance?.m3colors.m3secondaryContainer ?? \"#F1D3F9\""
+  "code": "Appearance?.m3colors.m3secondaryContainer ?? \"#F1D3F9\"",
+  "form": "expression"
  }
 }

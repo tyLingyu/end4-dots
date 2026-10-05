@@ -1,6 +1,6 @@
 """Translations of JavaScript the translator cannot do mechanically, kept outside the generated code.
 
-data/js/<qml path>.json maps a stable key to {code, context, expected, cpp}. The generator uses
+data/js/<qml path>.json maps a stable key to {code, context, kind, form, expected, cpp}. The generator uses
 `cpp` when present and otherwise emits a stub (a compile error) and records the entry with
 `cpp: null` for AI (or a person) to fill. Regenerating never loses filled translations.
 """
@@ -34,12 +34,12 @@ class JsStore:
     def key(context: str, code: str) -> str:
         return hashlib.sha1(f"{context}\0{code}".encode()).hexdigest()[:12]
 
-    def get(self, qml: Path, context: str, code: str, expected: str, kind: str) -> tuple[str, str | None]:
+    def get(self, qml: Path, context: str, code: str, expected: str, kind: str, form: str = "statements") -> tuple[str, str | None]:
         """(key, translation or None). Records the entry so it shows up in the to-do list."""
         rel = self._rel(qml)
         key = self.key(context, code)
         entry = self._data(rel).setdefault(key, {"cpp": None})
-        entry.update({"kind": kind, "context": context, "expected": expected, "code": code})
+        entry.update({"kind": kind, "form": form, "context": context, "expected": expected, "code": code})
         self._used.setdefault(rel, set()).add(key)
         return key, entry.get("cpp")
 

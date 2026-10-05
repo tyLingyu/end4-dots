@@ -3,147 +3,168 @@
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "monitor/initProc/stdout.onRead",
-  "expected": "void",
-  "code": "data => {\n                    const [, , , current, max] = data.split(\" \");\n                    monitor.rawMaxBrightness = parseInt(max);\n                    monitor.brightness = parseInt(current) / monitor.rawMaxBrightness;\n                    monitor.ready = true;\n                }"
+  "expected": "handler body, parameters (const std::string& data)",
+  "code": "data => {\n                    const [, , , current, max] = data.split(\" \");\n                    monitor.rawMaxBrightness = parseInt(max);\n                    monitor.brightness = parseInt(current) / monitor.rawMaxBrightness;\n                    monitor.ready = true;\n                }",
+  "form": "body"
  },
  "0e6ceba525dc": {
   "cpp": null,
   "kind": "delegate (default component property)",
   "context": "root/Variants.0/screenScope",
   "expected": "",
-  "code": "Variants { Scope { ... } }"
+  "code": "Variants { Scope { ... } }",
+  "form": "statements"
  },
  "2ccda1eceedf": {
   "cpp": null,
   "kind": "function",
   "context": "root.decreaseBrightness",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function decreaseBrightness() { const focusedName = Hyprland.focusedMonitor.name;\n        const monitor = monitors.find(m => focusedName === m.screen.name);\n        if (monitor && monitor.brightness > 0) \n            monitor.setBrightness(monitor.brightness - 0.05);\n        // if brightness is 0, then decrease gamma\n        else {\n            Hyprsunset.setGamma(Hyprsunset.gamma - 5);\n        } }"
+  "code": "function decreaseBrightness() { const focusedName = Hyprland.focusedMonitor.name;\n        const monitor = monitors.find(m => focusedName === m.screen.name);\n        if (monitor && monitor.brightness > 0) \n            monitor.setBrightness(monitor.brightness - 0.05);\n        // if brightness is 0, then decrease gamma\n        else {\n            Hyprsunset.setGamma(Hyprsunset.gamma - 5);\n        } }",
+  "form": "function"
  },
  "473dcc30751b": {
   "cpp": null,
   "kind": "statements (call increaseBrightness)",
   "context": "root/GlobalShortcut.0.onPressed",
-  "expected": "void",
-  "code": "root.increaseBrightness()"
+  "expected": "handler body, parameters ()",
+  "code": "root.increaseBrightness()",
+  "form": "body"
  },
  "4a71924592a5": {
   "cpp": null,
   "kind": "function",
   "context": "root.increaseBrightness",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function increaseBrightness() { if (Hyprsunset.gamma !== 100) {\n            Hyprsunset.setGamma(Hyprsunset.gamma + 5);\n            return;\n        }\n\n        const focusedName = Hyprland.focusedMonitor.name;\n        const monitor = monitors.find(m => focusedName === m.screen.name);\n        if (monitor)\n            monitor.setBrightness(monitor.brightness + 0.05); }"
+  "code": "function increaseBrightness() { if (Hyprsunset.gamma !== 100) {\n            Hyprsunset.setGamma(Hyprsunset.gamma + 5);\n            return;\n        }\n\n        const focusedName = Hyprland.focusedMonitor.name;\n        const monitor = monitors.find(m => focusedName === m.screen.name);\n        if (monitor)\n            monitor.setBrightness(monitor.brightness + 0.05); }",
+  "form": "function"
  },
  "4d24c3e4e0ec": {
   "cpp": null,
   "kind": "function",
   "context": "root.brightnessMultiplierForLightness",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function brightnessMultiplierForLightness(x) { return (6.600135 + 216.360356 * Math.pow(Math.E, -0.0811129189 * x)) / 100.0; }"
+  "code": "function brightnessMultiplierForLightness(x) { return (6.600135 + 216.360356 * Math.pow(Math.E, -0.0811129189 * x)) / 100.0; }",
+  "form": "function"
  },
  "4e71e842eb94": {
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "root/ddcProc/stdout.onRead",
-  "expected": "void",
-  "code": "data => {\n                if (data.startsWith(\"Display \")) {\n                    const lines = data.split(\"\\n\").map(l => l.trim());\n                    root.ddcMonitors.push({\n                        name: lines.find(l => l.startsWith(\"DRM connector:\")).split(\"-\").slice(1).join('-'),\n                        busNum: lines.find(l => l.startsWith(\"I2C bus:\")).split(\"/dev/i2c-\")[1]\n                    });\n                }\n            }"
+  "expected": "handler body, parameters (const std::string& data)",
+  "code": "data => {\n                if (data.startsWith(\"Display \")) {\n                    const lines = data.split(\"\\n\").map(l => l.trim());\n                    root.ddcMonitors.push({\n                        name: lines.find(l => l.startsWith(\"DRM connector:\")).split(\"-\").slice(1).join('-'),\n                        busNum: lines.find(l => l.startsWith(\"I2C bus:\")).split(\"/dev/i2c-\")[1]\n                    });\n                }\n            }",
+  "form": "body"
  },
  "51d8f084b1b8": {
   "cpp": null,
-  "kind": "binding (cannot assign std::vector<qs::ShellScreen*> to nlohmann::json)",
+  "kind": "binding (cannot assign std::vector<qs::ShellScreen*> to js::Json)",
   "context": "root/Variants.0.model",
-  "expected": "nlohmann::json",
-  "code": "Quickshell.screens"
+  "expected": "js::Json",
+  "code": "Quickshell.screens",
+  "form": "expression"
  },
  "7e5cd8ac16e4": {
   "cpp": null,
   "kind": "binding (FunctionExpression)",
   "context": "root.monitors",
   "expected": "std::vector<ii::services::Brightness_BrightnessMonitor*>",
-  "code": "Quickshell.screens.map(screen => monitorComp.createObject(root, {\n        screen\n    }))"
+  "code": "Quickshell.screens.map(screen => monitorComp.createObject(root, {\n        screen\n    }))",
+  "form": "expression"
  },
  "805e84294949": {
   "cpp": null,
   "kind": "function",
   "context": "monitor.setBrightnessMultiplier",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function setBrightnessMultiplier(value) { monitor.brightnessMultiplier = value; }"
+  "code": "function setBrightnessMultiplier(value) { monitor.brightnessMultiplier = value; }",
+  "form": "function"
  },
  "811d11d5ddd5": {
   "cpp": null,
   "kind": "statements (call initializeMonitor)",
   "context": "root.ddcDetectFinished",
-  "expected": "void",
-  "code": "initializeMonitor(0);"
+  "expected": "handler body, parameters ()",
+  "code": "initializeMonitor(0);",
+  "form": "body"
  },
  "824cc85e3cce": {
   "cpp": null,
   "kind": "statements (call increaseBrightness)",
   "context": "root/IpcHandler.0.increment",
-  "expected": "void",
-  "code": "onPressed: root.increaseBrightness()"
+  "expected": "handler body, parameters ()",
+  "code": "onPressed: root.increaseBrightness()",
+  "form": "body"
  },
  "865beadb5b3d": {
   "cpp": null,
   "kind": "statements (array of mixed types)",
   "context": "monitor.syncBrightness",
-  "expected": "void",
-  "code": "const brightnessValue = Math.max(monitor.multipliedBrightness, 0);\n            if (isDdc) {\n                const rawValueRounded = Math.max(Math.floor(brightnessValue * monitor.rawMaxBrightness), 1);\n                setProc.exec([\"ddcutil\", \"-b\", busNum, \"setvcp\", \"10\", rawValueRounded]);\n            } else {\n                const valuePercentNumber = Math.floor(brightnessValue * 100);\n                let valuePercent = `${valuePercentNumber}%`;\n                if (valuePercentNumber == 0) valuePercent = \"1\"; // Prevent fully black\n                setProc.exec([\"brightnessctl\", \"--class\", \"backlight\", \"s\", valuePercent, \"--quiet\"])\n            }"
+  "expected": "handler body, parameters ()",
+  "code": "const brightnessValue = Math.max(monitor.multipliedBrightness, 0);\n            if (isDdc) {\n                const rawValueRounded = Math.max(Math.floor(brightnessValue * monitor.rawMaxBrightness), 1);\n                setProc.exec([\"ddcutil\", \"-b\", busNum, \"setvcp\", \"10\", rawValueRounded]);\n            } else {\n                const valuePercentNumber = Math.floor(brightnessValue * 100);\n                let valuePercent = `${valuePercentNumber}%`;\n                if (valuePercentNumber == 0) valuePercent = \"1\"; // Prevent fully black\n                setProc.exec([\"brightnessctl\", \"--class\", \"backlight\", \"s\", valuePercent, \"--quiet\"])\n            }",
+  "form": "body"
  },
  "8eddc15ba906": {
   "cpp": null,
   "kind": "function",
   "context": "root.getMonitorForScreen",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function getMonitorForScreen(screen) { return monitors.find(m => m.screen === screen); }"
+  "code": "function getMonitorForScreen(screen) { return monitors.find(m => m.screen === screen); }",
+  "form": "function"
  },
  "9b3aec3538ca": {
   "cpp": null,
   "kind": "statements (call decreaseBrightness)",
   "context": "root/GlobalShortcut.1.onPressed",
-  "expected": "void",
-  "code": "root.decreaseBrightness()"
+  "expected": "handler body, parameters ()",
+  "code": "root.decreaseBrightness()",
+  "form": "body"
  },
  "9ef0972e2c51": {
   "cpp": null,
   "kind": "function",
   "context": "monitor.initialize",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function initialize() { monitor.ready = false;\n            const match = root.ddcMonitors.find(m => m.name === screen.name && !root.monitors.slice(0, root.monitors.indexOf(this)).some(mon => mon.busNum === m.busNum));\n            isDdc = !!match;\n            busNum = match?.busNum ?? \"\";\n            initProc.command = isDdc ? [\"ddcutil\", \"-b\", busNum, \"getvcp\", \"10\", \"--brief\"] : [\"sh\", \"-c\", `echo \"a b c $(brightnessctl g) $(brightnessctl m)\"`];\n            initProc.running = true; }"
+  "code": "function initialize() { monitor.ready = false;\n            const match = root.ddcMonitors.find(m => m.name === screen.name && !root.monitors.slice(0, root.monitors.indexOf(this)).some(mon => mon.busNum === m.busNum));\n            isDdc = !!match;\n            busNum = match?.busNum ?? \"\";\n            initProc.command = isDdc ? [\"ddcutil\", \"-b\", busNum, \"getvcp\", \"10\", \"--brief\"] : [\"sh\", \"-c\", `echo \"a b c $(brightnessctl g) $(brightnessctl m)\"`];\n            initProc.running = true; }",
+  "form": "function"
  },
  "a1f6b449646b": {
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "monitor/initProc.onExited",
-  "expected": "void",
-  "code": "(exitCode, exitStatus) => {\n                initializeMonitor(root.monitors.indexOf(monitor) + 1);\n            }"
+  "expected": "handler body, parameters (const int& exitCode, const int& exitStatus)",
+  "code": "(exitCode, exitStatus) => {\n                initializeMonitor(root.monitors.indexOf(monitor) + 1);\n            }",
+  "form": "body"
  },
  "a8ba80e121ba": {
   "cpp": null,
   "kind": "statements (call decreaseBrightness)",
   "context": "root/IpcHandler.0.decrement",
-  "expected": "void",
-  "code": "onPressed: root.decreaseBrightness()"
+  "expected": "handler body, parameters ()",
+  "code": "onPressed: root.decreaseBrightness()",
+  "form": "body"
  },
  "bc37309a2005": {
   "cpp": null,
   "kind": "statements (unknown member animationEnabled)",
   "context": "monitor.onMultipliedBrightnessChanged",
-  "expected": "void",
-  "code": "{\n            if (monitor.animationEnabled) syncBrightness();\n            else setTimer.restart();\n        }"
+  "expected": "handler body, parameters ()",
+  "code": "{\n            if (monitor.animationEnabled) syncBrightness();\n            else setTimer.restart();\n        }",
+  "form": "body"
  },
  "c1e61a072b99": {
   "cpp": null,
   "kind": "function",
   "context": "monitor.setBrightness",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function setBrightness(value) { value = Math.max(0, Math.min(1, value));\n            monitor.brightness = value; }"
+  "code": "function setBrightness(value) { value = Math.max(0, Math.min(1, value));\n            monitor.brightness = value; }",
+  "form": "function"
  },
  "c52b589119e5": {
   "cpp": null,
   "kind": "function",
   "context": "root.initializeMonitor",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function initializeMonitor(i) { if (i >= monitors.length)\n            return;\n        monitors[i].initialize(); }"
+  "code": "function initializeMonitor(i) { if (i >= monitors.length)\n            return;\n        monitors[i].initialize(); }",
+  "form": "function"
  }
 }

@@ -1,8 +1,9 @@
 """The structs var-types.json infers for `property var` values, as one generated header.
 
 Each struct gets a defaulted operator== (deleted, and so ignored by Property<T>, when a field
-isn't comparable) and, when every field converts to JSON, to_json/from_json that use the JSON
-key names, so translated `JSON.parse` code can read them.
+isn't comparable) and, when every field converts to JSON, to_json/from_json for js::Json
+(key order kept, as in JS) that use the JSON key names, so translated `JSON.parse` code can
+read them.
 """
 from __future__ import annotations
 
@@ -13,7 +14,7 @@ from .typemap import VarTypes, qualified_class
 
 HEADER = "ii/var_structs.h"
 
-_SCALARS = {"bool", "int", "double", "std::string", "nlohmann::json"}
+_SCALARS = {"bool", "int", "double", "std::string", "js::Json"}
 # Types the runtime provides (some still planned), and the header that declares each.
 _RUNTIME_HEADERS = {
     "ii::Color": "runtime/color.h",
@@ -42,7 +43,7 @@ def render(var_types: VarTypes) -> tuple[str, list[str]]:
     """The header, and the type names that have no C++ definition yet."""
     structs = var_types.structs
     components = _components()
-    includes = {"<nlohmann/json.hpp>", "<string>"}
+    includes = {'"runtime/js.h"', "<string>"}
     forwards: set[str] = set()
     unknown: set[str] = set()
 
@@ -56,7 +57,7 @@ def render(var_types: VarTypes) -> tuple[str, list[str]]:
 
         def word(m: re.Match) -> str:
             name = m.group(0)
-            if name in structs or name in _SCALARS or name.startswith(("std::", "ii::", "nlohmann::")) or name in ("void", "const"):
+            if name in structs or name in _SCALARS or name.startswith(("std::", "ii::", "js::")) or name in ("void", "const"):
                 return name
             if name.startswith("qs::"):
                 forwards.add(f"namespace ii::qs {{ class {name[4:]}; }}")
@@ -68,7 +69,7 @@ def render(var_types: VarTypes) -> tuple[str, list[str]]:
             unknown.add(name)
             return name
 
-        return re.sub(r"[A-Za-z_][\w:]*", word, text)
+        return re.sub(r"[A-Za-z_][\w:]*", word, text.replace("nlohmann::json", "js::Json"))
 
     # Definition order: a struct after every struct its fields mention.
     order: list[str] = []
@@ -86,6 +87,7 @@ def render(var_types: VarTypes) -> tuple[str, list[str]]:
         visit(name)
 
     def jsonable(t: str) -> bool:
+        t = t.replace("nlohmann::json", "js::Json")
         words = set(re.findall(r"[A-Za-z_][\w:]*", t)) - {"std::vector", "std::optional", "std::map"}
         return all(w in _SCALARS or w in structs and all(jsonable(f) for f in structs[w].values()) for w in words)
 
@@ -101,14 +103,14 @@ def render(var_types: VarTypes) -> tuple[str, list[str]]:
         body.append("};")
         if all(jsonable(t) for t in fields.values()):
             pairs = ", ".join(f'{{"{key}", v.{members[key]}}}' for key in fields)
-            body.append(f"inline void to_json(nlohmann::json& j, const {name}& v) {{ j = nlohmann::json{{{pairs}}}; }}")
-            body.append(f"inline void from_json(const nlohmann::json& j, {name}& v) {{")
+            body.append(f"inline void to_json(js::Json& j, const {name}& v) {{ j = js::Json{{{pairs}}}; }}")
+            body.append(f"inline void from_json(const js::Json& j, {name}& v) {{")
             for key in fields:
                 body.append(f'  if (j.contains("{key}")) j.at("{key}").get_to(v.{members[key]});')
             body.append("}")
         body.append("")
 
-    aliases = [f"using {name} = nlohmann::json;  // TODO: no C++ type yet" for name in sorted(unknown)]
+    aliases = [f"using {name} = js::Json;  // TODO: no C++ type yet" for name in sorted(unknown)]
     std_includes = sorted(i for i in includes if i.startswith("<"))
     own_includes = sorted(i for i in includes if i.startswith('"'))
     lines = [

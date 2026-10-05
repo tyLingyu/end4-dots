@@ -4,13 +4,15 @@
   "kind": "binding (unknown member radius)",
   "context": "root.radius",
   "expected": "double",
-  "code": "target.radius"
+  "code": "target.radius",
+  "form": "expression"
  },
  "87846338f33d": {
   "cpp": null,
   "kind": "binding (name Qt)",
   "context": "root.offset",
-  "expected": "",
-  "code": "Qt.vector2d(0.0, 1.0)"
+  "expected": "Point",
+  "code": "Qt.vector2d(0.0, 1.0)",
+  "form": "expression"
  }
 }

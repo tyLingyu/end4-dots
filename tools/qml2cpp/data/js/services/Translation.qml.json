@@ -3,105 +3,120 @@
   "cpp": null,
   "kind": "statements (TemplateLiteral)",
   "context": "translationReader.reread",
-  "expected": "void",
-  "code": "translationReader.path = \"\";\n            translationReader.path = `${translationReader.translationsDir}/${translationReader.languageCode}.json`;\n            translationReader.reload();"
+  "expected": "handler body, parameters ()",
+  "code": "translationReader.path = \"\";\n            translationReader.path = `${translationReader.translationsDir}/${translationReader.languageCode}.json`;\n            translationReader.reload();",
+  "form": "body"
  },
  "0d0c81d117d9": {
   "cpp": null,
   "kind": "statements (call print)",
   "context": "root.onLanguageCodeChanged",
-  "expected": "void",
-  "code": "{\n        print(\"[Translation] Language changed to\", root.languageCode);\n        translationFileView.languageCode = root.languageCode;\n        generatedTranslationFileView.languageCode = root.languageCode;\n        translationFileView.reread();\n        generatedTranslationFileView.reread();\n    }"
+  "expected": "handler body, parameters ()",
+  "code": "{\n        print(\"[Translation] Language changed to\", root.languageCode);\n        translationFileView.languageCode = root.languageCode;\n        generatedTranslationFileView.languageCode = root.languageCode;\n        translationFileView.reread();\n        generatedTranslationFileView.reread();\n    }",
+  "form": "body"
  },
  "27dcaeae2ebf": {
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "translationScanner.onExited",
-  "expected": "void",
-  "code": "(exitCode, exitStatus) => {\n            if (exitCode !== 0) {\n                translationScanner.languagesScanned([\"en_US\"]);\n            }\n        }"
+  "expected": "handler body, parameters (const int& exitCode, const int& exitStatus)",
+  "code": "(exitCode, exitStatus) => {\n            if (exitCode !== 0) {\n                translationScanner.languagesScanned([\"en_US\"]);\n            }\n        }",
+  "form": "body"
  },
  "57c016bbc4c0": {
   "cpp": null,
   "kind": "binding (Block)",
   "context": "root.allAvailableLanguages",
   "expected": "std::vector<std::string>",
-  "code": "{\n        const combined = new Set([...root.availableLanguages, ...root.availableGeneratedLanguages]);\n        return Array.from(combined).sort();\n    }"
+  "code": "{\n        const combined = new Set([...root.availableLanguages, ...root.availableGeneratedLanguages]);\n        return Array.from(combined).sort();\n    }",
+  "form": "expression"
  },
  "5cdf1be34476": {
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "translationScanner/stdout.onStreamFinished",
-  "expected": "void",
-  "code": "{\n                const output = languagesCollector.text;\n                const files = output.trim().split('\\n').map(f => f.trim());\n                translationScanner.languagesScanned(files);\n            }"
+  "expected": "handler body, parameters ()",
+  "code": "{\n                const output = languagesCollector.text;\n                const files = output.trim().split('\\n').map(f => f.trim());\n                translationScanner.languagesScanned(files);\n            }",
+  "form": "body"
  },
  "6914e02933c0": {
   "cpp": null,
   "kind": "binding (ObjectPattern)",
   "context": "root.translations",
   "expected": "std::map<std::string, std::string>",
-  "code": "({})"
+  "code": "({})",
+  "form": "expression"
  },
  "6bcbc0dc50de": {
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "translationReader.onLoadFailed",
-  "expected": "void",
-  "code": "error => {\n            translationReader.contentLoaded({});\n        }"
+  "expected": "handler body, parameters (const qs::FileViewError& error)",
+  "code": "error => {\n            translationReader.contentLoaded({});\n        }",
+  "form": "body"
  },
  "73c643974253": {
   "cpp": null,
   "kind": "binding (ObjectPattern)",
   "context": "root.generatedTranslations",
   "expected": "std::map<std::string, std::string>",
-  "code": "({})"
+  "code": "({})",
+  "form": "expression"
  },
  "7ab64b391cc4": {
   "cpp": null,
   "kind": "binding (Block)",
   "context": "root.languageCode",
   "expected": "std::string",
-  "code": "{\n        var configLang = Config?.options.language.ui ?? \"auto\";\n\n        if (configLang !== \"auto\")\n            return configLang;\n\n        return Qt.locale().name;\n    }"
+  "code": "{\n        var configLang = Config?.options.language.ui ?? \"auto\";\n\n        if (configLang !== \"auto\")\n            return configLang;\n\n        return Qt.locale().name;\n    }",
+  "form": "expression"
  },
  "81e228a10466": {
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "root/generatedTranslationFileView.onContentLoaded",
-  "expected": "void",
-  "code": "(data) => {\n            root.generatedTranslations = data;\n            root.isLoading = false;\n        }"
+  "expected": "handler body, parameters (const js::Json& data)",
+  "code": "(data) => {\n            root.generatedTranslations = data;\n            root.isLoading = false;\n        }",
+  "form": "body"
  },
  "8722a40a5efc": {
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "root/scanLanguagesProcess.onLanguagesScanned",
-  "expected": "void",
-  "code": "(languages) => {\n            root.availableLanguages = [...languages];\n        }"
+  "expected": "handler body, parameters (const js::Json& languages)",
+  "code": "(languages) => {\n            root.availableLanguages = [...languages];\n        }",
+  "form": "body"
  },
  "9143522293c0": {
   "cpp": null,
   "kind": "function",
   "context": "root.tr",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
-  "code": "function tr(text) { if (!text) return \"\";\n        var key = text.toString();\n        if (root.isLoading || (!root?.translations?.hasOwnProperty(key) && !root?.generatedTranslations?.hasOwnProperty(key)))\n            return key;\n        \n        // Normal cases\n        var translation = root.translations[key] || root.generatedTranslations[key] || key;\n        // print(key, \"-> [\", root.translations[key], root.generatedTranslations[key], key, \"] ->\", translation);\n        if (translation.endsWith(root.translationKeepSuffix)) {\n            translation = translation.substring(0, translation.length - root.translationKeepSuffix.length).trim();\n        }\n        return translation; }"
+  "code": "function tr(text) { if (!text) return \"\";\n        var key = text.toString();\n        if (root.isLoading || (!root?.translations?.hasOwnProperty(key) && !root?.generatedTranslations?.hasOwnProperty(key)))\n            return key;\n        \n        // Normal cases\n        var translation = root.translations[key] || root.generatedTranslations[key] || key;\n        // print(key, \"-> [\", root.translations[key], root.generatedTranslations[key], key, \"] ->\", translation);\n        if (translation.endsWith(root.translationKeepSuffix)) {\n            translation = translation.substring(0, translation.length - root.translationKeepSuffix.length).trim();\n        }\n        return translation; }",
+  "form": "function"
  },
  "c5289e41b32a": {
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "root/scanGeneratedLanguagesProcess.onLanguagesScanned",
-  "expected": "void",
-  "code": "(languages) => {\n            root.availableGeneratedLanguages = [...languages];\n        }"
+  "expected": "handler body, parameters (const js::Json& languages)",
+  "code": "(languages) => {\n            root.availableGeneratedLanguages = [...languages];\n        }",
+  "form": "body"
  },
  "d5a8165c27a2": {
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "root/translationFileView.onContentLoaded",
-  "expected": "void",
-  "code": "(data) => {\n            root.translations = data;\n            root.isLoading = false;\n        }"
+  "expected": "handler body, parameters (const js::Json& data)",
+  "code": "(data) => {\n            root.translations = data;\n            root.isLoading = false;\n        }",
+  "form": "body"
  },
  "f5d0b1369c72": {
   "cpp": null,
   "kind": "statements (TryStatement)",
   "context": "translationReader.onLoaded",
-  "expected": "void",
-  "code": "{\n            var textContent = \"\";\n            try {\n                textContent = text();\n                var jsonData = JSON.parse(textContent);\n                translationReader.contentLoaded(jsonData);\n            } catch (e) {\n                console.log(\"[Translation] Failed to load translations:\", e);\n                translationReader.contentLoaded({});\n            }\n        }"
+  "expected": "handler body, parameters ()",
+  "code": "{\n            var textContent = \"\";\n            try {\n                textContent = text();\n                var jsonData = JSON.parse(textContent);\n                translationReader.contentLoaded(jsonData);\n            } catch (e) {\n                console.log(\"[Translation] Failed to load translations:\", e);\n                translationReader.contentLoaded({});\n            }\n        }",
+  "form": "body"
  }
 }
