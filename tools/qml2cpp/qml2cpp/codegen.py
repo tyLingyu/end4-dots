@@ -95,7 +95,9 @@ class ComponentGen:
     objects: list[Emitted] = field(default_factory=list)
     std_includes: set[str] = field(default_factory=set)
     anon_emitted: list[Emitted] = field(default_factory=list)  # objects with their own class, factories included
+    behavior_bases: dict = field(default_factory=dict)  # anonymous Behavior class -> Behavior<T>
     pending_components: list[tuple[dom.QmlObject, Value, str]] = field(default_factory=list)
+    pending_delegates: list[tuple[Value, dom.QmlObject, str]] = field(default_factory=list)
 
     def __post_init__(self):
         self.component = self.ts.registry.component(self.ref)
@@ -207,9 +209,12 @@ class ComponentGen:
             default = self.ts.view(parent_type).default_property if parent_type is not None else None
             default_prop = self.ts.prop(parent_type, default) if default else None
             if default_prop is not None and default_prop.component_of is not None:
-                # Variants / Repeater / Instantiator: the child is the delegate, instantiated per model
-                # item with `required property modelData` set. Needs the stage 3 delegate runtime.
-                self.stub_line(child_path, f"{obj.type_name} {{ {child.type_name} {{ ... }} }}", "delegate (default component property)", "")
+                # Variants (Repeater, Instantiator): the child is the delegate, made per model item.
+                if self.class_of(parent_type) == "qs::Variants" and not self.factory_depth:
+                    self.pending_delegates.append((parent, child, child_path))
+                else:
+                    self.stub_line(child_path, f"{obj.type_name} {{ {child.type_name} {{ ... }} }}",
+                                   "delegate (only Variants delegates so far)", "")
                 continue
             cls = self.class_of(child_type)
             if cls is None:
@@ -338,10 +343,11 @@ class ComponentGen:
         for e in list(self.objects):
             self.bind_object(e)
 
-    def bind_object(self, e: Emitted) -> None:
+    def bind_object(self, e: Emitted, skip: set[str] | None = None) -> None:
         if e.type is None or (isinstance(e.type, BuiltinRef) and e.type.name == "Connections"):
             return
         aliases = {p.name for p in self.component.root.properties if p.is_alias} if e is self.objects[0] else set()
+        aliases |= skip or set()
         easing: dict[str, dom.Binding] = {}
         for b in e.obj.bindings:
             if b.name in IGNORED or b.is_signal_handler or b.is_on or b.name in aliases:
@@ -376,6 +382,25 @@ class ComponentGen:
             self.body += [f"  {line}" for line in lines]
             self.body.append("}));")
 
+    def delegates(self) -> None:
+        """Variants delegates: a factory per model item, `required property modelData` set first so
+        every binding already sees it."""
+        for parent, child, path in self.pending_delegates:
+            child_type = self.ts.object_type(self.ref, child)
+            model_data = self.ts.prop(child_type, "modelData") if child_type is not None else None
+            prelude = []
+            if model_data is not None and model_data.cpp_type and model_data.cpp_type.endswith("*"):
+                prelude.append(f"{{var}}->modelData.set(static_cast<{model_data.cpp_type}>(modelData));")
+            elif model_data is not None:
+                self.stub_line(path, f"modelData: {model_data.cpp_type}", "delegate (modelData is not an object)", "")
+                continue
+            lines = self.factory(child, path, prelude)
+            if lines is not None:
+                target = "" if parent.cpp == "this" else f"{parent.cpp}->"
+                self.body.append(f"{target}setDelegate([=, this](Object& owner, [[maybe_unused]] Object* modelData) -> Object* {{")
+                self.body += [f"  {line}" for line in lines]
+                self.body.append("});")
+
     def component_members(self) -> None:
         for child, member, path in self.pending_components:
             lines = self.factory(child.children[0], path)
@@ -384,7 +409,7 @@ class ComponentGen:
                 self.body += [f"  {line}" for line in lines]
                 self.body.append("});")
 
-    def factory(self, inner: dom.QmlObject, path: str) -> list[str] | None:
+    def factory(self, inner: dom.QmlObject, path: str, prelude: list[str] | None = None) -> list[str] | None:
         """The body of a factory lambda building `inner`'s object tree, bindings and handlers.
         Ids inside are local to it, as a Component's ids are to its own context."""
         inner_type = self.ts.object_type(self.ref, inner)
@@ -398,6 +423,7 @@ class ComponentGen:
         self.counter += 1
         var = Value(f"c{self.counter}", f"{cls}*", inner_type)
         self.body.append(f"auto* {var.cpp} = owner.create<{cls}>();")
+        self.body += [line.format(var=var.cpp) for line in prelude or []]
         if inner.id:
             self.ids[inner.id] = var
         self.emitted(Emitted(var, inner, inner_type, path))
@@ -460,32 +486,8 @@ class ComponentGen:
         create = "create" if e.var.cpp == "this" else f"{e.var.cpp}->create"
         obj_type = self.ts.object_type(self.ref, obj)
         self.counter += 1
-        if obj.type_name == "Behavior" and (obj.properties or obj.id or any(c.children for c in obj.children)):
-            # A group (SequentialAnimation { ... PropertyAction {} }) needs a Behavior that drives
-            # animation groups; a Behavior with an id or its own properties needs a class of its own.
-            self.stub_line(context, f"Behavior on {b.name} {{ {' '.join(c.type_name for c in obj.children)} {{ ... }} }}",
-                           "behavior (animation group, id or own properties)", "")
-            return
         if obj.type_name == "Behavior":
-            self.class_of(obj_type)
-            var = Value(f"b{self.counter}", f"Behavior<{cpp_type}>*", obj_type)
-            self.body.append(f"auto* {var.cpp} = {create}<Behavior<{cpp_type}>>({member});")
-            be = Emitted(var, obj, obj_type, f"{context}.Behavior")
-            for bb in obj.bindings:
-                if bb.name == "animation" and bb.value.script:
-                    self.behavior_animation(be, bb)
-                elif bb.name == "enabled" and bb.value.script:
-                    self.binding(be, bb)
-            for child in obj.children:
-                child_type = self.ts.object_type(self.ref, child)
-                cls = self.class_of(child_type)
-                if cls is None:
-                    self.stub_line(f"{context}.Behavior", child.type_name, "behavior animation (unknown type)", "")
-                    continue
-                self.counter += 1
-                anim = Value(f"a{self.counter}", f"{cls}*", child_type)
-                self.body.append(f"auto* {anim.cpp} = {var.cpp}->setAnimation<{cls}>();")
-                self.bind_object(Emitted(anim, child, child_type, f"{context}.Behavior/{child.type_name}"))
+            self.behavior(e, b, obj, obj_type, member, cpp_type, create, context)
             return
         # A property value source: the animation targets the property and runs by default.
         cls = self.class_of(obj_type)
@@ -498,6 +500,130 @@ class ComponentGen:
         self.bind_object(Emitted(anim, obj, obj_type, f"{context}.{obj.type_name}"))
         if not any(x.name == "running" for x in obj.bindings):
             self.body.append(f"{anim.cpp}->running.set(true);")
+
+    def behavior(self, e: Emitted, b: dom.Binding, obj: dom.QmlObject, obj_type, member: str, cpp_type: str,
+                 create: str, context: str) -> None:
+        """`Behavior on x { ... }`: a Behavior<T> (a class of its own when it declares properties),
+        its bindings, and its animation (one, or a group taking the change at a bare PropertyAction)."""
+        behavior_cls = f"Behavior<{cpp_type}>"
+        cls = behavior_cls
+        if isinstance(obj_type, AnonRef):
+            self.behavior_bases[obj_type] = behavior_cls
+            cls = self.class_of(obj_type)
+        if obj.id and not self.factory_depth:
+            name = self.id_member(obj.id)
+            self.members.append(f"{cls}* {name} = nullptr;")
+            self.body.append(f"{name} = {create}<{cls}>({member});")
+        else:
+            name = obj.id or f"b{self.counter}"
+            self.body.append(f"auto* {name} = {create}<{cls}>({member});")
+        var = Value(name, f"{cls}*", obj_type)
+        if obj.id:
+            self.ids[obj.id] = var
+        be = Emitted(var, obj, obj_type, f"{context}.Behavior")
+        if isinstance(obj_type, AnonRef) and all(x.type != obj_type for x in self.anon_emitted):
+            self.anon_emitted.append(be)
+        self.bind_object(be, skip={"animation"})
+        for bb in obj.bindings:
+            if bb.name == "animation" and bb.value.script:
+                self.behavior_animation(be, bb)
+        for child in obj.children:
+            self.animation_object(var, child, cpp_type, f"{context}.Behavior", "setAnimation")
+
+    # Runtime animation classes and the value type they animate.
+    ANIMATION_VALUE_TYPES = {"NumberAnimation": "double", "ColorAnimation": "Color", "RotationAnimation": "double",
+                             "SmoothedAnimation": "double"}
+    GROUPS = {"SequentialAnimation", "ParallelAnimation"}
+
+    def expand_inline(self, obj: dom.QmlObject) -> dom.QmlObject:
+        """An inline animation component of this file used as `Anim { ... }`: its definition's
+        bindings and children, with the use site's bindings replacing same-named ones. Ids in it
+        resolve where it is created (QML's creation context), which is this component."""
+        inline = self.ts.registry.file(self.ref.path).inline_components.get(obj.type_name)
+        if inline is None or not self.is_expanded_inline(inline.root):
+            return obj
+        _flatten_groups(inline.root)
+        names = {b.name for b in obj.bindings}
+        bindings = [b for b in inline.root.bindings if b.name not in names] + list(obj.bindings)
+        return dom.QmlObject(type_name=inline.root.type_name, id=obj.id, properties=[], bindings=bindings,
+                             methods=list(obj.methods), children=list(inline.root.children) + list(obj.children))
+
+    @staticmethod
+    def is_expanded_inline(root: dom.QmlObject) -> bool:
+        """Inline components that are plain animations with bindings: expanded where used."""
+        animations = ComponentGen.GROUPS | set(ComponentGen.ANIMATION_VALUE_TYPES) | {"PropertyAction", "PauseAnimation", "ScriptAction"}
+        return root.type_name in animations and not root.properties and not root.methods
+
+    def animation_object(self, parent: Value, obj: dom.QmlObject, behavior_type: str | None, path: str, attach: str) -> None:
+        """An animation inside a Behavior (attach "setAnimation") or a group (attach "add").
+        `target: x; property: "p"` becomes a pointer to x's property; a PropertyAction is typed by
+        its target property, or by the Behavior when it has none."""
+        obj = self.expand_inline(obj)
+        child_path = f"{path}/{obj.type_name}"
+        t = self.ts.resolve(self.ref, obj.type_name)
+        by_name = {b.name: b for b in obj.bindings if b.value.script is not None}
+        target_ref = None
+        try:
+            if "target" in by_name or "property" in by_name:
+                if "target" not in by_name or "property" not in by_name:
+                    raise Untranslatable("target without property (or the reverse)")
+                prop_ast = by_name["property"].value.script.ast
+                if prop_ast is None or prop_ast.kind != "StringLiteral":
+                    raise Untranslatable("property is not a string literal")
+                target = self.tr.expression(by_name["target"].value.script.ast, self.scope_for(Emitted(parent, obj, t, child_path)))
+                prop = self.ts.prop(target.obj, prop_ast.attrs["value"]) if target.obj is not None else None
+                if prop is None or prop.kind != "property" or prop.cpp_type is None:
+                    raise Untranslatable(f"no property {prop_ast.attrs['value']} on the target")
+                target_ref = (f"&{target.member(prop.access)}" if target.cpp != "this" else f"&this->{prop.access}", prop.cpp_type)
+        except Untranslatable as err:
+            self.stub_line(child_path, f"{obj.type_name} {{ target/property }}", f"animation ({err})", "")
+            return
+        if obj.type_name == "PropertyAction":
+            value_type = target_ref[1] if target_ref else behavior_type
+            if value_type is None:
+                self.stub_line(child_path, "PropertyAction", "animation (PropertyAction without a type)", "")
+                return
+            cls = f"PropertyAction<{value_type}>"
+            self.header_includes.add("runtime/animation.h")
+        else:
+            cls = self.class_of(t)
+            value_type = self.ANIMATION_VALUE_TYPES.get(obj.type_name)
+            if cls is None:
+                self.stub_line(child_path, obj.type_name, "animation (unknown type)", "")
+                return
+        if target_ref is not None and value_type is not None and target_ref[1] != value_type:
+            self.stub_line(child_path, f"{obj.type_name} on a {target_ref[1]}", "animation (target type mismatch)", "")
+            return
+        self.counter += 1
+        name = f"a{self.counter}"
+        self.body.append(f"[[maybe_unused]] auto* {name} = {parent.cpp}->{attach}<{cls}>();")
+        var = Value(name, f"{cls}*", t)
+        if obj.id:
+            self.ids[obj.id] = var
+        if target_ref is not None:
+            self.body.append(f"{name}->target = {target_ref[0]};")
+        emitted = Emitted(var, obj, t, child_path)
+        skip = {"target", "property", "targets", "properties"}
+        if obj.type_name == "PropertyAction" and "value" in by_name:
+            skip.add("value")
+            self.typed_binding(emitted, by_name["value"], f"{name}->value.", value_type)
+        self.bind_object(emitted, skip=skip)
+        for child in obj.children:
+            self.animation_object(var, child, behavior_type, child_path, "add")
+
+    def typed_binding(self, e: Emitted, b: dom.Binding, setter: str, cpp_type: str) -> None:
+        """A binding whose target type the runtime fixes (PropertyAction.value is a QVariant in Qt)."""
+        context = f"{e.path}.{b.name}"
+        try:
+            value = self.tr.expression(b.value.script.ast, self.scope_for(e))
+            expr = self.tr.coerce(value, cpp_type)
+        except Untranslatable as err:
+            filled = self.stub_line(context, b.value.script.code, f"binding ({err})", cpp_type, "expression")
+            if filled:
+                self.body.append(f'{setter}bind([=, this] {{ return {filled}; }}, "{self.cls}/{b.name}");')
+            return
+        self.translated += 1
+        self.emit_assignment(setter, expr, f"{self.cls}/{e.path.rsplit('/', 1)[-1]}.{b.name}")
 
     def behavior_animation(self, be: Emitted, b: dom.Binding) -> None:
         """`animation: Appearance.animation.x.numberAnimation.createObject(this)`."""
@@ -602,7 +728,7 @@ class ComponentGen:
             return
         signal, params = target
         scope = self.scope_for(e)
-        scope.locals.update({n: Value(n, t) for n, t in params})
+        scope.locals.update({n: Value(n, t, self.ts.type_of_cpp(self.ref, t)) for n, t in params})
         body = self.handler_body(context, b.value.script, scope, ", ".join(f"{t} const& {n}" for n, t in params))
         if body is not None:
             self.body += self.connect_lines(signal, params, body, "connectForever")
@@ -637,7 +763,7 @@ class ComponentGen:
                 continue
             signal, params = found
             scope = self.scope_for(e)
-            scope.locals.update({n: Value(n, t) for (n, t) in params})
+            scope.locals.update({n: Value(n, t, self.ts.type_of_cpp(self.ref, t)) for (n, t) in params})
             scope.locals["target"] = Value("target", f"{cls}*", target.obj)
             body = self.handler_body(f"{context}.{m.name}", m.body, scope,
                                      ", ".join(f"{t} const& {n}" for n, t in params) + f"; `target` is the {cls}*")
@@ -738,17 +864,75 @@ class ComponentGen:
             out.append("")
         for e in self.anon_emitted:
             view = self.ts.view(e.type)
-            base = self.class_of(view.base) or "Object"
+            base = self.behavior_bases.get(e.type) or self.class_of(view.base) or "Object"
             out.append(f"class {e.type.name} : public {base} {{")
             out.append("public:")
+            if e.type in self.behavior_bases:
+                out.append(f"  using {base}::Behavior;")
             for p in e.obj.properties:
                 prop = view.props[p.name]
                 self.class_of(prop.object_type)
                 self.uses_type(prop.cpp_type)
                 out.append(f"  Property<{prop.cpp_type or JSON + ' /* TODO type */'}> {p.name};")
+            if self.derives_json(e.type):
+                out += [f"  {line}" if line else "" for line in self.json_reflection(view, e.obj.properties)]
                 self.uses_type(prop.cpp_type or JSON)
             out.append("};")
             out.append("")
+        return out
+
+    def derives_json(self, t: AnyType | None) -> bool:
+        """Whether a type derives from Quickshell's JsonObject (JsonAdapter included)."""
+        while t is not None:
+            if isinstance(t, BuiltinRef):
+                return t.name in ("JsonObject", "JsonAdapter")
+            t = self.ts.view(t).base
+        return False
+
+    def json_reflection(self, view, declared: list) -> list[str]:
+        """JsonObject overrides listing the declared properties (see compat/file_view.h), with
+        Quickshell's JsonAdapter semantics: QJsonValue::fromVariant out, QVariant::convert in."""
+        self.header_includes.add("compat/json_value.h")
+        objects, values = [], []
+        for p in declared:
+            prop = view.props[p.name]
+            if prop.kind != "property" or prop.cpp_type is None:
+                continue
+            if prop.object_type is not None and self.derives_json(prop.object_type):
+                objects.append((p.name, f"this->{prop.access}"))
+            else:
+                values.append((p.name, f"this->{prop.access}", prop.cpp_type))
+        order = [(p.name, f"this->{view.props[p.name].access}") for p in declared if any(p.name == n for n, *_ in objects + values)]
+        is_object = {name for name, _ in objects}
+        cpp_of = {name: cpp for name, _, cpp in values}
+        out = ["void writeJson(js::Json& out) const override {", "  out = js::Json::object();"]
+        for name, member in order:
+            if name in is_object:
+                out.append(f'  if (const auto* o = {member}.peek()) {{ js::Json j; o->writeJson(j); out["{name}"] = std::move(j); }} '
+                           f'else {{ out["{name}"] = nullptr; }}')
+            else:
+                out.append(f'  out["{name}"] = qs::toQtJson({member}.peek());')
+        out += ["}", "void readJson(const js::Json& in) override {"]
+        for name, member in order:
+            if name in is_object:
+                out.append(f'  if (auto it = in.find("{name}"); it != in.end()) {{ if (it->is_object() && {member}.peek()) '
+                           f'{member}.peek()->readJson(*it); else if (it->is_null()) {member}.writeDirect(nullptr); }}')
+            else:
+                out.append(f'  if (auto it = in.find("{name}"); it != in.end()) {{ {cpp_of[name]} v{{}}; '
+                           f'if (qs::fromQtJson(*it, v)) {member}.writeDirect(std::move(v)); }}')
+        out += ["}", "void connectNotifiers(const std::function<void()>& notify) override {",
+                "  if (!m_notifiersConnected) {", "    m_notifiersConnected = true;"]
+        out += [f"    {member}.changed().connectForever(notify);" for _, member in order]
+        out.append("  }")
+        out += [f"  if (auto* o = {member}.peek()) o->connectNotifiers(notify);" for _, member in objects]
+        out += ["}", "qs::JsonObject* child([[maybe_unused]] std::string_view key) const override {"]
+        out += [f'  if (key == "{name}") return {member}.peek();' for name, member in objects]
+        out += ["  return nullptr;", "}", "js::Json value([[maybe_unused]] std::string_view key) const override {"]
+        out += [f'  if (key == "{name}") return qs::toQtJson({member}.peek());' for name, member, _ in values]
+        out += ["  return js::Json();", "}", "bool setValue([[maybe_unused]] std::string_view key, [[maybe_unused]] const js::Json& json) override {"]
+        for name, member, cpp in values:
+            out.append(f'  if (key == "{name}") {{ {cpp} v{{}}; if (!qs::fromQtJson(json, v)) return false; {member}.set(std::move(v)); return true; }}')
+        out += ["  return false;", "}"]
         return out
 
     def generate(self) -> None:
@@ -758,6 +942,7 @@ class ComponentGen:
         self.alias_wiring()
         self.bind_properties()
         self.component_members()
+        self.delegates()
         self.handlers(self.objects)
         for r in self.tr.used:
             if isinstance(r, ComponentRef):
@@ -811,7 +996,9 @@ class ComponentGen:
 def generate_file(ts: TypeSystem, tr: Translator, store: JsStore, path) -> tuple[str, str, list[ComponentGen]]:
     """Header and source for one QML file: its inline components (bases first), then its component."""
     qml = ts.registry.file(path)
-    refs = [ComponentRef(path, name) for name in qml.inline_components]
+    # Inline animation components are expanded where they are used (ComponentGen.expand_inline).
+    refs = [ComponentRef(path, name) for name, comp in qml.inline_components.items()
+            if not ComponentGen.is_expanded_inline(comp.root)]
     ordered: list[ComponentRef] = []
 
     def visit(ref: ComponentRef) -> None:

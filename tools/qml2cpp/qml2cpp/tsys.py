@@ -110,6 +110,12 @@ GROUPS: dict[str, dict[str, dict[str, tuple[str, str]]]] = {
     },
 }
 
+# Properties the runtime types more precisely than .qmltypes does, by declaring class.
+PROPERTY_TYPES: dict[str, dict[str, str]] = {
+    # Every Variants model in ii is a list of screens (objects).
+    "Variants": {"model": "std::vector<Object*>"},
+}
+
 # Attached properties (`Layout.fillWidth: true`): attached type -> member -> (access, C++ type).
 ATTACHED: dict[str, dict[str, tuple[str, str]]] = {
     "Layout": {
@@ -202,14 +208,21 @@ class TypeSystem:
         return None
 
     def builtin_method(self, ref: AnyType, name: str, nargs: int):
-        """The signature of a method of a built-in type (from .qmltypes, or a typed function of a
-        type implemented in QML) taking `nargs` arguments, if its types are all known."""
+        """The first overload of a built-in type's method taking `nargs` arguments whose types are
+        all known (see builtin_methods)."""
+        found = self.builtin_methods(ref, name, nargs)
+        return found[0] if found else None
+
+    def builtin_methods(self, ref: AnyType, name: str, nargs: int) -> list:
+        """Every overload of a method of a built-in type (from .qmltypes, or a typed function of a
+        type implemented in QML) taking `nargs` arguments whose types are all known."""
         from .signature import Signature
 
+        out = []
         while ref is not None and not isinstance(ref, BuiltinRef):
             ref = self.view(ref).base
         if ref is None:
-            return None
+            return out
         for info in self.registry.builtins.chain(self.registry.builtin_info(ref)):
             for params, returns in info.overloads.get(name, []):
                 if len(params) != nargs:
@@ -220,8 +233,8 @@ class TypeSystem:
                     continue
                 cpp_params = [(t, n or f"a{i}", None) for i, ((n, _), t) in enumerate(zip(params, types))]
                 text = f"{ret} {name}({', '.join(f'{t} {n}' for t, n, _ in cpp_params)})"
-                return Signature(ret, name, cpp_params, text)
-        return None
+                out.append(Signature(ret, name, cpp_params, text))
+        return out
 
     @staticmethod
     def is_procedure(method: dom.Method) -> bool:
@@ -318,6 +331,11 @@ class TypeSystem:
                 view.props[p.name] = Prop(p.name, cpp, cpp_name(p.name), object_type=obj, is_list=p.is_list,
                                           readonly=p.is_readonly, owner=ref,
                                           component_of=ref if cpp == "Component<Object>" else None)
+        # Where the runtime types a property more precisely than .qmltypes' QVariant.
+        for t in chain:
+            for name, cpp in PROPERTY_TYPES.get(t.cpp_name, {}).items():
+                if name in view.props:
+                    view.props[name].cpp_type = cpp
         groups: dict[str, dict[str, tuple[str, str]]] = {}
         for t in chain:
             groups.update(GROUPS.get(t.cpp_name, {}))
@@ -338,6 +356,19 @@ class TypeSystem:
             return f"::{qualified_class(ref)}" if isinstance(ref, ComponentRef) else name
 
         return re.sub(r"(?<![\w:])[A-Za-z_][\w:]*", word, cpp)
+
+    def type_of_cpp(self, owner: ComponentRef, cpp: str | None) -> AnyType | None:
+        """The QML type behind a C++ object pointer type (a signal parameter, a function result)."""
+        if not cpp or not cpp.endswith("*"):
+            return None
+        name = cpp[:-1].strip().removeprefix("::")
+        if name.startswith("ii::") and not name.startswith("ii::qs::"):
+            from .typemap import component_for_class
+
+            ref = component_for_class(name)
+            if ref is not None:
+                return ref
+        return self._type_of_cpp(owner, cpp)
 
     def _type_of_cpp(self, owner: ComponentRef, cpp: str) -> AnyType | None:
         """The QML type behind an object pointer type of var-types.json: qs::ShellScreen*, ii::Item*, Notif*."""

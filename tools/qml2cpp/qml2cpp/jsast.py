@@ -55,7 +55,37 @@ def parse(dump: str) -> Node | None:
         else:
             raise ValueError(f"jsast: unexpected {dump[pos:pos + 40]!r}")
     root = stack[0]
+    _fold_templates(root)
     return root.children[0] if root.children else None
+
+
+def _fold_templates(node: Node) -> None:
+    """qmldom prints a template literal's chain (`a${x}b${y}c`) as sibling TemplateLiteral
+    elements, each with its text and the expression after it. Fold each run into one
+    TemplateString node whose children alternate TemplateChunk(value) and expressions."""
+    for child in node.children:
+        _fold_templates(child)
+    folded: list[Node] = []
+    i = 0
+    while i < len(node.children):
+        child = node.children[i]
+        if child.kind != "TemplateLiteral" or not child.attrs.get("literalToken", "").startswith("`"):
+            folded.append(child)
+            i += 1
+            continue
+        template = Node("TemplateString")
+        while True:
+            part = node.children[i]
+            template.children.append(Node("TemplateChunk", {"value": part.attrs.get("value", "")}))
+            template.children += part.children
+            i += 1
+            token = part.attrs.get("literalToken", "")
+            if token.endswith("`") and len(token) > 1 or i >= len(node.children):
+                break
+            if node.children[i].kind != "TemplateLiteral" or not node.children[i].attrs.get("literalToken", "").startswith("}"):
+                break
+        folded.append(template)
+    node.children = folded
 
 
 def free_identifiers(node: Node | None) -> set[str]:

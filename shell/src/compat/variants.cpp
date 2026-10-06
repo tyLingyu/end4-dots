@@ -34,6 +34,9 @@ namespace ii::qs {
     for (Object* item : items) {
       auto it = std::ranges::find(kept, item, &std::pair<Object*, Object*>::first);
       Object* instance = it != kept.end() ? it->second : m_delegate(*this, item);
+      if (it == kept.end() && instance != nullptr) {
+        instance->complete();  // the delegate builds the tree; completing is the runtime's
+      }
       if (instance != nullptr) {
         next.emplace_back(item, instance);
         list.push_back(instance);

@@ -25,12 +25,13 @@
   "signature": "void migrateRenamedOptions(const std::string& fileText)"
  },
  "c7b1389dbf74": {
-  "cpp": null,
+  "cpp": "std::vector<std::string> keys = js::split(nestedKey, \".\");\nqs::JsonObject* obj = this->options;  // an alias of the adapter\n// Traverse the parent objects. In QML a missing or non-object step is replaced by a new JS\n// object ({}), which isn't part of the adapter and so changes nothing that is saved; here the\n// call stops instead (a deviation that changes nothing observable).\nfor (std::size_t i = 0; i + 1 < keys.size(); ++i) {\n  qs::JsonObject* next = obj != nullptr ? obj->child(keys[i]) : nullptr;\n  if (next == nullptr) {\n    js::warn(\"setNestedValue:\", nestedKey, \"does not name a nested option\");\n    return;\n  }\n  obj = next;\n}\n// Convert value to correct type using JSON.parse when safe\njs::Json convertedValue = value;\nif (value.is_string()) {\n  const std::string trimmed = js::trim(value.get<std::string>());\n  if (trimmed == \"true\" || trimmed == \"false\" || !std::isnan(js::toNumber(trimmed))) {\n    try {\n      convertedValue = js::parse(trimmed);\n    } catch (const std::exception&) {\n      convertedValue = value;\n    }\n  }\n}\nobj->setValue(keys.back(), convertedValue);",
   "kind": "function",
   "context": "root.setNestedValue",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function setNestedValue(nestedKey, value) { let keys = nestedKey.split(\".\");\n        let obj = root.options;\n        let parents = [obj];\n\n        // Traverse and collect parent objects\n        for (let i = 0; i < keys.length - 1; ++i) {\n            if (!obj[keys[i]] || typeof obj[keys[i]] !== \"object\") {\n                obj[keys[i]] = {};\n            }\n            obj = obj[keys[i]];\n            parents.push(obj);\n        }\n\n        // Convert value to correct type using JSON.parse when safe\n        let convertedValue = value;\n        if (typeof value === \"string\") {\n            let trimmed = value.trim();\n            if (trimmed === \"true\" || trimmed === \"false\" || !isNaN(Number(trimmed))) {\n                try {\n                    convertedValue = JSON.parse(trimmed);\n                } catch (e) {\n                    convertedValue = value;\n                }\n            }\n        }\n\n        obj[keys[keys.length - 1]] = convertedValue; }",
-  "form": "function"
+  "form": "function",
+  "signature": "void setNestedValue(const std::string& nestedKey, const js::Json& value)"
  },
  "e0a04d56aab9": {
   "cpp": "try {\n  this->migrateRenamedOptions(configFileView->text());\n} catch (const std::runtime_error& e) {\n  // QML 打印异常并中止处理函数，ready 不会被设置\n  js::warn(e.what());\n  return;\n}\nthis->ready.set(true);",

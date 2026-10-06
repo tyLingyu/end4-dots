@@ -271,6 +271,57 @@ TEST("behavior: destroying the item mid-animation is safe") {
   advance(50);
 }
 
+TEST("behavior: a group takes the change where a bare PropertyAction sits (StyledText)") {
+  // Behavior on text { SequentialAnimation { NumberAnimation { target: item; property: "opacity";
+  // to: 0 } PropertyAction {} NumberAnimation { ...; to: 1 } } }
+  useManualClock();
+  struct Label : Item {
+    Property<std::string> text;
+  };
+  Label label;
+  auto* behavior = label.create<Behavior<std::string>>(label.text);
+  auto* seq = behavior->setAnimation<SequentialAnimation>();
+  auto* fadeOut = seq->add<NumberAnimation>();
+  fadeOut->target = &label.opacity;
+  fadeOut->to.set(0.0);
+  fadeOut->duration.set(100);
+  seq->add<PropertyAction<std::string>>();
+  auto* fadeIn = seq->add<NumberAnimation>();
+  fadeIn->target = &label.opacity;
+  fadeIn->to.set(1.0);
+  fadeIn->duration.set(100);
+  label.text.set("old");
+  label.complete();
+
+  label.text.set("new");
+  CHECK(label.text.peek() == "old");  // not yet: the action sits after the fade-out
+  advance(50);
+  CHECK(near(label.opacity.peek(), 0.5));
+  CHECK(label.text.peek() == "old");
+  advance(60);  // past the fade-out: the PropertyAction has written the new text
+  CHECK(label.text.peek() == "new");
+  CHECK(label.opacity.peek() < 0.2);
+  advance(200);
+  CHECK(near(label.opacity.peek(), 1.0));
+  CHECK(label.text.peek() == "new");
+}
+
+TEST("behavior: a group without a target-less animation writes the value at once") {
+  useManualClock();
+  Item item;
+  auto* behavior = item.create<Behavior<double>>(item.x);
+  auto* seq = behavior->setAnimation<SequentialAnimation>();
+  auto* other = seq->add<NumberAnimation>();
+  other->target = &item.opacity;
+  other->to.set(0.0);
+  other->duration.set(100);
+  item.complete();
+  item.x.set(10.0);
+  CHECK(near(item.x.peek(), 10.0));  // nobody took the change: written directly
+  advance(50);
+  CHECK(near(item.opacity.peek(), 0.5));  // the group still runs
+}
+
 TEST("smoothed: velocity sets the duration, in-out quad easing") {
   useManualClock();
   Item item;

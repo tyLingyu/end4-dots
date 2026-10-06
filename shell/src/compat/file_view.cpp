@@ -1,5 +1,7 @@
 #include "compat/file_view.h"
 
+#include "compat/json_value.h"
+
 #include "core/deferred_call.h"
 #include "core/log.h"
 
@@ -41,31 +43,42 @@ namespace ii::qs {
 
   // ── JsonAdapter ────────────────────────────────────────────────────────────
 
-  JsonAdapter::JsonAdapter() {
-    propertyChanged.connectForever([this] {
-      if (!m_deserializing) {
-        adapterUpdated.emit();
-      }
-    });
+  void JsonAdapter::componentComplete() { connectNotifiers([this] { onPropertyChanged(); }); }
+
+  void JsonAdapter::onPropertyChanged() {
+    if (m_changesBlocked) {
+      return;
+    }
+    connectNotifiers([this] { onPropertyChanged(); });  // a replaced nested object
+    adapterUpdated.emit();
   }
 
   bool JsonAdapter::deserialize(const std::string& text) {
+    if (text.empty()) {
+      return true;
+    }
     js::Json json;
     try {
       json = js::parse(text);
-    } catch (const std::exception&) {
+    } catch (const std::exception& e) {
+      kLog.warn("Failed to deserialize json: {}", e.what());
       return false;
     }
-    m_deserializing = true;
+    if (!json.is_object()) {
+      kLog.warn("Failed to deserialize json: not an object");
+      return false;
+    }
+    m_changesBlocked = true;
     readJson(json);
-    m_deserializing = false;
+    m_changesBlocked = false;
+    connectNotifiers([this] { onPropertyChanged(); });
     return true;
   }
 
   std::string JsonAdapter::serialize() const {
     js::Json json;
     writeJson(json);
-    return js::stringify(json, 4) + "\n";
+    return qtJsonIndented(json);
   }
 
   // ── FileView ───────────────────────────────────────────────────────────────

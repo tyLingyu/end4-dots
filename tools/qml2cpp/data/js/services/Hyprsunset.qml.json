@@ -1,7 +1,7 @@
 {
  "265fbb99ae05": {
   "cpp": "temperatureActive.set(false);\n// console.log(\"[Hyprsunset] Disabling\");\nqs::Quickshell::instance().execDetached(\n    std::vector<std::string>{\"bash\", \"-c\", \"hyprctl hyprsunset temperature \" + js::toString(defaultColorTemperature.get())});",
-  "kind": "statements (TemplateLiteral)",
+  "kind": "statements (cannot assign std::vector<std::string> to std::string)",
   "context": "root.disableTemperature",
   "expected": "handler body, parameters ()",
   "code": "root.temperatureActive = false;\n        // console.log(\"[Hyprsunset] Disabling\");\n        Quickshell.execDetached([\"bash\", \"-c\", `hyprctl hyprsunset temperature ${root.defaultColorTemperature}`]);",
@@ -33,7 +33,7 @@
  },
  "49301c2f10c6": {
   "cpp": "const std::string output = js::trim(stateCollector->text.get());\nif (js::length(output) == 0 || js::startsWith(output, \"Couldn't\")) {\n  temperatureActive.set(false);\n} else {\n  // `output != root.defaultColorTemperature` compares loosely: the string goes through Number()\n  temperatureActive.set(js::toNumber(output) != defaultColorTemperature.get());  // 6000 is the default when off\n}\n// console.log(\"[Hyprsunset] Fetched state:\", output, \"->\", root.temperatureActive);",
-  "kind": "statements (call trim)",
+  "kind": "statements (compare std::string != int)",
   "context": "root/fetchProc/stdout.onStreamFinished",
   "expected": "handler body, parameters ()",
   "code": "{\n                const output = stateCollector.text.trim();\n                if (output.length == 0 || output.startsWith(\"Couldn't\"))\n                    root.temperatureActive = false;\n                else\n                    root.temperatureActive = (output != root.defaultColorTemperature); // 6000 is the default when off\n                // console.log(\"[Hyprsunset] Fetched state:\", output, \"->\", root.temperatureActive);\n            }",
@@ -57,7 +57,7 @@
  },
  "5349fd834dfe": {
   "cpp": "temperatureActive.set(true);\n\n// console.log(\"[Hyprsunset] Enabling\");\nthis->startHyprsunset();\nqs::Quickshell::instance().execDetached(\n    std::vector<std::string>{\"bash\", \"-c\", \"hyprctl hyprsunset temperature \" + js::toString(colorTemperature.get())});",
-  "kind": "statements (TemplateLiteral)",
+  "kind": "statements (cannot assign std::vector<std::string> to std::string)",
   "context": "root.enableTemperature",
   "expected": "handler body, parameters ()",
   "code": "root.temperatureActive = true;\n\n        // console.log(\"[Hyprsunset] Enabling\");\n        root.startHyprsunset();\n        Quickshell.execDetached([\"bash\", \"-c\", `hyprctl hyprsunset temperature ${root.colorTemperature}`]);",
@@ -83,7 +83,7 @@
  },
  "86324640c2a5": {
   "cpp": "qs::Quickshell::instance().execDetached(std::vector<std::string>{\"bash\", \"-c\", \"pidof hyprsunset || hyprsunset\"});",
-  "kind": "statements (TemplateLiteral)",
+  "kind": "statements (cannot assign std::vector<std::string> to std::string)",
   "context": "root.startHyprsunset",
   "expected": "handler body, parameters ()",
   "code": "Quickshell.execDetached([\"bash\", \"-c\", `pidof hyprsunset || hyprsunset`]);",
@@ -99,7 +99,7 @@
  },
  "8d60c8d96c26": {
   "cpp": "if (!temperatureActive.get()) {\n  return;\n}\nqs::Quickshell::instance().execDetached(std::vector<std::string>{\n    \"hyprctl\", \"hyprsunset\", \"temperature\",\n    js::toString(::ii::common::Config::instance().options->light.get()->night.get()->colorTemperature.get())});",
-  "kind": "statements (TemplateLiteral)",
+  "kind": "statements (cannot assign std::vector<std::string> to std::string)",
   "context": "root/Connections.0.Connections.onColorTemperatureChanged",
   "expected": "handler body, parameters (; `target` is the ::ii::common::Config::ConfigOptionsJsonAdapterLightNight*)",
   "code": "if (!root.temperatureActive) return;\n            Quickshell.execDetached([\"hyprctl\", \"hyprsunset\", \"temperature\", `${Config.options.light.night.colorTemperature}`]);",

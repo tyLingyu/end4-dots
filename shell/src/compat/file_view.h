@@ -10,8 +10,10 @@
 #include "runtime/object.h"
 #include "runtime/property.h"
 
+#include <functional>
 #include <memory>
 #include <string>
+#include <string_view>
 
 namespace ii::qs {
 
@@ -20,33 +22,59 @@ namespace ii::qs {
     enum Enum { Success = 0, Unknown = 1, FileNotFound = 2, PermissionDenied = 3, NotAFile = 4 };
   };
 
-  // A JSON object whose fields are the component's properties.
+  // A JSON object whose fields are the component's properties. qml2cpp generates the overrides
+  // for every class derived from JsonObject or JsonAdapter, listing its declared properties
+  // (Quickshell reflects over QML properties; generated classes can't).
   class JsonObject : public Object {
   public:
-    // Generated: every declared property, nested objects recursively.
+    // Every declared property, nested objects recursively (QJsonValue::fromVariant values).
     virtual void writeJson(js::Json& out) const { out = js::Json::object(); }
+    // The properties `in` has, converted as QVariant::convert does; a write keeps bindings.
     virtual void readJson(const js::Json& in) { (void)in; }
-    // Generated: emitted (also for nested objects) when a property changes.
-    Signal<> propertyChanged;
+    // Calls `notify` on every property change, nested objects too. Once per object.
+    virtual void connectNotifiers(const std::function<void()>& notify) { (void)notify; }
+    // Dynamic access, for code that indexes by name (Config.setNestedValue): a nested object,
+    // a value, and an assignment (which breaks the property's binding, as JS's does).
+    [[nodiscard]] virtual JsonObject* child(std::string_view name) const {
+      (void)name;
+      return nullptr;
+    }
+    [[nodiscard]] virtual js::Json value(std::string_view name) const {
+      (void)name;
+      return js::Json();
+    }
+    virtual bool setValue(std::string_view name, const js::Json& value) {
+      (void)name;
+      (void)value;
+      return false;
+    }
+
+  protected:
+    bool m_notifiersConnected = false;
   };
 
   class FileViewAdapter : public JsonObject {
   public:
     Signal<> adapterUpdated;
-    // The file's content became `text`; returns false when it can't be parsed.
+    // The file's content became `text`; false when it can't be parsed.
     virtual bool deserialize(const std::string& text) = 0;
     [[nodiscard]] virtual std::string serialize() const = 0;
   };
 
-  // The root of a JSON-backed file. Serialization matches Quickshell's (QJsonDocument::Indented).
+  // The root of a JSON-backed file (Quickshell's JsonAdapter): reads the document into the
+  // properties, reports any property change as adapterUpdated, writes QJsonDocument::Indented.
   class JsonAdapter : public FileViewAdapter {
   public:
-    JsonAdapter();
     bool deserialize(const std::string& text) override;
     [[nodiscard]] std::string serialize() const override;
 
+  protected:
+    void componentComplete() override;
+
   private:
-    bool m_deserializing = false;
+    void onPropertyChanged();
+
+    bool m_changesBlocked = false;
   };
 
   // A file's contents. Loads asynchronously unless blockLoading; reloads when watchChanges and

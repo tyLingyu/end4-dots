@@ -60,6 +60,8 @@ QT_CPP = {
     "QJSValue": JSON,
     "QStringList": "std::vector<std::string>",
     "QVariantMap": JSON,
+    # Quickshell's ProcessContext; ii always passes the command as a list.
+    "qs::io::process::ProcessContext": "std::vector<std::string>",
     "QVariantList": f"std::vector<{JSON}>",
     "QPointF": "Point",
     "QSizeF": "Size",
@@ -130,6 +132,8 @@ RUNTIME: dict[str, Runtime] = {
     "Quickshell.Hyprland/Hyprland": Runtime("qs::Hyprland", "compat/hyprland.h", False),
     "Quickshell.Hyprland/HyprlandMonitor": Runtime("qs::HyprlandMonitor", "compat/hyprland.h", False),
     "Quickshell.Hyprland/HyprlandWorkspace": Runtime("qs::HyprlandWorkspace", "compat/hyprland.h", False),
+    "Quickshell.Hyprland/HyprlandEvent": Runtime("qs::HyprlandEvent", "compat/hyprland.h", False),
+    "Quickshell.Hyprland/HyprlandToplevel": Runtime("qs::HyprlandToplevel", "compat/hyprland.h", False),
     "Quickshell.Services.Pipewire/Pipewire": Runtime("qs::Pipewire", "compat/pipewire.h", False),
     "Quickshell.Services.Pipewire/PwNode": Runtime("qs::PwNode", "compat/pipewire.h", False),
     "Quickshell.Services.Pipewire/PwNodeAudio": Runtime("qs::PwNodeAudio", "compat/pipewire.h", False),
@@ -156,7 +160,9 @@ RUNTIME: dict[str, Runtime] = {
 
 
 def runtime_for(ref: BuiltinRef) -> Runtime | None:
-    return RUNTIME.get(f"{ref.module}/{ref.name}") or RUNTIME.get(f"QtQuick/{ref.name}")
+    # Quickshell exports from internal submodules (Quickshell.Hyprland._Ipc) the public one re-exports.
+    module = ref.module.split("._")[0]
+    return RUNTIME.get(f"{module}/{ref.name}") or RUNTIME.get(f"QtQuick/{ref.name}")
 
 
 # ── Generated components ─────────────────────────────────────────────────────

@@ -59,4 +59,10 @@ namespace ii {
     bool m_completed = false;
   };
 
+  // A list of derived-object pointers as a list of base pointers (Quickshell.screens as a
+  // Variants model).
+  template <typename To, typename From> [[nodiscard]] std::vector<To*> upcastAll(const std::vector<From*>& list) {
+    return std::vector<To*>(list.begin(), list.end());
+  }
+
 } // namespace ii

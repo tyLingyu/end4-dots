@@ -113,6 +113,7 @@ ii_sources = files(
   'src/compat/file_view.cpp',
   'src/compat/hyprland.cpp',
   'src/compat/ipc.cpp',
+  'src/compat/json_value.cpp',
   'src/compat/notifications.cpp',
   'src/compat/panel_window.cpp',
   'src/compat/pipewire.cpp',

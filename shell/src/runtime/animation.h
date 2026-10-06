@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <typeindex>
 #include <limits>
 #include <optional>
 #include <utility>
@@ -45,6 +46,15 @@ namespace ii {
     std::vector<Animation*>* m_ticking = nullptr;
   };
 
+  // A Behavior's change, offered to the animations it runs (QQuickBehavior's state action): an
+  // animation that names no target of its own animates, or sets, the behavior's property.
+  struct BehaviorTransition {
+    PropertyBase* property;
+    std::type_index type;
+    const void* from;
+    const void* to;
+  };
+
   // QQuickAbstractAnimation. Top-level animations run on the driver; animations inside a group
   // are driven by the group.
   class Animation : public Object {
@@ -74,6 +84,13 @@ namespace ii {
 
     // Length of one loop in milliseconds.
     [[nodiscard]] virtual double loopDuration() const = 0;
+
+    // Takes a Behavior's change if this animation (or one inside it) has no target of its own;
+    // returns whether any did.
+    virtual bool takeTransition(const BehaviorTransition& transition) {
+      (void)transition;
+      return false;
+    }
 
   protected:
     friend class AnimationGroup;
@@ -143,6 +160,17 @@ namespace ii {
       this->start();
     }
 
+    bool takeTransition(const BehaviorTransition& transition) override {
+      if ((target != nullptr && !m_targetFromBehavior) || transition.type != std::type_index(typeid(T))) {
+        return false;
+      }
+      target = static_cast<Property<T>*>(transition.property);
+      m_targetFromBehavior = true;
+      m_actionFrom = *static_cast<const T*>(transition.from);
+      m_actionTo = *static_cast<const T*>(transition.to);
+      return true;
+    }
+
     [[nodiscard]] double loopDuration() const override { return std::max(duration.peek(), 0.0); }
 
   protected:
@@ -172,6 +200,7 @@ namespace ii {
     std::optional<T> m_actionTo;
     T m_start{};
     T m_end{};
+    bool m_targetFromBehavior = false;
   };
 
   using NumberAnimation = PropertyAnimation<double>;
@@ -217,18 +246,34 @@ namespace ii {
   };
 
   // Instantaneous steps inside groups.
+  // Instantaneous steps inside groups. A bare `PropertyAction {}` in a Behavior sets the
+  // behavior's property to its new value at that point.
   template <typename T> class PropertyAction : public Animation {
   public:
     Property<T>* target = nullptr;
     Property<T> value;
     [[nodiscard]] double loopDuration() const override { return 0.0; }
 
+    bool takeTransition(const BehaviorTransition& transition) override {
+      if ((target != nullptr && !m_targetFromBehavior) || transition.type != std::type_index(typeid(T))) {
+        return false;
+      }
+      target = static_cast<Property<T>*>(transition.property);
+      m_targetFromBehavior = true;
+      m_actionValue = *static_cast<const T*>(transition.to);
+      return true;
+    }
+
   protected:
     void update(double /*time*/) override {
       if (target != nullptr) {
-        target->writeDirect(value.peek());
+        target->writeDirect(m_targetFromBehavior ? m_actionValue : value.peek());
       }
     }
+
+  private:
+    T m_actionValue{};
+    bool m_targetFromBehavior = false;
   };
 
   class ScriptAction : public Animation {
@@ -250,6 +295,15 @@ namespace ii {
   };
 
   class AnimationGroup : public Animation {
+  public:
+    bool takeTransition(const BehaviorTransition& transition) override {
+      bool taken = false;
+      for (Animation* child : m_children) {
+        taken = child->takeTransition(transition) || taken;
+      }
+      return taken;
+    }
+
   public:
     template <typename A, typename... Args> A* add(Args&&... args) {
       A* child = this->create<A>(std::forward<Args>(args)...);
@@ -301,18 +355,24 @@ namespace ii {
 
     Property<bool> enabled{true};
 
+    // The animation that runs on each change: a single animation of the property, or any other
+    // animation (a group) that takes the change through takeTransition().
     template <typename A, typename... Args> A* setAnimation(Args&&... args) {
-      A* animation = this->create<A>(std::forward<Args>(args)...);
-      animation->setTarget(&m_target);
-      m_animation = animation;
-      return animation;
+      return adoptAnimation(this->create<A>(std::forward<Args>(args)...));
     }
 
     // Takes an animation already created as this behavior's child (e.g. from a Component).
     template <typename A> A* adoptAnimation(A* animation) {
-      if (animation != nullptr) {
+      if (animation == nullptr) {
+        return animation;
+      }
+      if constexpr (std::is_base_of_v<BehaviorAnimation<T>, A>) {
         animation->setTarget(&m_target);
         m_animation = animation;
+        m_group = nullptr;
+      } else {
+        m_group = animation;
+        m_animation = nullptr;
       }
       return animation;
     }
@@ -320,6 +380,9 @@ namespace ii {
     [[nodiscard]] BehaviorAnimation<T>* animation() const noexcept { return m_animation; }
 
     bool intercept(const T& value) override {
+      if (m_group != nullptr) {
+        return interceptGroup(value);
+      }
       if (m_animation == nullptr || !enabled.peek() || !isCompleted()) {
         if (m_animation != nullptr) {
           m_animation->stopNow();
@@ -344,8 +407,34 @@ namespace ii {
     }
 
   private:
+    // QQuickBehavior::write with an animation group: the change is offered as a state action;
+    // when no animation takes it, the value is written at once (and the group still runs).
+    bool interceptGroup(const T& value) {
+      if (!enabled.peek() || !isCompleted()) {
+        m_group->stopNow();
+        m_targetValue = value;
+        return false;
+      }
+      const bool active = m_group->running.peek();
+      if (active && m_targetValue == value) {
+        return true;
+      }
+      m_targetValue = value;
+      if (active) {
+        m_group->stopNow();
+      }
+      const T current = m_target.peek();
+      if (!active && current == value) {
+        return false;
+      }
+      const bool taken = m_group->takeTransition({&m_target, std::type_index(typeid(T)), &current, &value});
+      m_group->start();
+      return taken;
+    }
+
     Property<T>& m_target;
     BehaviorAnimation<T>* m_animation = nullptr;
+    Animation* m_group = nullptr;
     std::optional<T> m_targetValue;
   };
 

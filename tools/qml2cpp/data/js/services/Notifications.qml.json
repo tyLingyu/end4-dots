@@ -161,7 +161,7 @@
  },
  "7d2bca30db5a": {
   "cpp": "// ii: list.slice(0) 与原列表内容相同。给 list<Notif> 属性赋相同的内容时 QML 不发 listChanged（Qt 6.11 实测），\n// 这一句实际什么也不做；Property::set 遇到相等的值同样不通知\nthis->list.set(js::slice(this->list.get()));",
-  "kind": "statements (call slice)",
+  "kind": "statements (array method slice)",
   "context": "root.triggerListChange",
   "expected": "handler body, parameters ()",
   "code": "root.list = root.list.slice(0)",

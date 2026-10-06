@@ -7,14 +7,6 @@
   "code": "data => {\n                    const [, , , current, max] = data.split(\" \");\n                    monitor.rawMaxBrightness = parseInt(max);\n                    monitor.brightness = parseInt(current) / monitor.rawMaxBrightness;\n                    monitor.ready = true;\n                }",
   "form": "body"
  },
- "0e6ceba525dc": {
-  "cpp": null,
-  "kind": "delegate (default component property)",
-  "context": "root/Variants.0/screenScope",
-  "expected": "",
-  "code": "Variants { Scope { ... } }",
-  "form": "statements"
- },
  "2ccda1eceedf": {
   "cpp": "qs::HyprlandMonitor* focused = qs::Hyprland::instance().focusedMonitor.get();\nif (focused == nullptr) {\n  return;  // ii: focusedMonitor 为 null 时 JS 读 .name 抛 TypeError，函数到此中止\n}\nconst std::string focusedName = focused->name.get();\nconst std::optional<Brightness_BrightnessMonitor*> monitor = js::find(\n    monitors.get(), [&](Brightness_BrightnessMonitor* m) { return focusedName == m->screen.get()->name.get(); });\nif (monitor && (*monitor)->brightness.get() > 0) {\n  (*monitor)->setBrightness((*monitor)->brightness.get() - 0.05);\n} else {\n  // if brightness is 0, then decrease gamma\n  auto& hyprsunset = ::ii::services::Hyprsunset::instance();\n  hyprsunset.setGamma(hyprsunset.gamma.get() - 5);\n}",
   "kind": "function",
@@ -49,14 +41,6 @@
   "expected": "handler body, parameters (std::string const& data)",
   "code": "data => {\n                if (data.startsWith(\"Display \")) {\n                    const lines = data.split(\"\\n\").map(l => l.trim());\n                    root.ddcMonitors.push({\n                        name: lines.find(l => l.startsWith(\"DRM connector:\")).split(\"-\").slice(1).join('-'),\n                        busNum: lines.find(l => l.startsWith(\"I2C bus:\")).split(\"/dev/i2c-\")[1]\n                    });\n                }\n            }",
   "form": "body"
- },
- "51d8f084b1b8": {
-  "cpp": null,
-  "kind": "binding (cannot assign std::vector<qs::ShellScreen*> to js::Json)",
-  "context": "root/Variants.0.model",
-  "expected": "js::Json",
-  "code": "Quickshell.screens",
-  "form": "expression"
  },
  "7e5cd8ac16e4": {
   "cpp": "// 每次求值都新建一组 monitor（旧的留在 root 下），与 QML 相同\nreturn js::map(qs::Quickshell::instance().screens.get(), [this](qs::ShellScreen* screen) {\n  return monitorComp.createObject(*this, [&](Brightness_BrightnessMonitor& o) { o.screen.set(screen); });\n});",

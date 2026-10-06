@@ -88,6 +88,8 @@ class Translator:
             return f"jsString({value.cpp})"
         if target == "std::vector<js::Json>" and value.type and value.cpp.startswith(f"{value.type}{{"):
             return target + value.cpp[len(value.type):]  # an array literal for a list<var>
+        if target == "std::vector<Object*>" and value.type and re.fullmatch(r"std::vector<.+\*>", value.type):
+            return f"upcastAll<Object>({value.cpp})"
         if target.endswith("*") and value.type == "std::nullptr_t":
             return "nullptr"
         if target.endswith("*") and value.type and value.type.endswith("*"):
@@ -131,6 +133,27 @@ class Translator:
         if all(e.type == "std::string" for e in elements):
             return Value(f"std::vector<std::string>{{{', '.join(e.cpp for e in elements)}}}", "std::vector<std::string>")
         raise Untranslatable("array of mixed types")
+
+    def _TemplateString(self, node: Node, scope: Scope) -> Value:
+        """`a${x}b`: the pieces joined, each substitution converted as String() does."""
+        pieces: list[str] = []
+        for child in node.children:
+            if child.kind == "TemplateChunk":
+                if child.attrs["value"]:
+                    pieces.append(cpp_string(child.attrs["value"]))
+                continue
+            value = self.expression(child, scope)
+            if value.type == "std::string":
+                pieces.append(value.cpp)
+            elif value.type in NUMERIC:
+                pieces.append(f"js::toString({value.cpp})")
+            elif value.type == "bool":
+                pieces.append(f"std::string({value.cpp} ? \"true\" : \"false\")")
+            else:
+                raise Untranslatable(f"template substitution of {value.type}")
+        if not pieces:
+            return Value('std::string("")', "std::string")
+        return Value(f"({' + '.join(pieces)})" if len(pieces) > 1 else pieces[0], "std::string")
 
     def _NestedExpression(self, node: Node, scope: Scope) -> Value:
         inner = self.expression(node.children[0], scope)
@@ -179,6 +202,10 @@ class Translator:
         base = self.expression(base_node, scope)
         if node.attrs.get("dotToken") == "?." and not base.is_ref:
             raise Untranslatable("optional chaining")  # (a singleton is never null: `?.` is `.`)
+        if name == "length" and base.type == "std::string":
+            return Value(f"js::length({base.cpp})", "int")
+        if name == "length" and (base.type or "").startswith("std::vector<"):
+            return Value(f"static_cast<int>(({base.cpp}).size())", "int")
         if base.group is not None:
             member = self.ts.view(base.obj).groups.get(base.group, {}).get(name)
             if member is None:
@@ -332,6 +359,77 @@ class Translator:
                 flatten(child)
         return out
 
+    # String.prototype methods ii::js implements: name -> (result type, parameter types; "?" optional).
+    STRING_METHODS = {
+        "trim": ("std::string", []),
+        "toLowerCase": ("std::string", []),
+        "toUpperCase": ("std::string", []),
+        "startsWith": ("bool", ["std::string", "int?"]),
+        "endsWith": ("bool", ["std::string", "int?"]),
+        "includes": ("bool", ["std::string", "int?"]),
+        "indexOf": ("int", ["std::string", "int?"]),
+        "lastIndexOf": ("int", ["std::string", "int?"]),
+        "split": ("std::vector<std::string>", ["std::string"]),
+        "slice": ("std::string", ["int", "int?"]),
+        "substring": ("std::string", ["int", "int?"]),
+        "substr": ("std::string", ["int", "int?"]),
+        "charAt": ("std::string", ["int"]),
+        "padStart": ("std::string", ["int", "std::string?"]),
+        "padEnd": ("std::string", ["int", "std::string?"]),
+        "repeat": ("std::string", ["int"]),
+        "replace": ("std::string", ["std::string", "std::string"]),
+    }
+
+    def builtin_call(self, base: Value, name: str, args: list[Value]) -> Value:
+        """`s.trim()`, `list.includes(x)`: JS methods of strings and arrays through ii::js."""
+        if base.type == "std::string":
+            if name not in self.STRING_METHODS:
+                raise Untranslatable(f"string method {name}")
+            returns, params = self.STRING_METHODS[name]
+            required = sum(1 for p in params if not p.endswith("?"))
+            if not required <= len(args) <= len(params):
+                raise Untranslatable(f"{name} with {len(args)} arguments")
+            coerced = [self.coerce(a, params[i].rstrip("?")) for i, a in enumerate(args)]
+            return Value(f"js::{name}({', '.join([base.cpp, *coerced])})", returns)
+        element = base.type[len("std::vector<"):-1]
+        if name in ("includes", "indexOf") and len(args) == 1:
+            item = self.coerce(args[0], element)
+            return Value(f"js::{name}({base.cpp}, {item})", "bool" if name == "includes" else "int")
+        if name == "join" and element in ("std::string", "double", "int") and len(args) <= 1:
+            sep = [self.coerce(args[0], "std::string")] if args else []
+            return Value(f"js::join({', '.join([base.cpp, *sep])})", "std::string")
+        raise Untranslatable(f"array method {name}")
+
+    GLOBALS = {"parseFloat", "parseInt", "Number", "String", "isNaN", "Boolean"}
+
+    def global_call(self, name: str, arg: Value) -> Value:
+        if name in ("parseFloat", "parseInt"):
+            if arg.type != "std::string":
+                raise Untranslatable(f"{name} of {arg.type}")
+            return Value(f"js::{name}({arg.cpp})", "double")
+        if name == "Number":
+            if arg.type in NUMERIC:
+                return Value(f"static_cast<double>({arg.cpp})", "double")
+            if arg.type in ("std::string", "bool"):
+                return Value(f"js::toNumber({arg.cpp})", "double")
+        if name == "String":
+            if arg.type == "std::string":
+                return arg
+            if arg.type in NUMERIC:
+                return Value(f"js::toString({arg.cpp})", "std::string")
+            if arg.type == "bool":
+                return Value(f'std::string({arg.cpp} ? "true" : "false")', "std::string")
+        if name == "isNaN":
+            if arg.type == "double":
+                return Value(f"std::isnan({arg.cpp})", "bool")
+            if arg.type == "int":
+                return Value("false", "bool")
+            if arg.type == "std::string":
+                return Value(f"std::isnan(js::toNumber({arg.cpp}))", "bool")
+        if name == "Boolean":
+            return Value(self.truthy(arg), "bool")
+        raise Untranslatable(f"{name} of {arg.type}")
+
     # Methods of built-in types the runtime provides with the same name and no arguments.
     BUILTIN_METHODS = {"start", "stop", "restart", "complete"}
 
@@ -374,10 +472,16 @@ class Translator:
             fn = self.MATH[callee.attrs["name"]]
             cast = [a.cpp if a.type == "double" else f"static_cast<double>({a.cpp})" for a in args]
             return Value(f"{fn}({', '.join(cast)})", "double")
+        # JS's global conversions, with ii::js's V4 semantics.
+        if callee.kind == "IdentifierExpression" and callee.attrs["name"] in self.GLOBALS and len(args) == 1 \
+                and callee.attrs["name"] not in scope.locals and callee.attrs["name"] not in scope.ids:
+            return self.global_call(callee.attrs["name"], args[0])
         # A component's own JS function, once translated (its signature is in data/js).
         if callee.kind == "FieldMemberExpression":
             name = callee.attrs["name"]
             base = self.expression(callee.children[0], scope)
+            if base.type == "std::string" or (base.type or "").startswith("std::vector<"):
+                return self.builtin_call(base, name, args)
             target = base.member(cpp_name(name))
         elif callee.kind == "IdentifierExpression":
             name = callee.attrs["name"]
@@ -397,7 +501,15 @@ class Translator:
             return Value(f"{emitter}.emit({', '.join(coerced)})", "void")
         signature = self.ts.function(base.obj, name) if base.obj is not None else None
         if signature is None and base.obj is not None:
-            signature = self.ts.builtin_method(base.obj, name, len(args))
+            # Overloads: the first whose parameters take the arguments (execDetached(string) or (list)).
+            for candidate in self.ts.builtin_methods(base.obj, name, len(args)):
+                try:
+                    for i, a in enumerate(args):
+                        self.coerce(a, candidate.params[i][0].removeprefix("const ").removesuffix("&").strip())
+                except Untranslatable:
+                    continue
+                signature = candidate
+                break
         if signature is None:
             raise Untranslatable(f"call {name}")
         if len(args) > len(signature.params) and all(self._pure(a) for a in arg_nodes[len(signature.params):]):
@@ -405,7 +517,7 @@ class Translator:
         if not signature.required <= len(args) <= len(signature.params):
             raise Untranslatable(f"call {name} with {len(args)} arguments")
         coerced = [self.coerce(a, signature.params[i][0].removeprefix("const ").removesuffix("&").strip()) for i, a in enumerate(args)]
-        return Value(f"{target}({', '.join(coerced)})", signature.returns)
+        return Value(f"{target}({', '.join(coerced)})", signature.returns, self.ts.type_of_cpp(scope.file, signature.returns))
 
     # ── Statements ───────────────────────────────────────────────────────────
 
