@@ -22,7 +22,7 @@ namespace ii {
     source.changed().connectForever([this] { reload(); });
   }
 
-  Loader::~Loader() { unload(); }
+  Loader::~Loader() { destroyOwned(); }  // the item is owned: destroyed with the loader, no deleteLater
 
   void Loader::componentComplete() { reload(); }
 

@@ -1,6 +1,7 @@
 #include "runtime/object.h"
 
 #include "core/deferred_call.h"
+#include "core/log.h"
 
 #include <algorithm>
 
@@ -23,6 +24,13 @@ namespace ii {
     released->m_owner = nullptr;
     return released;
   }
+
+  namespace detail {
+    void reportHandlerError(const std::exception& error) noexcept {
+      static constexpr Logger kLog("qml");
+      kLog.warn("signal handler: {}", error.what());
+    }
+  } // namespace detail
 
   void Object::deleteLater() {
     if (m_owner == nullptr) {

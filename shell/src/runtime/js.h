@@ -23,6 +23,7 @@
 #include <limits>
 #include <optional>
 #include <regex>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -38,6 +39,19 @@ namespace ii::js {
   using Json = nlohmann::ordered_json;
 
   inline constexpr double NaN = std::numeric_limits<double>::quiet_NaN();
+
+  // A JS TypeError, e.g. reading a member of null: a binding keeps its value, a handler stops.
+  struct TypeError : std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+
+  // `x.member` where x may be null: generated code dereferences through this.
+  template <typename T> T& deref(T* pointer) {
+    if (pointer == nullptr) {
+      throw TypeError("TypeError: Cannot read property of null");
+    }
+    return *pointer;
+  }
 
   // ── Numbers ────────────────────────────────────────────────────────────────
 

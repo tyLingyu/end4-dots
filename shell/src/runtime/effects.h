@@ -13,6 +13,9 @@ namespace ii {
   // clamping are QQuickRectangularShadowPrivate's (Qt 6.11), the shader is Qt's.
   class RectangularShadow : public Item {
   public:
+    // Owned objects (children) go first, while this object's own members are intact: their
+    // teardown notifies, and this object's bindings may still run.
+    ~RectangularShadow() override { destroyOwned(); }
     RectangularShadow();
 
     Property<double> blur{10.0};

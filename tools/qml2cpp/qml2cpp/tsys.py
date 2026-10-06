@@ -270,12 +270,18 @@ class TypeSystem:
         if is_pointer and cpp == "QQmlComponent":
             return "Component<Object>", None  # sourceComponent, delegate: an implicit component
         if is_pointer:
-            for info in self.registry.builtins.by_cpp.values():
-                if info.cpp_name == cpp and info.exports:
-                    module, name = next(iter(info.exports.items()))
-                    ref = BuiltinRef(module, name, cpp)
-                    runtime = runtime_for(ref)
-                    return (f"{runtime.cpp}*" if runtime else None), ref
+            info = self.registry.builtins.by_cpp.get(cpp)
+            if info is None:
+                # .qmltypes writes some types unqualified inside their namespace: FileViewAdapter
+                # for qs::io::FileViewAdapter.
+                matches = [i for i in self.registry.builtins.by_cpp.values()
+                           if i.exports and i.cpp_name.rsplit("::", 1)[-1] == cpp]
+                info = matches[0] if len(matches) == 1 else None
+            if info is not None and info.exports:
+                module, name = next(iter(info.exports.items()))
+                ref = BuiltinRef(module, name, info.cpp_name)
+                runtime = runtime_for(ref)
+                return (f"{runtime.cpp}*" if runtime else None), ref
             return None, None
         return QT_CPP.get(cpp), None
 

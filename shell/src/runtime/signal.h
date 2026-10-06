@@ -1,5 +1,6 @@
 #pragma once
 
+#include <exception>
 #include <functional>
 #include <memory>
 #include <utility>
@@ -49,6 +50,11 @@ namespace ii {
 
   // QML-style signal. Handlers run synchronously in connection order. Handlers may connect,
   // disconnect, or destroy the object that owns the signal while it is being emitted.
+  namespace detail {
+    // Logs an exception thrown by a signal handler (defined in object.cpp).
+    void reportHandlerError(const std::exception& error) noexcept;
+  } // namespace detail
+
   template <typename... Args> class Signal {
   public:
     using Handler = std::function<void(Args...)>;
@@ -76,6 +82,8 @@ namespace ii {
     // (QML `onFooChanged:` inside the declaring component).
     void connectForever(Handler handler) { m_slots.push_back(std::make_shared<Slot>(std::move(handler))); }
 
+    // A handler that throws (a JS TypeError, say) is reported and the others still run, as QML's
+    // engine reports an exception in a signal handler and carries on.
     void emit(Args... args) {
       if (m_slots.empty()) {
         return;
@@ -86,7 +94,11 @@ namespace ii {
       const auto snapshot = m_slots;
       for (const auto& slot : snapshot) {
         if (slot->connected) {
-          slot->handler(args...);
+          try {
+            slot->handler(args...);
+          } catch (const std::exception& error) {
+            detail::reportHandlerError(error);
+          }
           if (destroyed) {
             if (outerFlag != nullptr) {
               *outerFlag = true;

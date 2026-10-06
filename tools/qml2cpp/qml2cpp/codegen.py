@@ -240,6 +240,11 @@ class ComponentGen:
                 if child.id:
                     self.ids[child.id] = var
             self.emitted(Emitted(var, child, child_type, child_path))
+            if default_prop is not None and not default_prop.is_list and default_prop.kind == "property" \
+                    and default_prop.object_type is not None and default_prop.component_of is None:
+                # A single-object default property: FileView { JsonAdapter { ... } } sets `adapter`.
+                setter = default_prop.access if parent.cpp == "this" else parent.member(default_prop.access)
+                self.body.append(f"{setter}.set({var.cpp});")
             if isinstance(child_type, BuiltinRef) and child_type.name == "Loader":
                 # `source:` URLs are relative to the QML file that declares the loader.
                 self.body.append(f'{var.cpp}->setSourceBase("{self.ref.path.relative_to(SHELL_ROOT)}");')
@@ -423,6 +428,9 @@ class ComponentGen:
         self.counter += 1
         var = Value(f"c{self.counter}", f"{cls}*", inner_type)
         self.body.append(f"auto* {var.cpp} = owner.create<{cls}>();")
+        if self.is_visual(inner_type):
+            # createObject(parent): an Item parent is the visual parent, before any binding runs.
+            self.body.append(f"if (auto* parentItem = dynamic_cast<Item*>(&owner)) {var.cpp}->parent.set(parentItem);")
         self.body += [line.format(var=var.cpp) for line in prelude or []]
         if inner.id:
             self.ids[inner.id] = var
@@ -869,6 +877,7 @@ class ComponentGen:
             out.append("public:")
             if e.type in self.behavior_bases:
                 out.append(f"  using {base}::Behavior;")
+            out.append(f"  ~{e.type.name}() override {{ destroyOwned(); }}")
             for p in e.obj.properties:
                 prop = view.props[p.name]
                 self.class_of(prop.object_type)
@@ -963,6 +972,9 @@ class ComponentGen:
             *([f"  static {self.cls}& instance();", ""] if singleton else []),
             *(f"  {line}" for line in nested_decls),
             f"  {self.cls}();",
+            # Owned objects first, while this class's members (which their teardown may notify,
+            # and which bindings and handlers read) are still there.
+            f"  ~{self.cls}() override {{ destroyOwned(); }}",
             "",
             *(f"  {m}" for m in declared),
             "",

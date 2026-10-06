@@ -9,6 +9,9 @@ namespace ii {
   // at the paddings. Both are reparented to the control, the background behind.
   class Control : public Item {
   public:
+    // Owned objects (children) go first, while this object's own members are intact: their
+    // teardown notifies, and this object's bindings may still run.
+    ~Control() override { destroyOwned(); }
     Control();
 
     Property<Item*> background;
@@ -39,6 +42,9 @@ namespace ii {
   // QtQuick.Templates ProgressBar (QQuickProgressBar): value kept within [from, to] once complete.
   class ProgressBar : public Control {
   public:
+    // Owned objects (children) go first, while this object's own members are intact: their
+    // teardown notifies, and this object's bindings may still run.
+    ~ProgressBar() override { destroyOwned(); }
     ProgressBar();
 
     Property<double> from{0.0};

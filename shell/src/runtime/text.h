@@ -21,6 +21,9 @@ namespace ii {
   // implicitHeight is the laid-out height at the current width, rounded up to whole pixels.
   class Text : public Item {
   public:
+    // Owned objects (children) go first, while this object's own members are intact: their
+    // teardown notifies, and this object's bindings may still run.
+    ~Text() override { destroyOwned(); }
     Text();
 
     Property<std::string> text;

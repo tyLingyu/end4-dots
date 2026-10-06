@@ -7,6 +7,7 @@
 
 #include <cerrno>
 #include <cstdio>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <sstream>
@@ -155,6 +156,13 @@ namespace ii::qs {
       return;
     }
     const std::string file = stripFileUrl(path.peek());
+    std::error_code ec;
+    std::filesystem::create_directories(std::filesystem::path(file).parent_path(), ec);  // as Quickshell's mkpath
+    if (ec) {
+      kLog.warn("Write of {} failed: Could not create parent directories of file.", file);
+      saveFailed.emit(FileViewError::PermissionDenied);
+      return;
+    }
     const std::string target = atomicWrites.peek() ? file + ".tmp" : file;
     {
       std::ofstream out(target, std::ios::binary | std::ios::trunc);

@@ -48,6 +48,9 @@ namespace ii {
   // hoverEnabled (or while a button is held), as in Qt.
   class MouseArea : public Item {
   public:
+    // Owned objects (children) go first, while this object's own members are intact: their
+    // teardown notifies, and this object's bindings may still run.
+    ~MouseArea() override { destroyOwned(); }
     MouseArea();
 
     Property<bool> hoverEnabled;

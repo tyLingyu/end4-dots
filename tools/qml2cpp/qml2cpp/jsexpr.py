@@ -30,9 +30,14 @@ class Value:
     obj: AnyType | None = None  # QML type, when the value is an object
     is_ref: bool = False  # cpp is an object reference (singleton) rather than a pointer
     group: str | None = None  # `x.font`: cpp/obj are x, members are looked up in the group
+    nullable: bool = False  # an object pointer read from a property: may be null
 
     def member(self, access: str) -> str:
-        return f"{self.cpp}{'.' if self.is_ref else '->'}{access}"
+        if self.is_ref:
+            return f"{self.cpp}.{access}"
+        if self.nullable:
+            return f"js::deref({self.cpp}).{access}"  # a TypeError on null, as in JS
+        return f"{self.cpp}->{access}"
 
 
 @dataclass
@@ -172,7 +177,8 @@ class Translator:
             return Value(f"{base.member(prop.access)}->get()", prop.cpp_type, prop.object_type)
         if prop.kind != "property" or prop.cpp_type is None:
             raise Untranslatable(f"property {prop.name} ({prop.kind}) not readable yet")
-        return Value(f"{base.member(prop.access)}.get()", prop.cpp_type, prop.object_type)
+        return Value(f"{base.member(prop.access)}.get()", prop.cpp_type, prop.object_type,
+                     nullable=prop.cpp_type.endswith("*"))
 
     def _IdentifierExpression(self, node: Node, scope: Scope) -> Value:
         name = node.attrs["name"]

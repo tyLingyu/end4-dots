@@ -146,6 +146,7 @@ RUNTIME: dict[str, Runtime] = {
     "Quickshell.Io/SplitParser": Runtime("qs::SplitParser", "compat/process.h", False),
     "Quickshell.Io/FileView": Runtime("qs::FileView", "compat/file_view.h", False),
     "Quickshell.Io/JsonAdapter": Runtime("qs::JsonAdapter", "compat/file_view.h", False),
+    "Quickshell.Io/FileViewAdapter": Runtime("qs::FileViewAdapter", "compat/file_view.h", False),
     "Quickshell.Io/JsonObject": Runtime("qs::JsonObject", "compat/file_view.h", False),
     "Quickshell.Io/IpcHandler": Runtime("qs::IpcHandler", "compat/ipc.h", False),
     "Quickshell.Hyprland/GlobalShortcut": Runtime("qs::GlobalShortcut", "compat/hyprland.h", False),

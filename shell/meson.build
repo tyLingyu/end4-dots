@@ -293,3 +293,11 @@ foreach _t : [
     cpp_args: ii_cpp_args + ['-DII_DIFF_EXPECTED_DIR="' + meson.current_source_dir() / 'tests/diff/expected' + '"'],
   ))
 endforeach
+
+# The generated OSD, headless (only when qml2cpp's output is there).
+if is_variable('ii_generated_dep')
+  test('osd', executable('osd_test', ['tests/generated/osd_test.cpp'] + ii_exe_sources,
+    dependencies: ii_generated_dep,
+    cpp_args: ii_cpp_args + ['-Wno-shadow', '-DII_DIFF_EXPECTED_DIR="' + meson.current_source_dir() / 'tests/diff/expected' + '"'],
+  ))
+endif

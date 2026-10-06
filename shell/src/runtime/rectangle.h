@@ -10,6 +10,9 @@ namespace ii {
   // QQuickRectangle: filled rounded rectangle with an inner border.
   class Rectangle : public Item {
   public:
+    // Owned objects (children) go first, while this object's own members are intact: their
+    // teardown notifies, and this object's bindings may still run.
+    ~Rectangle() override { destroyOwned(); }
     Rectangle();
 
     Property<Color> color{Color{1.0F, 1.0F, 1.0F, 1.0F}}; // QML default: white
