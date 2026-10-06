@@ -1,0 +1,137 @@
+{
+ "06ea9324e678": {
+  "cpp": "// Replace \"-\" and \"_\" with space, then capitalize each word\nstatic const js::Regex separators(\"[-_]\", \"g\");\nstatic const js::Regex words(\"\\\\w\\\\S*\", \"g\");\nreturn js::replace(js::replace(str, separators, \" \"), words, [](const std::vector<std::string>& match) -> std::string {\n  const std::string& txt = match[0];\n  return js::toUpperCase(js::charAt(txt, 0)) + js::toLowerCase(js::substr(txt, 1));\n});",
+  "kind": "function",
+  "context": "root.toTitleCase",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function toTitleCase(str) { return str.replace(/[-_]/g, \" \").replace(\n            /\\w\\S*/g,\n            function(txt) {\n            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();\n            }\n        ); }",
+  "form": "function",
+  "signature": "std::string toTitleCase(const std::string& str)"
+ },
+ "1afb863a4824": {
+  "cpp": "for (const std::string& substring : substrings) {\n  if (js::includes(str, substring)) {\n    return true;\n  }\n}\nreturn false;",
+  "kind": "function",
+  "context": "root.stringListContainsSubstring",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function stringListContainsSubstring(str, substrings) { for (let i = 0; i < substrings.length; ++i) {\n            if (str.includes(substrings[i])) {\n                return true;\n            }\n        }\n        return false; }",
+  "form": "function",
+  "signature": "bool stringListContainsSubstring(const std::string& str, const std::vector<std::string>& substrings)"
+ },
+ "3638ac8a7439": {
+  "cpp": "// format(str, ...args)：剩余参数是一个数组。替换值在 JS 里经 ToString，数字由调用处用 js::toString 转好\n// /{(\\d+)}/g：std::regex 不接受不成对的 {，写成 \\{ \\}，含义相同\nstatic const js::Regex placeholder(\"\\\\{(\\\\d+)\\\\}\", \"g\");\nreturn js::replace(str, placeholder, [&args](const std::vector<std::string>& match) -> std::string {\n  // args[index]：index 是数字串，只有规范的数组下标（\"0\"，或不以 0 开头）且小于 args.length 时才有值，\n  // 否则是 undefined，保留原文 match\n  const double index = js::toNumber(match[1]);\n  if (js::toString(index) != match[1] || index >= static_cast<double>(args.size())) {\n    return match[0];\n  }\n  return args[static_cast<std::size_t>(index)];\n});",
+  "kind": "function",
+  "context": "root.format",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function format(str, args) { return str.replace(/{(\\d+)}/g, (match, index) => typeof args[index] !== 'undefined' ? args[index] : match); }",
+  "form": "function",
+  "signature": "std::string format(const std::string& str, const std::vector<std::string>& args = {})"
+ },
+ "3e6a8a4ae9d1": {
+  "cpp": "static const js::Regex domain(\"^(?:https?:\\\\/\\\\/)?(?:www\\\\.)?([^\\\\/]+)\");\nconst auto match = js::match(url, domain);\n// match ? match[1] : null\nif (!match) {\n  return std::nullopt;\n}\nreturn (*match)[1];",
+  "kind": "function",
+  "context": "root.getDomain",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function getDomain(url) { const match = url.match(/^(?:https?:\\/\\/)?(?:www\\.)?([^\\/]+)/);\n        return match ? match[1] : null; }",
+  "form": "function",
+  "signature": "std::optional<std::string> getDomain(const std::string& url)"
+ },
+ "51380014e9bb": {
+  "cpp": "// isNaN(seconds)：调用处的 player?.position 为 undefined 时传 js::NaN\nif (std::isnan(seconds) || seconds < 0) {\n  return \"0:00\";\n}\nseconds = std::floor(seconds);\nconst double h = std::floor(seconds / 3600);\nconst double m = std::floor(std::fmod(seconds, 3600) / 60);\nconst double s = std::fmod(seconds, 60);\nif (h > 0) {\n  return js::toString(h) + \":\" + js::padStart(js::toString(m), 2, \"0\") + \":\" + js::padStart(js::toString(s), 2, \"0\");\n} else {\n  return js::toString(m) + \":\" + js::padStart(js::toString(s), 2, \"0\");\n}",
+  "kind": "function",
+  "context": "root.friendlyTimeForSeconds",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function friendlyTimeForSeconds(seconds) { if (isNaN(seconds) || seconds < 0)\n            return \"0:00\";\n        seconds = Math.floor(seconds);\n        const h = Math.floor(seconds / 3600);\n        const m = Math.floor((seconds % 3600) / 60);\n        const s = seconds % 60;\n        if (h > 0) {\n            return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;\n        } else {\n            return `${m}:${s.toString().padStart(2, '0')}`;\n        } }",
+  "form": "function",
+  "signature": "std::string friendlyTimeForSeconds(double seconds)"
+ },
+ "53e373058056": {
+  "cpp": "static const js::Regex entryId(\"^\\\\d+\\\\t\");\nreturn js::replace(str, entryId, \"\");",
+  "kind": "function",
+  "context": "root.cleanCliphistEntry",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function cleanCliphistEntry(str) { return str.replace(/^\\d+\\t/, \"\"); }",
+  "form": "function",
+  "signature": "std::string cleanCliphistEntry(const std::string& str)"
+ },
+ "6d41b34bda4c": {
+  "cpp": "static const js::Regex regex(\"```(\\\\w+)?\\\\n([\\\\s\\\\S]*?)```|<think>([\\\\s\\\\S]*?)<\\\\/think>\", \"g\");\n// {type: \"text\" | \"think\" | \"code\", content, lang?, completed?}，键按 JS 对象字面量的顺序\nstd::vector<js::Json> result;\nint lastIndex = 0;\nint regexLastIndex = 0;  // regex.lastIndex: the literal makes a fresh RegExp per call\nwhile (const auto match = js::exec(regex, markdown, regexLastIndex)) {\n  const auto& m = match->groups;\n  if (match->index > lastIndex) {\n    const std::string text = js::slice(markdown, lastIndex, match->index);\n    if (!js::trim(text).empty()) {\n      result.push_back(js::Json{{\"type\", \"text\"}, {\"content\", text}});\n    }\n  }\n  if (js::startsWith(m[0], \"```\")) {\n    // match[2] && match[2].trim(): an unmatched group is \"\"\n    if (!js::trim(m[2]).empty()) {\n      result.push_back(js::Json{{\"type\", \"code\"}, {\"lang\", m[1]}, {\"content\", m[2]}, {\"completed\", true}});  // match[1] || \"\"\n    }\n  } else if (js::startsWith(m[0], \"<think>\")) {\n    if (!js::trim(m[3]).empty()) {\n      result.push_back(js::Json{{\"type\", \"think\"}, {\"content\", m[3]}, {\"completed\", true}});\n    }\n  }\n  lastIndex = regexLastIndex;\n}\n// Handle any remaining text after the last match\nif (lastIndex < js::length(markdown)) {\n  const std::string text = js::slice(markdown, lastIndex);\n  // Check for unfinished <think> block\n  const int thinkStart = js::indexOf(text, \"<think>\");\n  const int codeStart = js::indexOf(text, \"```\");\n  if (thinkStart != -1 && (codeStart == -1 || thinkStart < codeStart)) {\n    const std::string beforeThink = js::slice(text, 0, thinkStart);\n    if (!js::trim(beforeThink).empty()) {\n      result.push_back(js::Json{{\"type\", \"text\"}, {\"content\", beforeThink}});\n    }\n    const std::string thinkContent = js::slice(text, thinkStart + 7);\n    if (!js::trim(thinkContent).empty()) {\n      result.push_back(js::Json{{\"type\", \"think\"}, {\"content\", thinkContent}, {\"completed\", false}});\n    }\n  } else if (codeStart != -1) {\n    const std::string beforeCode = js::slice(text, 0, codeStart);\n    if (!js::trim(beforeCode).empty()) {\n      result.push_back(js::Json{{\"type\", \"text\"}, {\"content\", beforeCode}});\n    }\n    // Try to detect language after ```\n    static const js::Regex langPattern(\"^(\\\\w+)?\\\\n\");\n    const auto codeLangMatch = js::match(js::slice(text, codeStart + 3), langPattern);\n    std::string lang;\n    int codeContentStart = codeStart + 3;\n    if (codeLangMatch) {\n      lang = (*codeLangMatch)[1];  // codeLangMatch[1] || \"\"；没参与匹配的组是 \"\"\n      codeContentStart += js::length((*codeLangMatch)[0]);\n    } else if (js::charAt(text, codeStart + 3) == \"\\n\") {\n      // ii: 走不到：``` 后面紧跟 \\n 时上面的正则已经匹配\n      codeContentStart += 1;\n    }\n    const std::string codeContent = js::slice(text, codeContentStart);\n    if (!js::trim(codeContent).empty()) {\n      result.push_back(js::Json{{\"type\", \"code\"}, {\"lang\", lang}, {\"content\", codeContent}, {\"completed\", false}});\n    }\n  } else if (!js::trim(text).empty()) {\n    result.push_back(js::Json{{\"type\", \"text\"}, {\"content\", text}});\n  }\n}\n// console.log(JSON.stringify(result, null, 2));\nreturn result;",
+  "kind": "function",
+  "context": "root.splitMarkdownBlocks",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function splitMarkdownBlocks(markdown) { const regex = /```(\\w+)?\\n([\\s\\S]*?)```|<think>([\\s\\S]*?)<\\/think>/g;\n        /**\n         * @type {{type: \"text\" | \"think\" | \"code\"; content: string; lang: string | undefined; completed: boolean | undefined}[]}\n         */\n        let result = [];\n        let lastIndex = 0;\n        let match;\n        while ((match = regex.exec(markdown)) !== null) {\n            if (match.index > lastIndex) {\n                const text = markdown.slice(lastIndex, match.index);\n                if (text.trim()) {\n                    result.push({\n                        type: \"text\",\n                        content: text\n                    });\n                }\n            }\n            if (match[0].startsWith('```')) {\n                if (match[2] && match[2].trim()) {\n                    result.push({\n                        type: \"code\",\n                        lang: match[1] || \"\",\n                        content: match[2],\n                        completed: true\n                    });\n                }\n            } else if (match[0].startsWith('<think>')) {\n                if (match[3] && match[3].trim()) {\n                    result.push({\n                        type: \"think\",\n                        content: match[3],\n                        completed: true\n                    });\n                }\n            }\n            lastIndex = regex.lastIndex;\n        }\n        // Handle any remaining text after the last match\n        if (lastIndex < markdown.length) {\n            const text = markdown.slice(lastIndex);\n            // Check for unfinished <think> block\n            const thinkStart = text.indexOf('<think>');\n            const codeStart = text.indexOf('```');\n            if (thinkStart !== -1 && (codeStart === -1 || thinkStart < codeStart)) {\n                const beforeThink = text.slice(0, thinkStart);\n                if (beforeThink.trim()) {\n                    result.push({\n                        type: \"text\",\n                        content: beforeThink\n                    });\n                }\n                const thinkContent = text.slice(thinkStart + 7);\n                if (thinkContent.trim()) {\n                    result.push({\n                        type: \"think\",\n                        content: thinkContent,\n                        completed: false\n                    });\n                }\n            } else if (codeStart !== -1) {\n                const beforeCode = text.slice(0, codeStart);\n                if (beforeCode.trim()) {\n                    result.push({\n                        type: \"text\",\n                        content: beforeCode\n                    });\n                }\n                // Try to detect language after ```\n                const codeLangMatch = text.slice(codeStart + 3).match(/^(\\w+)?\\n/);\n                let lang = \"\";\n                let codeContentStart = codeStart + 3;\n                if (codeLangMatch) {\n                    lang = codeLangMatch[1] || \"\";\n                    codeContentStart += codeLangMatch[0].length;\n                } else if (text[codeStart + 3] === '\\n') {\n                    codeContentStart += 1;\n                }\n                const codeContent = text.slice(codeContentStart);\n                if (codeContent.trim()) {\n                    result.push({\n                        type: \"code\",\n                        lang,\n                        content: codeContent,\n                        completed: false\n                    });\n                }\n            } else if (text.trim()) {\n                result.push({\n                    type: \"text\",\n                    content: text\n                });\n            }\n        }\n        // console.log(JSON.stringify(result, null, 2));\n        return result; }",
+  "form": "function",
+  "signature": "std::vector<js::Json> splitMarkdownBlocks(const std::string& markdown)"
+ },
+ "76fc584d93cb": {
+  "cpp": "static const js::Regex base(\"^(https?:\\\\/\\\\/[^\\\\/]+)(\\\\/.*)?$\");\nconst auto match = js::match(url, base);\n// match ? match[1] : null\nif (!match) {\n  return std::nullopt;\n}\nreturn (*match)[1];",
+  "kind": "function",
+  "context": "root.getBaseUrl",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function getBaseUrl(url) { const match = url.match(/^(https?:\\/\\/[^\\/]+)(\\/.*)?$/);\n        return match ? match[1] : null; }",
+  "form": "function",
+  "signature": "std::optional<std::string> getBaseUrl(const std::string& url)"
+ },
+ "8a072131d5fc": {
+  "cpp": "// !str：null 由调用处按 \"\" 传入\nif (str.empty()) {\n  return \"\";\n}\nconst std::vector<std::string> words = js::split(str, \" \");\nstd::vector<std::string> lines;\nstd::string current;\nfor (const std::string& word : words) {\n  // maxLen 是 NaN（undefined）时比较恒为假，不换行，与 JS 相同\n  if (js::length(current + (!current.empty() ? \" \" : \"\") + word) > maxLen) {\n    if (!current.empty()) {\n      lines.push_back(current);\n    }\n    current = word;\n  } else {\n    current += (!current.empty() ? \" \" : \"\") + word;\n  }\n}\nif (!current.empty()) {\n  lines.push_back(current);\n}\nreturn js::join(lines, \"\\n\");",
+  "kind": "function",
+  "context": "root.wordWrap",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function wordWrap(str, maxLen) { if (!str)\n            return \"\";\n        let words = str.split(\" \");\n        let lines = [];\n        let current = \"\";\n        for (let i = 0; i < words.length; ++i) {\n            if ((current + (current.length > 0 ? \" \" : \"\") + words[i]).length > maxLen) {\n                if (current.length > 0)\n                    lines.push(current);\n                current = words[i];\n            } else {\n                current += (current.length > 0 ? \" \" : \"\") + words[i];\n            }\n        }\n        if (current.length > 0)\n            lines.push(current);\n        return lines.join(\"\\n\"); }",
+  "form": "function",
+  "signature": "std::string wordWrap(const std::string& str, double maxLen)"
+ },
+ "9186fa3a1027": {
+  "cpp": "if (js::startsWith(str, prefix)) {\n  return js::slice(str, js::length(prefix));\n}\nreturn str;",
+  "kind": "function",
+  "context": "root.cleanPrefix",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function cleanPrefix(str, prefix) { if (str.startsWith(prefix)) {\n            return str.slice(prefix.length);\n        }\n        return str; }",
+  "form": "function",
+  "signature": "std::string cleanPrefix(const std::string& str, const std::string& prefix)"
+ },
+ "a9a3a2dab265": {
+  "cpp": "for (const std::string& prefix : prefixes) {\n  if (js::startsWith(str, prefix)) {\n    return js::slice(str, js::length(prefix));\n  }\n}\nreturn str;",
+  "kind": "function",
+  "context": "root.cleanOnePrefix",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function cleanOnePrefix(str, prefixes) { for (let i = 0; i < prefixes.length; ++i) {\n            if (str.startsWith(prefixes[i])) {\n                return str.slice(prefixes[i].length);\n            }\n        }\n        return str; }",
+  "form": "function",
+  "signature": "std::string cleanOnePrefix(const std::string& str, const std::vector<std::string>& prefixes)"
+ },
+ "c827f547bc42": {
+  "cpp": "static const js::Regex backslash(\"\\\\\\\\\", \"g\");\nreturn js::replace(str, backslash, \"\\\\\\\\\");",
+  "kind": "function",
+  "context": "root.escapeBackslashes",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function escapeBackslashes(str) { return str.replace(/\\\\/g, '\\\\\\\\'); }",
+  "form": "function",
+  "signature": "std::string escapeBackslashes(const std::string& str)"
+ },
+ "ce6589b8370a": {
+  "cpp": "// String(str)：形参是 std::string。传数字的调用处由生成器加 jsString()，即 String(n)\nstatic const js::Regex quote(\"'\", \"g\");\n// .replace(/\\\\/g, '\\\\\\\\')（上游注释掉了）\nreturn js::replace(str, quote, \"'\\\\''\");",
+  "kind": "function",
+  "context": "root.shellSingleQuoteEscape",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function shellSingleQuoteEscape(str) { return String(str)\n        // .replace(/\\\\/g, '\\\\\\\\')\n        .replace(/'/g, \"'\\\\''\"); }",
+  "form": "function",
+  "signature": "std::string shellSingleQuoteEscape(const std::string& str)"
+ },
+ "ecd11d17506d": {
+  "cpp": "// !title: callers pass \"\" where JS gets undefined/null (player?.trackTitle); same result\nif (title.empty()) {\n  return \"\";\n}\n// Brackets\nstatic const js::Regex round(\"^ *\\\\([^)]*\\\\) *\", \"g\");\nstatic const js::Regex square(\"^ *\\\\[[^\\\\]]*\\\\] *\", \"g\");\nstatic const js::Regex curly(\"^ *\\\\{[^\\\\}]*\\\\} *\", \"g\");\ntitle = js::replace(title, round, \" \");  // Round brackets\ntitle = js::replace(title, square, \" \");  // Square brackets\ntitle = js::replace(title, curly, \" \");  // Curly brackets\n// Japenis brackets\nstatic const js::Regex touhou(\"^ *【[^】]*】\");\nstatic const js::Regex doubleAngle(\"^ *《[^》]*》\");\nstatic const js::Regex corner(\"^ *「[^」]*」\");\nstatic const js::Regex whiteCorner(\"^ *『[^』]*』\");\ntitle = js::replace(title, touhou, \"\");  // Touhou\ntitle = js::replace(title, doubleAngle, \"\");  // ??\ntitle = js::replace(title, corner, \"\");  // OP/ED thingie\ntitle = js::replace(title, whiteCorner, \"\");  // OP/ED thingie\n\nreturn js::trim(title);",
+  "kind": "function",
+  "context": "root.cleanMusicTitle",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function cleanMusicTitle(title) { if (!title)\n            return \"\";\n        // Brackets\n        title = title.replace(/^ *\\([^)]*\\) */g, \" \"); // Round brackets\n        title = title.replace(/^ *\\[[^\\]]*\\] */g, \" \"); // Square brackets\n        title = title.replace(/^ *\\{[^\\}]*\\} */g, \" \"); // Curly brackets\n        // Japenis brackets\n        title = title.replace(/^ *【[^】]*】/, \"\"); // Touhou\n        title = title.replace(/^ *《[^》]*》/, \"\"); // ??\n        title = title.replace(/^ *「[^」]*」/, \"\"); // OP/ED thingie\n        title = title.replace(/^ *『[^』]*』/, \"\"); // OP/ED thingie\n\n        return title.trim(); }",
+  "form": "function",
+  "signature": "std::string cleanMusicTitle(std::string title)"
+ },
+ "fac6c2fc0273": {
+  "cpp": "// typeof str !== 'string' 时原样返回：参数恒为 std::string，走不到\nstatic const js::Regex amp(\"&\", \"g\");\nstatic const js::Regex lt(\"<\", \"g\");\nstatic const js::Regex gt(\">\", \"g\");\nstatic const js::Regex quot(\"\\\"\", \"g\");\nstatic const js::Regex apos(\"'\", \"g\");\nstd::string out = js::replace(str, amp, \"&amp;\");\nout = js::replace(out, lt, \"&lt;\");\nout = js::replace(out, gt, \"&gt;\");\nout = js::replace(out, quot, \"&quot;\");\nreturn js::replace(out, apos, \"&#39;\");",
+  "kind": "function",
+  "context": "root.escapeHtml",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function escapeHtml(str) { if (typeof str !== 'string')\n            return str;\n        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;'); }",
+  "form": "function",
+  "signature": "std::string escapeHtml(const std::string& str)"
+ }
+}

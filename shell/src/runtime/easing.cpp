@@ -116,4 +116,25 @@ namespace ii {
     return t;
   }
 
+  Easing::Type easingTypeFromQt(int qtType) {
+    using T = Easing::Type;
+    switch (qtType) {
+    case 1: return T::InQuad;
+    case 2: return T::OutQuad;
+    case 3: return T::InOutQuad;
+    case 5: return T::InCubic;
+    case 6: return T::OutCubic;
+    case 7: return T::InOutCubic;
+    case 17: return T::InSine;
+    case 18: return T::OutSine;
+    case 19: return T::InOutSine;
+    case 21: return T::InExpo;
+    case 22: return T::OutExpo;
+    case 23: return T::InOutExpo;
+    case 34: return T::OutBack;
+    case 45: return T::BezierSpline;
+    default: return T::Linear;
+    }
+  }
+
 } // namespace ii

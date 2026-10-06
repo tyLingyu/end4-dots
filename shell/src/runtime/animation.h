@@ -302,6 +302,15 @@ namespace ii {
       return animation;
     }
 
+    // Takes an animation already created as this behavior's child (e.g. from a Component).
+    template <typename A> A* adoptAnimation(A* animation) {
+      if (animation != nullptr) {
+        animation->setTarget(&m_target);
+        m_animation = animation;
+      }
+      return animation;
+    }
+
     [[nodiscard]] BehaviorAnimation<T>* animation() const noexcept { return m_animation; }
 
     bool intercept(const T& value) override {

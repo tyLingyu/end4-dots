@@ -1,0 +1,130 @@
+{
+ "025c00ed6ea6": {
+  "cpp": "std::vector<Object*>{sink.get(), source.get()}",
+  "kind": "binding (array of mixed types)",
+  "context": "root/PwObjectTracker.0.objects",
+  "expected": "std::vector<Object*>",
+  "code": "[sink, source]",
+  "form": "expression"
+ },
+ "246f81dfa5d9": {
+  "cpp": "const std::string ogaPath = \"/usr/share/sounds/\" + audioTheme.get() + \"/stereo/\" + soundName + \".oga\";\nconst std::string oggPath = \"/usr/share/sounds/\" + audioTheme.get() + \"/stereo/\" + soundName + \".ogg\";\n\n// Try playing .oga first\nstd::vector<std::string> command = {\"ffplay\", \"-nodisp\", \"-autoexit\", ogaPath};\nqs::Quickshell::instance().execDetached(command);\n\n// Also try playing .ogg (ffplay will just fail silently if file doesn't exist)\ncommand = {\"ffplay\", \"-nodisp\", \"-autoexit\", oggPath};\nqs::Quickshell::instance().execDetached(command);",
+  "kind": "function",
+  "context": "root.playSystemSound",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function playSystemSound(soundName) { const ogaPath = `/usr/share/sounds/${root.audioTheme}/stereo/${soundName}.oga`;\n        const oggPath = `/usr/share/sounds/${root.audioTheme}/stereo/${soundName}.ogg`;\n\n        // Try playing .oga first\n        let command = [\n            \"ffplay\",\n            \"-nodisp\",\n            \"-autoexit\",\n            ogaPath\n        ];\n        Quickshell.execDetached(command);\n\n        // Also try playing .ogg (ffplay will just fail silently if file doesn't exist)\n        command = [\n            \"ffplay\",\n            \"-nodisp\",\n            \"-autoexit\",\n            oggPath\n        ];\n        Quickshell.execDetached(command); }",
+  "form": "function",
+  "signature": "void playSystemSound(const std::string& soundName)"
+ },
+ "284b0a9c5ab4": {
+  "cpp": "if (!node->nickname.get().empty()) {\n  return node->nickname.get();\n}\nif (!node->description.get().empty()) {\n  return node->description.get();\n}\nreturn ::ii::services::Translation::instance().tr(\"Unknown\");",
+  "kind": "function",
+  "context": "root.friendlyDeviceName",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function friendlyDeviceName(node) { return (node.nickname || node.description || Translation.tr(\"Unknown\")); }",
+  "form": "function",
+  "signature": "std::string friendlyDeviceName(qs::PwNode* node)"
+ },
+ "31b00562a49f": {
+  "cpp": "// Protection against sudden volume changes: Connections { target: sink?.audio ?? null; function onVolumeChanged() }\no2->setConnector([=, this](Object* object, std::vector<Connection>& out) {\n  if (object == nullptr) {\n    return;\n  }\n  auto* target = static_cast<qs::PwNodeAudio*>(object);\n  // onVolumeChanged is volume's NOTIFY signal, volumesChanged: it fires on any channel change.\n  out.push_back(target->volumes.changed().connect([=, this]() {\n    auto* protection = ::ii::common::Config::instance().options->audio.get()->protection.get();\n    if (!protection->enable.get()) {\n      return;\n    }\n    const double newVolume = sink.get()->audio.get()->volume.get();\n    // when resuming from suspend, we should not write volume to avoid pipewire volume reset issues\n    // (a number is never undefined or null: of the three tests only isNaN can hold)\n    if (std::isnan(newVolume)) {\n      o2->lastReady.set(false);\n      o2->lastVolume.set(0);\n      return;\n    }\n    if (!o2->lastReady.get()) {\n      o2->lastVolume.set(newVolume);\n      o2->lastReady.set(true);\n      return;\n    }\n    const double maxAllowedIncrease = protection->maxAllowedIncrease.get() / 100;\n    const double maxAllowed = protection->maxAllowed.get() / 100;\n\n    if (newVolume - o2->lastVolume.get() > maxAllowedIncrease) {\n      sink.get()->audio.get()->volume.set(o2->lastVolume.get());\n      sinkProtectionTriggered.emit(::ii::services::Translation::instance().tr(\"Illegal increment\"));\n    } else if (newVolume > maxAllowed || newVolume > hardMaxValue.get()) {\n      sinkProtectionTriggered.emit(::ii::services::Translation::instance().tr(\"Exceeded max allowed\"));\n      // std::min(a, b) returns a when either is NaN; only lastVolume can be NaN here, as with Math.min\n      sink.get()->audio.get()->volume.set(std::min(o2->lastVolume.get(), maxAllowed));\n    }\n    o2->lastVolume.set(sink.get()->audio.get()->volume.get());\n  }));\n});",
+  "kind": "function of a child object",
+  "context": "root/Connections.0.onVolumeChanged",
+  "expected": "",
+  "code": "function onVolumeChanged() { if (!Config.options.audio.protection.enable) return;\n            const newVolume = sink.audio.volume;\n            // when resuming from suspend, we should not write volume to avoid pipewire volume reset issues\n            if (isNaN(newVolume) || newVolume === undefined || newVolume === null) {\n                lastReady = false;\n                lastVolume = 0;\n                return;\n            }\n            if (!lastReady) {\n                lastVolume = newVolume;\n                lastReady = true;\n                return;\n            }\n            const maxAllowedIncrease = Config.options.audio.protection.maxAllowedIncrease / 100; \n            const maxAllowed = Config.options.audio.protection.maxAllowed / 100;\n\n            if (newVolume - lastVolume > maxAllowedIncrease) {\n                sink.audio.volume = lastVolume;\n                root.sinkProtectionTriggered(Translation.tr(\"Illegal increment\"));\n            } else if (newVolume > maxAllowed || newVolume > root.hardMaxValue) {\n                root.sinkProtectionTriggered(Translation.tr(\"Exceeded max allowed\"));\n                sink.audio.volume = Math.min(lastVolume, maxAllowed);\n            }\n            lastVolume = sink.audio.volume; }",
+  "form": "statements"
+ },
+ "3fd133da2bf4": {
+  "cpp": "const double currentVolume = ::ii::services::Audio::instance().value.get();\n// ii: `0.02 || 0.2` is always 0.02 (|| binds tighter than ?:, and 0.02 is truthy)\nconst double step = currentVolume < 0.1 ? 0.01 : 0.02;\nqs::PwNodeAudio* audio = ::ii::services::Audio::instance().sink.get()->audio.get();\nconst double raised = audio->volume.get() + step;\naudio->volume.set(std::isnan(raised) ? raised : std::min(1.0, raised));  // Math.min keeps NaN",
+  "kind": "statements (double || double)",
+  "context": "root.incrementVolume",
+  "expected": "handler body, parameters ()",
+  "code": "const currentVolume = Audio.value;\n        const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;\n        Audio.sink.audio.volume = Math.min(1, Audio.sink.audio.volume + step);",
+  "form": "body"
+ },
+ "48dad7246dce": {
+  "cpp": "// Pipewire.nodes holds PwNode objects only\nconst std::vector<Object*> matching = js::filter(qs::Pipewire::instance().nodes.get()->values.get(), [&](Object* object) {\n  auto* node = static_cast<qs::PwNode*>(object);\n  return this->correctType(node, isSink) && node->isStream.get();\n});\nreturn js::map(matching, [](Object* object) { return static_cast<qs::PwNode*>(object); });",
+  "kind": "function",
+  "context": "root.appNodes",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function appNodes(isSink) { return Pipewire.nodes.values.filter((node) => { // Should be list<PwNode> but it breaks ScriptModel\n            return root.correctType(node, isSink) && node.isStream\n        }) }",
+  "form": "function",
+  "signature": "std::vector<qs::PwNode*> appNodes(bool isSink)"
+ },
+ "6f9ceacd83de": {
+  "cpp": "qs::Pipewire::instance().preferredDefaultAudioSource.set(node);",
+  "kind": "function",
+  "context": "root.setDefaultSource",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function setDefaultSource(node) { Pipewire.preferredDefaultAudioSource = node; }",
+  "form": "function",
+  "signature": "void setDefaultSource(qs::PwNode* node)"
+ },
+ "9930085c3075": {
+  "cpp": "qs::Pipewire::instance().preferredDefaultAudioSink.set(node);",
+  "kind": "function",
+  "context": "root.setDefaultSink",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function setDefaultSink(node) { Pipewire.preferredDefaultAudioSink = node; }",
+  "form": "function",
+  "signature": "void setDefaultSink(qs::PwNode* node)"
+ },
+ "9e86fd7ee8e6": {
+  "cpp": "const double currentVolume = ::ii::services::Audio::instance().value.get();\n// ii: `0.02 || 0.2` is always 0.02 (|| binds tighter than ?:, and 0.02 is truthy)\nconst double step = currentVolume < 0.1 ? 0.01 : 0.02;\nqs::PwNodeAudio* audio = ::ii::services::Audio::instance().sink.get()->audio.get();\naudio->volume.set(audio->volume.get() - step);",
+  "kind": "statements (double || double)",
+  "context": "root.decrementVolume",
+  "expected": "handler body, parameters ()",
+  "code": "const currentVolume = Audio.value;\n        const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;\n        Audio.sink.audio.volume -= step;",
+  "form": "body"
+ },
+ "afbccaf8b69f": {
+  "cpp": "// JS returns false or node.audio (an object, or null for a node without audio); its only\n// callers (appNodes, devices) use it as a condition, so its truthiness is returned\nreturn node->isSink.get() == isSink && node->audio.get() != nullptr;",
+  "kind": "function",
+  "context": "root.correctType",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function correctType(node, isSink) { return (node.isSink === isSink) && node.audio }",
+  "form": "function",
+  "signature": "bool correctType(qs::PwNode* node, bool isSink)"
+ },
+ "b047529a251a": {
+  "cpp": "// sink?.audio.volume ?? 0: undefined (so 0) without a sink; a volume is a number, never null\nqs::PwNode* node = sink.get();\nreturn node != nullptr ? static_cast<double>(node->audio.get()->volume.get()) : 0.0;",
+  "kind": "binding (optional chaining)",
+  "context": "root.value",
+  "expected": "double",
+  "code": "sink?.audio.volume ?? 0",
+  "form": "expression"
+ },
+ "b8721d6d8a69": {
+  "cpp": "// node.properties[\"application.name\"] is undefined when absent; PipeWire property values are strings\nconst js::Json& properties = node->properties.get();\nconst auto applicationName = properties.find(\"application.name\");\nif (applicationName != properties.end() && applicationName->is_string()\n    && !applicationName->get_ref<const std::string&>().empty()) {\n  return applicationName->get<std::string>();\n}\nif (!node->description.get().empty()) {\n  return node->description.get();\n}\nreturn node->name.get();",
+  "kind": "function",
+  "context": "root.appNodeDisplayName",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function appNodeDisplayName(node) { return (node.properties[\"application.name\"] || node.description || node.name) }",
+  "form": "function",
+  "signature": "std::string appNodeDisplayName(qs::PwNode* node)"
+ },
+ "b8bdaf09a0aa": {
+  "cpp": "// Pipewire.defaultAudioSink?.ready ?? false: false without a default sink; `ready` is a bool, never null\nqs::PwNode* node = qs::Pipewire::instance().defaultAudioSink.get();\nreturn node != nullptr && node->ready.get();",
+  "kind": "binding (optional chaining)",
+  "context": "root.ready",
+  "expected": "bool",
+  "code": "Pipewire.defaultAudioSink?.ready ?? false",
+  "form": "expression"
+ },
+ "da202cc06215": {
+  "cpp": "// sink?.audio ?? null\nqs::PwNode* node = sink.get();\nreturn node != nullptr ? static_cast<Object*>(node->audio.get()) : nullptr;",
+  "kind": "binding (optional chaining)",
+  "context": "root/Connections.0.target",
+  "expected": "Object*",
+  "code": "sink?.audio ?? null",
+  "form": "expression"
+ },
+ "dae08063d66b": {
+  "cpp": "// Pipewire.nodes holds PwNode objects only\nconst std::vector<Object*> matching = js::filter(qs::Pipewire::instance().nodes.get()->values.get(), [&](Object* object) {\n  auto* node = static_cast<qs::PwNode*>(object);\n  return this->correctType(node, isSink) && !node->isStream.get();\n});\nreturn js::map(matching, [](Object* object) { return static_cast<qs::PwNode*>(object); });",
+  "kind": "function",
+  "context": "root.devices",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function devices(isSink) { return Pipewire.nodes.values.filter(node => {\n            return root.correctType(node, isSink) && !node.isStream\n        }) }",
+  "form": "function",
+  "signature": "std::vector<qs::PwNode*> devices(bool isSink)"
+ }
+}

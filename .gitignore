@@ -18,3 +18,9 @@ __pycache__/
 
 # ii-shell build directories
 /shell/build*/
+# qml2cpp output (regenerated from the QML and tools/qml2cpp/data/js)
+/shell/src/ii/
+
+# qml2cpp parse cache
+/tools/qml2cpp/.cache/
+__pycache__/

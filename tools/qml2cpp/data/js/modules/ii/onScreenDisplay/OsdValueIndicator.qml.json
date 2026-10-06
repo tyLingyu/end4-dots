@@ -1,0 +1,16 @@
+{
+ "796be61bddf2": {
+  "cpp": null,
+  "kind": "behavior",
+  "context": "root/valueIndicator/valueRow/Item.0/MaterialSymbol.0.rotation",
+  "expected": "",
+  "code": "Behavior on rotation"
+ },
+ "e7368f0a839e": {
+  "cpp": null,
+  "kind": "behavior",
+  "context": "root/valueIndicator/valueRow/Item.0/MaterialSymbol.0.iconSize",
+  "expected": "",
+  "code": "Behavior on iconSize"
+ }
+}

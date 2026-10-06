@@ -1,0 +1,255 @@
+{
+ "08bdfadf8ae2": {
+  "cpp": "// popupList 是 var 属性里的 JS 数组，forEach 遍历读到的那一份；循环里 popup 变化让绑定换上新数组，不影响遍历\nconst std::vector<::ii::services::Notifications_Notif*> popups = this->popupList.get();\nfor (::ii::services::Notifications_Notif* notif : popups) {\n  this->timeout.emit(js::Json(notif->notificationId.get()));\n}\nconst std::vector<::ii::services::Notifications_Notif*> stillPopups = this->popupList.get();\nfor (::ii::services::Notifications_Notif* notif : stillPopups) {\n  notif->popup.set(false);\n}",
+  "kind": "statements (FunctionExpression)",
+  "context": "root.timeoutAll",
+  "expected": "handler body, parameters ()",
+  "code": "root.popupList.forEach((notif) => {\n            root.timeout(notif.notificationId);\n        })\n        root.popupList.forEach((notif) => {\n            notif.popup = false;\n        });",
+  "form": "body"
+ },
+ "0a2f2c4db99e": {
+  "cpp": "qs::Notification* const n = this->notification.get();\n// ii: 枚举属性在 JS 里读到的是数字，toString() 得到 \"0\"/\"1\"/\"2\"（Low/Normal/Critical），不是名字；\n// 只有 notification 为 null 时才是 \"normal\"。使用方用 == 和数字比，或与 NotificationUrgency.Critical.toString() 比\nreturn n != nullptr ? std::to_string(static_cast<int>(n->urgency.get())) : std::string(\"normal\");",
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.urgency",
+  "expected": "std::string",
+  "code": "notification?.urgency.toString() ?? \"normal\"",
+  "form": "expression"
+ },
+ "0fd2ef1c9257": {
+  "cpp": "return js::stringify(this->notifToJSON(notif), 2);",
+  "kind": "function",
+  "context": "root.notifToString",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function notifToString(notif) { return JSON.stringify(notifToJSON(notif), null, 2); }",
+  "form": "function",
+  "signature": "std::string notifToString(::ii::services::Notifications_Notif* notif)"
+ },
+ "11a53cc61e98": {
+  "cpp": "const std::string fileContents = notifFileView->text();\njs::Json parsed;\ntry {\n  parsed = js::parse(fileContents);\n} catch (const std::invalid_argument&) {\n  return;  // JSON.parse 抛 SyntaxError（如空文件），处理函数到此中止：list 不变，不发 initDone\n}\nif (!parsed.is_array()) {\n  return;  // 不是数组时没有 .map，抛 TypeError，处理函数到此中止\n}\n// 文件由 stringifyList 写出，每项是带全部字段的对象。缺字段或类型不对时 createObject 跳过该初始属性\n// （Qt 警告 \"Could not set initial property\"），属性保持组件里的值\nconst auto number = [](const js::Json& notif, const char* key) -> std::optional<double> {\n  const auto it = notif.find(key);\n  return it != notif.end() && it->is_number() ? std::optional<double>(it->get<double>()) : std::nullopt;\n};\nconst auto text = [](const js::Json& notif, const char* key) -> std::optional<std::string> {\n  const auto it = notif.find(key);\n  if (it == notif.end()) {\n    return std::nullopt;\n  }\n  if (it->is_string()) {\n    return it->get<std::string>();\n  }\n  if (it->is_number()) {\n    return js::toString(it->get<double>());  // 数字赋给 string 属性\n  }\n  return std::nullopt;\n};\nstd::vector<::ii::services::Notifications_Notif*> notifs;\nfor (const js::Json& notif : parsed) {\n  // ii: 元素不是对象时（null 上读属性抛 TypeError；其他值读到 undefined，缺了 required 的 notificationId，\n  // createObject 返回 null，之后读 null.notificationId 抛 TypeError），处理函数中止、不发 initDone。\n  // QML 中止前 list 里已经放进了 null；这里不把 null 放进 list，直接中止\n  if (!notif.is_object() || !number(notif, \"notificationId\")) {\n    return;\n  }\n  notifs.push_back(notifComponent.createObject(*this, [&](::ii::services::Notifications_Notif& o) {\n    o.notificationId.set(static_cast<int>(*number(notif, \"notificationId\")));\n    o.actions.set({});  // Notification actions are meaningless if they're not tracked by the server or the sender is dead\n    if (const auto value = text(notif, \"appIcon\")) {\n      o.appIcon.set(*value);\n    }\n    if (const auto value = text(notif, \"appName\")) {\n      o.appName.set(*value);\n    }\n    if (const auto value = text(notif, \"body\")) {\n      o.body.set(*value);\n    }\n    if (const auto value = text(notif, \"image\")) {\n      o.image.set(*value);\n    }\n    if (const auto value = text(notif, \"summary\")) {\n      o.summary.set(*value);\n    }\n    if (const auto value = number(notif, \"time\")) {\n      o.time.set(*value);\n    }\n    if (const auto value = text(notif, \"urgency\")) {\n      o.urgency.set(*value);\n    }\n  }));\n}\nthis->list.set(std::move(notifs));\n// Find largest notificationId\nint maxId = 0;\nfor (::ii::services::Notifications_Notif* notif : this->list.get()) {\n  maxId = std::max(maxId, notif->notificationId.get());\n}\n\njs::log(\"[Notifications] File loaded\");\nthis->idOffset.set(maxId);\nthis->initDone.emit();",
+  "kind": "statements (FunctionExpression)",
+  "context": "root/notifFileView.onLoaded",
+  "expected": "handler body, parameters ()",
+  "code": "{\n            const fileContents = notifFileView.text()\n            root.list = JSON.parse(fileContents).map((notif) => {\n                return notifComponent.createObject(root, {\n                    \"notificationId\": notif.notificationId,\n                    \"actions\": [], // Notification actions are meaningless if they're not tracked by the server or the sender is dead\n                    \"appIcon\": notif.appIcon,\n                    \"appName\": notif.appName,\n                    \"body\": notif.body,\n                    \"image\": notif.image,\n                    \"summary\": notif.summary,\n                    \"time\": notif.time,\n                    \"urgency\": notif.urgency,\n                });\n            });\n            // Find largest notificationId\n            let maxId = 0\n            root.list.forEach((notif) => {\n                maxId = Math.max(maxId, notif.notificationId)\n            })\n\n            console.log(\"[Notifications] File loaded\")\n            root.idOffset = maxId\n            root.initDone()\n        }",
+  "form": "body"
+ },
+ "1f3fb544f6bb": {
+  "cpp": "// Qt.resolvedUrl 相对调用方 QML 文件解析；filePath 是绝对路径，得到 file:// URL，FileView 会去掉 file:// 前缀\nreturn qt::resolvedUrl(this->filePath.get(), \"services/Notifications.qml\");",
+  "kind": "binding (name Qt)",
+  "context": "root/notifFileView.path",
+  "expected": "std::string",
+  "code": "Qt.resolvedUrl(filePath)",
+  "form": "expression"
+ },
+ "28fb1e5b53c1": {
+  "cpp": "// notification?.appIcon ?? \"\"：notification 为 null 时是 undefined；appIcon 是字符串属性，不会是 null\nqs::Notification* const n = this->notification.get();\nreturn n != nullptr ? n->appIcon.get() : std::string();",
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.appIcon",
+  "expected": "std::string",
+  "code": "notification?.appIcon ?? \"\"",
+  "form": "expression"
+ },
+ "30050b0d847d": {
+  "cpp": "return js::stringify(js::Json(js::map(notifs, [this](::ii::services::Notifications_Notif* notif) { return this->notifToJSON(notif); })), 2);",
+  "kind": "function",
+  "context": "root.stringifyList",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function stringifyList(list) { return JSON.stringify(list.map((notif) => notifToJSON(notif)), null, 2); }",
+  "form": "function",
+  "signature": "std::string stringifyList(const std::vector<::ii::services::Notifications_Notif*>& notifs)"
+ },
+ "31d2eec71b8e": {
+  "cpp": "// notification?.image ?? \"\"：notification 为 null 时是 undefined；image 是字符串属性，不会是 null\nqs::Notification* const n = this->notification.get();\nreturn n != nullptr ? n->image.get() : std::string();",
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.image",
+  "expected": "std::string",
+  "code": "notification?.image ?? \"\"",
+  "form": "expression"
+ },
+ "32d5d2348c52": {
+  "cpp": "if (error == qs::FileViewError::FileNotFound) {\n  js::log(\"[Notifications] File not found, creating new file.\");\n  this->list.set({});\n  notifFileView->setText(this->stringifyList(this->list.get()));\n} else {\n  // 枚举在 JS 里是数字，拼进字符串得到 \"1\"、\"3\" 这样的值\n  js::log(\"[Notifications] Error loading file: \" + std::to_string(static_cast<int>(error)));\n}",
+  "kind": "statements (FunctionExpression)",
+  "context": "root/notifFileView.onLoadFailed",
+  "expected": "handler body, parameters (qs::FileViewError::Enum const& error)",
+  "code": "(error) => {\n            if(error == FileViewError.FileNotFound) {\n                console.log(\"[Notifications] File not found, creating new file.\")\n                root.list = []\n                notifFileView.setText(stringifyList(root.list));\n            } else {\n                console.log(\"[Notifications] Error loading file: \" + error)\n            }\n        }",
+  "form": "body"
+ },
+ "37a18e0e4878": {
+  "cpp": "// notification?.appName ?? \"\"：notification 为 null 时是 undefined；appName 是字符串属性，不会是 null\nqs::Notification* const n = this->notification.get();\nreturn n != nullptr ? n->appName.get() : std::string();",
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.appName",
+  "expected": "std::string",
+  "code": "notification?.appName ?? \"\"",
+  "form": "expression"
+ },
+ "39442913f91e": {
+  "cpp": "qs::Notification* const n = this->notification.get();\nif (n == nullptr) {\n  return std::vector<NotifAction>{};  // notification?. 得到 undefined，?? []\n}\nreturn js::map(n->actions.get(), [](qs::NotificationAction* action) {\n  return NotifAction{action->identifier.get(), action->text.get()};\n});",
+  "kind": "binding (FunctionExpression)",
+  "context": "wrapper.actions",
+  "expected": "std::vector<NotifAction>",
+  "code": "notification?.actions.map((action) => ({\n            \"identifier\": action.identifier,\n            \"text\": action.text,\n        })) ?? []",
+  "form": "expression"
+ },
+ "4bc6b1e92390": {
+  "cpp": "const int index = js::findIndex(this->list.get(), [id](::ii::services::Notifications_Notif* notif) { return notif->notificationId.get() == id; });\n// root.list[index] != null：index 为 -1 时读到 undefined；list 里没有 null\nif (index != -1) {\n  this->list.get()[static_cast<std::size_t>(index)]->popup.set(false);\n}\nthis->timeout.emit(js::Json(id));",
+  "kind": "function",
+  "context": "root.timeoutNotification",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function timeoutNotification(id) { const index = root.list.findIndex((notif) => notif.notificationId === id);\n        if (root.list[index] != null)\n            root.list[index].popup = false;\n        root.timeout(id); }",
+  "form": "function",
+  "signature": "void timeoutNotification(int id)"
+ },
+ "523395cfc60f": {
+  "cpp": "this->groupsForList(this->list.get())",
+  "kind": "binding (cannot assign std::vector<ii::services::Notifications_Notif*> to std::vector<::ii::services::Notifications_Notif*>)",
+  "context": "root.groupsByAppName",
+  "expected": "std::map<std::string, NotifGroup>",
+  "code": "groupsForList(root.list)",
+  "form": "expression"
+ },
+ "52b53e4172c7": {
+  "cpp": "// Object.keys(groups) 的顺序决定 V4 不稳定排序里同 time 的键怎么排，要照 JS 还原：\n// 数组下标形式的键（\"0\"、\"42\"，小于 2^32 - 1）按数值升序在前，其余键按插入顺序。\n// groups 出自 groupsForList，插入顺序是各 appName 在传入列表里首次出现的顺序，也就是每组 notifications[0]\n// 的先后；传入的列表是 list 或它的子序列 popupList，所以按 notifications[0] 在 list 里的位置排。\n// 用 peek()：JS 版本只依赖 groups，不依赖 list。\nconst std::vector<::ii::services::Notifications_Notif*>& all = this->list.peek();\nconst auto position = [&all](const NotifGroup& group) {\n  return group.notifications.empty()\n             ? all.size()\n             : static_cast<std::size_t>(std::find(all.begin(), all.end(), group.notifications.front()) - all.begin());\n};\nconst auto arrayIndex = [](const std::string& key) -> std::optional<std::uint64_t> {\n  if (key.empty() || key.size() > 10 || (key.size() > 1 && key[0] == '0')) {\n    return std::nullopt;\n  }\n  std::uint64_t value = 0;\n  for (const char c : key) {\n    if (c < '0' || c > '9') {\n      return std::nullopt;\n    }\n    value = value * 10 + static_cast<std::uint64_t>(c - '0');\n  }\n  return value < 4294967295ULL ? std::optional<std::uint64_t>(value) : std::nullopt;\n};\nstd::vector<std::string> keys;\nstd::vector<std::string> named;\nfor (const auto& entry : groups) {\n  (arrayIndex(entry.first) ? keys : named).push_back(entry.first);\n}\nstd::sort(keys.begin(), keys.end(), [&](const std::string& a, const std::string& b) { return *arrayIndex(a) < *arrayIndex(b); });\nstd::stable_sort(named.begin(), named.end(), [&](const std::string& a, const std::string& b) {\n  return position(groups.at(a)) < position(groups.at(b));\n});\nkeys.insert(keys.end(), named.begin(), named.end());\nreturn js::sorted(std::move(keys), [&groups](const std::string& a, const std::string& b) {\n  // Sort by time, descending\n  return groups.at(b).time - groups.at(a).time;\n});",
+  "kind": "function",
+  "context": "root.appNameListForGroups",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function appNameListForGroups(groups) { return Object.keys(groups).sort((a, b) => {\n            // Sort by time, descending\n            return groups[b].time - groups[a].time;\n        }); }",
+  "form": "function",
+  "signature": "std::vector<std::string> appNameListForGroups(const std::map<std::string, NotifGroup>& groups)"
+ },
+ "564a4b2f3f6c": {
+  "cpp": "return js::Json{\n    {\"notificationId\", notif->notificationId.get()},\n    {\"actions\", notif->actions.get()},\n    {\"appIcon\", notif->appIcon.get()},\n    {\"appName\", notif->appName.get()},\n    {\"body\", notif->body.get()},\n    {\"image\", notif->image.get()},\n    {\"summary\", notif->summary.get()},\n    {\"time\", notif->time.get()},\n    {\"urgency\", notif->urgency.get()},\n};",
+  "kind": "function",
+  "context": "root.notifToJSON",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function notifToJSON(notif) { return {\n            \"notificationId\": notif.notificationId,\n            \"actions\": notif.actions,\n            \"appIcon\": notif.appIcon,\n            \"appName\": notif.appName,\n            \"body\": notif.body,\n            \"image\": notif.image,\n            \"summary\": notif.summary,\n            \"time\": notif.time,\n            \"urgency\": notif.urgency,\n        } }",
+  "form": "function",
+  "signature": "js::Json notifToJSON(::ii::services::Notifications_Notif* notif)"
+ },
+ "59371aa43195": {
+  "cpp": "js::log(\"[Notifications] Attempting to invoke action with identifier: \" + notifIdentifier + \" for notification ID: \" + std::to_string(id));\nconst std::vector<Object*> values = notifServer->trackedNotifications.get()->values.get();\n// trackedNotifications 里都是 Notification\nconst int notifServerIndex = js::findIndex(values, [this, id](Object* object) {\n  return static_cast<qs::Notification*>(object)->id.get() + this->idOffset.get() == id;\n});\njs::log(\"Notification server index: \" + std::to_string(notifServerIndex));\nif (notifServerIndex != -1) {\n  auto* notifServerNotif = static_cast<qs::Notification*>(values[static_cast<std::size_t>(notifServerIndex)]);\n  const std::optional<qs::NotificationAction*> action = js::find(\n      notifServerNotif->actions.get(), [&](qs::NotificationAction* candidate) { return candidate->identifier.get() == notifIdentifier; });\n  // console.log(\"Action found: \" + JSON.stringify(action));\n  if (!action) {\n    // ii: 找不到时 action 是 undefined，调 invoke() 抛 TypeError，函数到此中止（不会 discardNotification）\n    return;\n  }\n  (*action)->invoke();\n} else {\n  js::log(\"Notification not found in server: \" + std::to_string(id));\n}\nthis->discardNotification(id);",
+  "kind": "function",
+  "context": "root.attemptInvokeAction",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function attemptInvokeAction(id, notifIdentifier) { console.log(\"[Notifications] Attempting to invoke action with identifier: \" + notifIdentifier + \" for notification ID: \" + id);\n        const notifServerIndex = notifServer.trackedNotifications.values.findIndex((notif) => notif.id + root.idOffset === id);\n        console.log(\"Notification server index: \" + notifServerIndex);\n        if (notifServerIndex !== -1) {\n            const notifServerNotif = notifServer.trackedNotifications.values[notifServerIndex];\n            const action = notifServerNotif.actions.find((action) => action.identifier === notifIdentifier);\n            // console.log(\"Action found: \" + JSON.stringify(action));\n            action.invoke()\n        } \n        else {\n            console.log(\"Notification not found in server: \" + id)\n        }\n        root.discardNotification(id); }",
+  "form": "function",
+  "signature": "void attemptInvokeAction(int id, const std::string& notifIdentifier)"
+ },
+ "63e1b7cc9ab0": {
+  "cpp": "js::log(\"[Notifications] Discarding notification with ID: \" + std::to_string(id));\nconst int index = js::findIndex(this->list.get(), [id](::ii::services::Notifications_Notif* notif) { return notif->notificationId.get() == id; });\n// trackedNotifications 里都是 Notification\nconst int notifServerIndex = js::findIndex(notifServer->trackedNotifications.get()->values.get(), [this, id](Object* object) {\n  return static_cast<qs::Notification*>(object)->id.get() + this->idOffset.get() == id;\n});\nif (index != -1) {\n  // root.list.splice(index, 1)：QML 原地改 list，逐个替换后面的元素再删掉末尾，listChanged 发多次；\n  // 中间状态里只有留下的元素，一次 set 得到相同的最终状态\n  std::vector<::ii::services::Notifications_Notif*> remaining = this->list.get();\n  remaining.erase(remaining.begin() + index);\n  this->list.set(std::move(remaining));\n  notifFileView->setText(this->stringifyList(this->list.get()));\n  this->triggerListChange();\n}\nif (notifServerIndex != -1) {\n  // values 每次读取都是当前值，与 JS 再次读 values[notifServerIndex] 相同\n  const std::vector<Object*> values = notifServer->trackedNotifications.get()->values.get();\n  if (static_cast<std::size_t>(notifServerIndex) >= values.size()) {\n    return;  // JS 在 undefined 上调 dismiss() 抛 TypeError，函数到此中止\n  }\n  static_cast<qs::Notification*>(values[static_cast<std::size_t>(notifServerIndex)])->dismiss();\n}\nthis->discard.emit(id);  // Emit signal",
+  "kind": "function",
+  "context": "root.discardNotification",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function discardNotification(id) { console.log(\"[Notifications] Discarding notification with ID: \" + id);\n        const index = root.list.findIndex((notif) => notif.notificationId === id);\n        const notifServerIndex = notifServer.trackedNotifications.values.findIndex((notif) => notif.id + root.idOffset === id);\n        if (index !== -1) {\n            root.list.splice(index, 1);\n            notifFileView.setText(stringifyList(root.list));\n            triggerListChange()\n        }\n        if (notifServerIndex !== -1) {\n            notifServer.trackedNotifications.values[notifServerIndex].dismiss()\n        }\n        root.discard(id); }",
+  "form": "function",
+  "signature": "void discardNotification(int id)"
+ },
+ "69111679113d": {
+  "cpp": "auto& root = ::ii::services::Notifications::instance();\nconst int index = js::findIndex(root.list.get(), [this](::ii::services::Notifications_Notif* notif) {\n  return notif->notificationId.get() == this->notificationId.get();\n});\n// root.list[-1] 是 undefined\n::ii::services::Notifications_Notif* const notifObject = index != -1 ? root.list.get()[static_cast<std::size_t>(index)] : nullptr;\njs::log(\"[Notifications] Notification timer triggered for ID: \" + std::to_string(this->notificationId.get()) + \", transient: \" +\n        (notifObject != nullptr ? (notifObject->isTransient.get() ? \"true\" : \"false\") : \"undefined\"));  // print(...)\nif (notifObject == nullptr) {\n  // ii: 通知在计时器触发前已被丢弃时 notifObject 是 undefined，读 .isTransient 抛 TypeError，处理函数到此中止：\n  // destroy() 不执行，这个计时器一直留在 root 下\n  return;\n}\nif (notifObject->isTransient.get()) {\n  root.discardNotification(this->notificationId.get());\n} else {\n  root.timeoutNotification(this->notificationId.get());\n}\nthis->destroy();",
+  "kind": "statements (FunctionExpression)",
+  "context": "root.onTriggered",
+  "expected": "handler body, parameters ()",
+  "code": "() => {\n            const index = root.list.findIndex((notif) => notif.notificationId === notificationId);\n            const notifObject = root.list[index];\n            print(\"[Notifications] Notification timer triggered for ID: \" + notificationId + \", transient: \" + notifObject?.isTransient);\n            if (notifObject.isTransient) root.discardNotification(notificationId);\n            else root.timeoutNotification(notificationId);\n            destroy()\n        }",
+  "form": "body"
+ },
+ "6c783b3f9587": {
+  "cpp": "const int index = js::findIndex(this->list.get(), [id](::ii::services::Notifications_Notif* notif) { return notif->notificationId.get() == id; });\n// root.list[index] != null：index 为 -1 时读到 undefined；list 里没有 null\nif (index == -1) {\n  return;\n}\nTimer* timer = this->list.get()[static_cast<std::size_t>(index)]->timer.get();\nif (timer == nullptr) {\n  // ii: 没有计时器的通知（弹出被抑制、expireTimeout 为 0、从文件载入）以及计时器已触发并 destroy() 的通知，\n  // timer 都是 null，JS 在 null 上调 stop() 抛 TypeError，函数到此中止\n  return;\n}\ntimer->stop();",
+  "kind": "function",
+  "context": "root.cancelTimeout",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function cancelTimeout(id) { const index = root.list.findIndex((notif) => notif.notificationId === id);\n        if (root.list[index] != null)\n            root.list[index].timer.stop(); }",
+  "form": "function",
+  "signature": "void cancelTimeout(int id)"
+ },
+ "7d2bca30db5a": {
+  "cpp": "// ii: list.slice(0) 与原列表内容相同。给 list<Notif> 属性赋相同的内容时 QML 不发 listChanged（Qt 6.11 实测），\n// 这一句实际什么也不做；Property::set 遇到相等的值同样不通知\nthis->list.set(js::slice(this->list.get()));",
+  "kind": "statements (call slice)",
+  "context": "root.triggerListChange",
+  "expected": "handler body, parameters ()",
+  "code": "root.list = root.list.slice(0)",
+  "form": "body"
+ },
+ "81a5e043a798": {
+  "cpp": "// notification?.body ?? \"\"：notification 为 null 时是 undefined；body 是字符串属性，不会是 null\nqs::Notification* const n = this->notification.get();\nreturn n != nullptr ? n->body.get() : std::string();",
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.body",
+  "expected": "std::string",
+  "code": "notification?.body ?? \"\"",
+  "form": "expression"
+ },
+ "89fdb8f410b3": {
+  "cpp": "// ii: JS 原地修改 latestTimeForApp，不发 latestTimeForAppChanged。QML 按连接顺序先运行这个处理函数，\n// 再重新求值 groupsByAppName 等绑定，它们读到新的时间；runtime 里绑定先于 changed() 处理函数求值，\n// 所以这里用 set() 通知，让依赖它的绑定再求值一次，最终结果与 QML 相同\nstd::map<std::string, double> latestTimes = this->latestTimeForApp.get();\nconst std::vector<::ii::services::Notifications_Notif*>& notifs = this->list.get();\n// Update latest time for each app\nfor (::ii::services::Notifications_Notif* notif : notifs) {\n  const std::string& appName = notif->appName.get();\n  const double time = notif->time.get();\n  const auto latest = latestTimes.find(appName);\n  // !latestTimeForApp[appName]：没有这个键（undefined）或值为 0、NaN\n  const bool unset = latest == latestTimes.end() || latest->second == 0 || std::isnan(latest->second);\n  if (unset || time > latest->second) {\n    // Math.max(latestTimeForApp[appName] || 0, notif.time)，有 NaN 时得 NaN\n    const double current = unset ? 0.0 : latest->second;\n    latestTimes[appName] = std::isnan(time) ? js::NaN : std::max(current, time);\n  }\n}\n// Remove apps that no longer have notifications\nfor (auto entry = latestTimes.begin(); entry != latestTimes.end();) {\n  const std::string& appName = entry->first;\n  if (!js::some(notifs, [&appName](::ii::services::Notifications_Notif* notif) { return notif->appName.get() == appName; })) {\n    entry = latestTimes.erase(entry);\n  } else {\n    ++entry;\n  }\n}\nthis->latestTimeForApp.set(std::move(latestTimes));",
+  "kind": "statements (FunctionExpression)",
+  "context": "root.onListChanged",
+  "expected": "handler body, parameters ()",
+  "code": "{\n        // Update latest time for each app\n        root.list.forEach((notif) => {\n            if (!root.latestTimeForApp[notif.appName] || notif.time > root.latestTimeForApp[notif.appName]) {\n                root.latestTimeForApp[notif.appName] = Math.max(root.latestTimeForApp[notif.appName] || 0, notif.time);\n            }\n        });\n        // Remove apps that no longer have notifications\n        Object.keys(root.latestTimeForApp).forEach((appName) => {\n            if (!root.list.some((notif) => notif.appName === appName)) {\n                delete root.latestTimeForApp[appName];\n            }\n        });\n    }",
+  "form": "body"
+ },
+ "8ce8d987fb6a": {
+  "cpp": "this->list.set({});\nthis->triggerListChange();\nnotifFileView->setText(this->stringifyList(this->list.get()));\n// ii: values 是 QObjectList 属性，JS 里读到的是对属性的序列引用，每次按下标取值都重新读 values（Qt 6.11 实测）。\n// dismiss() 同步把通知移出 trackedNotifications，而 forEach 开始时取定长度、按下标前进、跳过越界的下标，\n// 所以只关掉第 0、2、4……个，其余的留在服务器里\nconst std::size_t length = notifServer->trackedNotifications.get()->values.get().size();\nfor (std::size_t k = 0; k < length; ++k) {\n  const std::vector<Object*> values = notifServer->trackedNotifications.get()->values.get();\n  if (k < values.size()) {\n    static_cast<qs::Notification*>(values[k])->dismiss();  // trackedNotifications 里都是 Notification\n  }\n}\nthis->discardAll.emit();",
+  "kind": "statements (FunctionExpression)",
+  "context": "root.discardAllNotifications",
+  "expected": "handler body, parameters ()",
+  "code": "root.list = []\n        triggerListChange()\n        notifFileView.setText(stringifyList(root.list));\n        notifServer.trackedNotifications.values.forEach((notif) => {\n            notif.dismiss()\n        })\n        root.discardAll();",
+  "form": "body"
+ },
+ "98c8b3544db9": {
+  "cpp": "std::map<std::string, double>{}",
+  "kind": "binding (ObjectPattern)",
+  "context": "root.latestTimeForApp",
+  "expected": "std::map<std::string, double>",
+  "code": "({})",
+  "form": "expression"
+ },
+ "a4a207059d8a": {
+  "cpp": "qs::Notification* const n = this->notification.get();\nif (n == nullptr) {\n  return false;  // notification?. 得到 undefined，?? false\n}\n// hints 是客户端发来的全部提示（Quickshell 只去掉 image-data 等图像数据），transient 原样在里面\nconst js::Json& hints = n->hints.get();\nconst auto transient = hints.find(\"transient\");\nif (transient == hints.end() || transient->is_null()) {\n  return false;  // undefined 或 null，?? false\n}\n// 其他值赋给 bool 属性时按 JS 真值转换\nif (transient->is_boolean()) {\n  return transient->get<bool>();\n}\nif (transient->is_number()) {\n  const double value = transient->get<double>();\n  return value != 0 && !std::isnan(value);\n}\nif (transient->is_string()) {\n  return !transient->get_ref<const std::string&>().empty();\n}\nreturn true;  // 对象、数组",
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.isTransient",
+  "expected": "bool",
+  "code": "notification?.hints.transient ?? false",
+  "form": "expression"
+ },
+ "ba39bc1f6285": {
+  "cpp": "// GlobalStates 是单例，GlobalStates?. 恒非空；sidebarRightOpen 是 bool，?? false 不生效\nreturn ::ii::GlobalStates::instance().sidebarRightOpen.get() || this->silent.get();",
+  "kind": "binding (operator ??)",
+  "context": "root.popupInhibited",
+  "expected": "bool",
+  "code": "(GlobalStates?.sidebarRightOpen ?? false) || silent",
+  "form": "expression"
+ },
+ "ba6fa307fab3": {
+  "cpp": "// notification?.summary ?? \"\"：notification 为 null 时是 undefined；summary 是字符串属性，不会是 null\nqs::Notification* const n = this->notification.get();\nreturn n != nullptr ? n->summary.get() : std::string();",
+  "kind": "binding (optional chaining)",
+  "context": "wrapper.summary",
+  "expected": "std::string",
+  "code": "notification?.summary ?? \"\"",
+  "form": "expression"
+ },
+ "dd67837015fd": {
+  "cpp": "// ii: groups 是普通 JS 对象，appName 为 \"constructor\"、\"toString\" 等 Object.prototype 上的名字时\n// !groups[appName] 为假，随后 .notifications.push 抛 TypeError；这里不模拟\nstd::map<std::string, NotifGroup> groups;\nconst std::map<std::string, double>& latestTimes = this->latestTimeForApp.get();\nfor (::ii::services::Notifications_Notif* notif : notifs) {  // JS 的参数 list\n  const std::string& appName = notif->appName.get();\n  auto group = groups.find(appName);\n  if (group == groups.end()) {\n    group = groups.emplace(appName, NotifGroup{appName, notif->appIcon.get(), {}, 0}).first;\n  }\n  group->second.notifications.push_back(notif);\n  // Always set to the latest time in the group\n  // latestTimeForApp[appName] || notif.time：没有这个键（undefined）或值为 0、NaN 时取 notif.time\n  const auto latest = latestTimes.find(appName);\n  const double latestTime = latest != latestTimes.end() ? latest->second : 0.0;\n  group->second.time = (latestTime != 0 && !std::isnan(latestTime)) ? latestTime : notif->time.get();\n}\nreturn groups;",
+  "kind": "function",
+  "context": "root.groupsForList",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function groupsForList(list) { const groups = {};\n        list.forEach((notif) => {\n            if (!groups[notif.appName]) {\n                groups[notif.appName] = {\n                    appName: notif.appName,\n                    appIcon: notif.appIcon,\n                    notifications: [],\n                    time: 0\n                };\n            }\n            groups[notif.appName].notifications.push(notif);\n            // Always set to the latest time in the group\n            groups[notif.appName].time = latestTimeForApp[notif.appName] || notif.time;\n        });\n        return groups; }",
+  "form": "function",
+  "signature": "std::map<std::string, NotifGroup> groupsForList(const std::vector<::ii::services::Notifications_Notif*>& notifs)"
+ },
+ "ddbd7f837f94": {
+  "cpp": "return js::filter(this->list.get(), [](::ii::services::Notifications_Notif* notif) { return notif->popup.get(); });",
+  "kind": "binding (FunctionExpression)",
+  "context": "root.popupList",
+  "expected": "std::vector<::ii::services::Notifications_Notif*>",
+  "code": "list.filter((notif) => notif.popup);",
+  "form": "expression"
+ },
+ "f1e5f83a7219": {
+  "cpp": "notification->tracked.set(true);\n::ii::services::Notifications_Notif* const newNotifObject =\n    notifComponent.createObject(*this, [&](::ii::services::Notifications_Notif& o) {\n      o.notificationId.set(notification->id.get() + this->idOffset.get());\n      o.notification.set(notification);\n      o.time.set(js::dateNow());\n    });\nstd::vector<::ii::services::Notifications_Notif*> next = this->list.get();  // [...root.list, newNotifObject]\nnext.push_back(newNotifObject);\nthis->list.set(std::move(next));\n\n// Popup\nif (!this->popupInhibited.get()) {\n  newNotifObject->popup.set(true);\n  const double expireTimeout = notification->expireTimeout.get();\n  if (expireTimeout != 0) {\n    // Config?.options.notifications.timeout ?? 7000：Config 是单例，timeout 是 int 属性，?? 7000 不生效\n    const double interval =\n        expireTimeout < 0 ? ::ii::common::Config::instance().options->notifications.get()->timeout.get() : expireTimeout;\n    newNotifObject->timer.set(notifTimerComponent.createObject(*this, [&](::ii::services::Notifications_NotifTimer& o) {\n      o.notificationId.set(newNotifObject->notificationId.get());\n      o.interval.set(static_cast<int>(interval));  // int 属性截断\n    }));\n  }\n  this->unread.set(this->unread.get() + 1);\n}\n// ii: signal notify(notification: var) 生成为 Signal<js::Json>，装不下 Notif 对象；ii 里没有任何地方接 notify，\n// 这里发出 notifToJSON 的快照\nthis->notify.emit(this->notifToJSON(newNotifObject));\n// console.log(notifToString(newNotifObject));\nnotifFileView->setText(this->stringifyList(this->list.get()));",
+  "kind": "statements (FunctionExpression)",
+  "context": "root/notifServer.onNotification",
+  "expected": "handler body, parameters (qs::Notification* const& notification)",
+  "code": "(notification) => {\n            notification.tracked = true\n            const newNotifObject = notifComponent.createObject(root, {\n                \"notificationId\": notification.id + root.idOffset,\n                \"notification\": notification,\n                \"time\": Date.now(),\n            });\n\t\t\troot.list = [...root.list, newNotifObject];\n\n            // Popup\n            if (!root.popupInhibited) {\n                newNotifObject.popup = true;\n                if (notification.expireTimeout != 0) {\n                    newNotifObject.timer = notifTimerComponent.createObject(root, {\n                        \"notificationId\": newNotifObject.notificationId,\n                        \"interval\": notification.expireTimeout < 0 ? (Config?.options.notifications.timeout ?? 7000) : notification.expireTimeout,\n                    });\n                }\n                root.unread++;\n            }\n            root.notify(newNotifObject);\n            // console.log(notifToString(newNotifObject));\n            notifFileView.setText(stringifyList(root.list));\n        }",
+  "form": "body",
+  "previous": {
+   "form": "statements",
+   "cpp": "notifServer->notification.connectForever([=, this](qs::Notification* notification) {\n  notification->tracked.set(true);\n  ::ii::services::Notifications_Notif* const newNotifObject =\n      notifComponent.createObject(*this, [&](::ii::services::Notifications_Notif& o) {\n        o.notificationId.set(notification->id.get() + this->idOffset.get());\n        o.notification.set(notification);\n        o.time.set(js::dateNow());\n      });\n  std::vector<::ii::services::Notifications_Notif*> next = this->list.get();  // [...root.list, newNotifObject]\n  next.push_back(newNotifObject);\n  this->list.set(std::move(next));\n\n  // Popup\n  if (!this->popupInhibited.get()) {\n    newNotifObject->popup.set(true);\n    const double expireTimeout = notification->expireTimeout.get();\n    if (expireTimeout != 0) {\n      // Config?.options.notifications.timeout ?? 7000：Config 是单例，timeout 是 int 属性，?? 7000 不生效\n      const double interval =\n          expireTimeout < 0 ? ::ii::common::Config::instance().options->notifications.get()->timeout.get() : expireTimeout;\n      newNotifObject->timer.set(notifTimerComponent.createObject(*this, [&](::ii::services::Notifications_NotifTimer& o) {\n        o.notificationId.set(newNotifObject->notificationId.get());\n        o.interval.set(static_cast<int>(interval));  // int 属性截断\n      }));\n    }\n    this->unread.set(this->unread.get() + 1);\n  }\n  // ii: signal notify(notification: var) 生成为 Signal<js::Json>，装不下 Notif 对象；ii 里没有任何地方接 notify，\n  // 这里发出 notifToJSON 的快照\n  this->notify.emit(this->notifToJSON(newNotifObject));\n  // console.log(notifToString(newNotifObject));\n  notifFileView->setText(this->stringifyList(this->list.get()));\n});"
+  }
+ }
+}

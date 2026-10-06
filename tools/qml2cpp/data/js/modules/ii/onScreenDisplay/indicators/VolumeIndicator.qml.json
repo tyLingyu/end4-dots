@@ -1,0 +1,18 @@
+{
+ "88e119fe0372": {
+  "cpp": "// Audio.sink?.audio.volume ?? 0: 0 without a sink; a volume is a number, never null\nqs::PwNode* node = ::ii::services::Audio::instance().sink.get();\nif (node == nullptr) {\n  return 0.0;\n}\nqs::PwNodeAudio* audio = node->audio.get();\nif (audio == nullptr) {\n  // ?. guards only sink: reading .volume of a null audio is a TypeError, and the binding keeps its value\n  throw std::runtime_error(\"TypeError: Cannot read property 'volume' of null\");\n}\nreturn static_cast<double>(audio->volume.get());",
+  "kind": "binding (optional chaining)",
+  "context": "osdValues.value",
+  "expected": "double",
+  "code": "Audio.sink?.audio.volume ?? 0",
+  "form": "expression"
+ },
+ "fc65b734904e": {
+  "cpp": "// Audio.sink?.audio.muted: undefined (falsy) without a sink\nqs::PwNode* node = ::ii::services::Audio::instance().sink.get();\nif (node == nullptr) {\n  return std::string(\"volume_up\");\n}\nqs::PwNodeAudio* audio = node->audio.get();\nif (audio == nullptr) {\n  // ?. guards only sink: reading .muted of a null audio is a TypeError, and the binding keeps its value\n  throw std::runtime_error(\"TypeError: Cannot read property 'muted' of null\");\n}\nreturn audio->muted.get() ? std::string(\"volume_off\") : std::string(\"volume_up\");",
+  "kind": "binding (optional chaining)",
+  "context": "osdValues.icon",
+  "expected": "std::string",
+  "code": "Audio.sink?.audio.muted ? \"volume_off\" : \"volume_up\"",
+  "form": "expression"
+ }
+}
