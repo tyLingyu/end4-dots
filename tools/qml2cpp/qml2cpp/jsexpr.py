@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from .jsast import Node
 from .registry import BuiltinRef, ComponentRef
 from .tsys import AnyType, Prop, TypeSystem
-from .typemap import runtime_for
+from .typemap import cpp_name, runtime_for
 
 NUMERIC = {"double", "int"}
 
@@ -231,7 +231,7 @@ class Translator:
             info = self.ts.registry.builtin_info(ref)
             if name in info.enums.get("Enum", []):
                 cls = "qs::" + info.cpp_name.rsplit("::", 1)[-1]
-                return Value(f"{cls}::{name}", cls)
+                return Value(f"{cls}::{name}", self.ts.quickshell_enum(info.cpp_name))
         if base.attrs["name"] == "Easing":
             # QEasingCurve::Type is sequential, so its position in .qmltypes is its value.
             easing = self.ts.registry.builtins.by_cpp.get("QQmlEasing")
@@ -371,7 +371,7 @@ class Translator:
         if callee.kind == "FieldMemberExpression":
             name = callee.attrs["name"]
             base = self.expression(callee.children[0], scope)
-            target = base.member(name)
+            target = base.member(cpp_name(name))
         elif callee.kind == "IdentifierExpression":
             name = callee.attrs["name"]
             base = scope.root_obj
@@ -385,7 +385,9 @@ class Translator:
             if len(args) != len(signal) or any(t is None for _, t in signal):
                 raise Untranslatable(f"emit {name}")
             coerced = [self.coerce(a, t) for a, (_, t) in zip(args, signal)]
-            return Value(f"{target}.emit({', '.join(coerced)})", "void")
+            member = self.ts.signal_member(base.obj, name)
+            emitter = member if base.cpp == "this" and callee.kind == "IdentifierExpression" else base.member(member)
+            return Value(f"{emitter}.emit({', '.join(coerced)})", "void")
         signature = self.ts.function(base.obj, name) if base.obj is not None else None
         if signature is None and base.obj is not None:
             signature = self.ts.builtin_method(base.obj, name, len(args))

@@ -1,6 +1,6 @@
 {
  "11bbc4842c4f": {
-  "cpp": null,
+  "cpp": "const auto* options = ::ii::common::Config::instance().options;\n// ii: `Config.options?.time.dateWithYearFormat ?? \"dd/MM/yyyy\"`: only a missing options object falls back;\n// an empty format string is kept (?? tests null/undefined only)\nreturn qt::formatDateTime(clockId->date.get(),\n                          options != nullptr ? options->time.get()->dateWithYearFormat.get() : std::string(\"dd/MM/yyyy\"));",
   "kind": "binding (optional chaining)",
   "context": "root.date",
   "expected": "std::string",
@@ -8,7 +8,7 @@
   "form": "expression"
  },
  "1ef52b5764c8": {
-  "cpp": null,
+  "cpp": "fileUptime->reload();\nconst std::string textUptime = fileUptime->text();\n// ii: split() always yields a first element, so `?? 0` never applies; Number(\"\") is 0\nconst double uptimeSeconds = js::toNumber(js::split(textUptime, \" \")[0]);\n\n// Convert seconds to days, hours, and minutes\nconst double days = std::floor(uptimeSeconds / 86400);\nconst double hours = std::floor(std::fmod(uptimeSeconds, 86400) / 3600);\nconst double minutes = std::floor(std::fmod(uptimeSeconds, 3600) / 60);\n\n// Build the formatted uptime string\nstd::string formatted;\nif (days > 0) {\n  formatted += js::toString(days) + \"d\";\n}\nif (hours > 0) {\n  formatted += std::string(!formatted.empty() ? \", \" : \"\") + js::toString(hours) + \"h\";\n}\nif (minutes > 0 || formatted.empty()) {\n  formatted += std::string(!formatted.empty() ? \", \" : \"\") + js::toString(minutes) + \"m\";\n}\nuptime.set(formatted);\n// Config.options?.resources?.updateInterval ?? 3000\nconst auto* options = ::ii::common::Config::instance().options;\nconst auto* resources = options != nullptr ? options->resources.get() : nullptr;\no1->interval.set(resources != nullptr ? resources->updateInterval.get() : 3000);",
   "kind": "statements (ArrayMemberExpression)",
   "context": "root/Timer.0.onTriggered",
   "expected": "handler body, parameters ()",
@@ -16,15 +16,15 @@
   "form": "body"
  },
  "2415a534b215": {
-  "cpp": null,
+  "cpp": "(::ii::common::Config::instance().options->time.get()->secondPrecision.get() || ::ii::GlobalStates::instance().screenLocked.get()) ? qs::SystemClock::Seconds : qs::SystemClock::Minutes",
   "kind": "binding (Block)",
   "context": "root/clock.precision",
-  "expected": "qs::SystemClock",
+  "expected": "qs::SystemClock::Enum",
   "code": "{\n            if (Config.options.time.secondPrecision || GlobalStates.screenLocked)\n                return SystemClock.Seconds;\n            return SystemClock.Minutes;\n        }",
   "form": "expression"
  },
  "9b0e67c0cf38": {
-  "cpp": null,
+  "cpp": "const auto* options = ::ii::common::Config::instance().options;\n// ii: `Config.options?.time.format ?? \"hh:mm\"`: only a missing options object falls back;\n// an empty format string is kept (?? tests null/undefined only)\nreturn qt::formatDateTime(clockId->date.get(),\n                          options != nullptr ? options->time.get()->format.get() : std::string(\"hh:mm\"));",
   "kind": "binding (optional chaining)",
   "context": "root.time",
   "expected": "std::string",
@@ -32,7 +32,7 @@
   "form": "expression"
  },
  "abf189d7a39a": {
-  "cpp": null,
+  "cpp": "const auto* options = ::ii::common::Config::instance().options;\n// ii: `Config.options?.time.shortDateFormat ?? \"dd/MM\"`: only a missing options object falls back;\n// an empty format string is kept (?? tests null/undefined only)\nreturn qt::formatDateTime(clockId->date.get(),\n                          options != nullptr ? options->time.get()->shortDateFormat.get() : std::string(\"dd/MM\"));",
   "kind": "binding (optional chaining)",
   "context": "root.shortDate",
   "expected": "std::string",
@@ -40,7 +40,7 @@
   "form": "expression"
  },
  "e4d759ba3661": {
-  "cpp": null,
+  "cpp": "qt::formatDateTime(clockId->date.get(), \"dddd, MMMM dd\")",
   "kind": "binding (name Qt)",
   "context": "root.collapsedCalendarFormat",
   "expected": "std::string",
@@ -48,7 +48,7 @@
   "form": "expression"
  },
  "f733626063b8": {
-  "cpp": null,
+  "cpp": "const auto* options = ::ii::common::Config::instance().options;\n// ii: `Config.options?.time.dateFormat ?? \"dddd, dd/MM\"`: only a missing options object falls back;\n// an empty format string is kept (?? tests null/undefined only)\nreturn qt::formatDateTime(clockId->date.get(),\n                          options != nullptr ? options->time.get()->dateFormat.get() : std::string(\"dddd, dd/MM\"));",
   "kind": "binding (optional chaining)",
   "context": "root.longDate",
   "expected": "std::string",

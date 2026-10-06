@@ -1,6 +1,6 @@
 {
  "1989fc5e246e": {
-  "cpp": null,
+  "cpp": "const std::string& path = wallColorQuant->wallpaperPath.get();\nreturn js::endsWith(path, \".mp4\") || js::endsWith(path, \".webm\") || js::endsWith(path, \".mkv\") ||\n       js::endsWith(path, \".avi\") || js::endsWith(path, \".mov\");",
   "kind": "binding (call endsWith)",
   "context": "root/wallColorQuant.wallpaperIsVideo",
   "expected": "bool",
@@ -8,7 +8,7 @@
   "form": "expression"
  },
  "5b0333653881": {
-  "cpp": null,
+  "cpp": "const std::vector<Color>& colors = wallColorQuant->colors.get();\n// ii: 取色完成前 colors 为空，colors[0]?.x 是 undefined，undefined + undefined 得 NaN\nif (colors.empty()) {\n  return js::NaN;\n}\nreturn (qt::hslSaturation(colors[0]) + qt::hslLightness(colors[0])) / 2;",
   "kind": "binding (optional chaining)",
   "context": "root.wallpaperVibrancy",
   "expected": "double",
@@ -16,7 +16,7 @@
   "form": "expression"
  },
  "8117d8194b6e": {
-  "cpp": null,
+  "cpp": "// Config 是单例，Config?. 不会短路\nconst auto* transparency = ::ii::common::Config::instance().options->appearance.get()->transparency.get();\nreturn transparency->enable.get()\n           ? (transparency->automatic.get() ? this->autoBackgroundTransparency.get() : transparency->backgroundTransparency.get())\n           : 0.0;",
   "kind": "binding (optional chaining)",
   "context": "root.backgroundTransparency",
   "expected": "double",
@@ -24,7 +24,7 @@
   "form": "expression"
  },
  "91beb11e3f75": {
-  "cpp": null,
+  "cpp": "const auto* background = ::ii::common::Config::instance().options->background.get();\n// Qt.resolvedUrl 相对调用方 QML 文件解析\nreturn qt::resolvedUrl(wallColorQuant->wallpaperIsVideo.get() ? background->thumbnailPath.get() : background->wallpaperPath.get(),\n                       \"modules/common/Appearance.qml\");",
   "kind": "binding (name Qt)",
   "context": "root/wallColorQuant.source",
   "expected": "std::string",
@@ -32,7 +32,7 @@
   "form": "expression"
  },
  "9a906c7019e4": {
-  "cpp": null,
+  "cpp": "std::map<std::string, double>{{\"wght\", 450}, {\"wdth\", 100}}",
   "kind": "binding (ObjectPattern)",
   "context": "root/font/variableAxes.main",
   "expected": "std::map<std::string, double>",
@@ -40,7 +40,7 @@
   "form": "expression"
  },
  "a39535b97963": {
-  "cpp": null,
+  "cpp": "// Config 是单例，Config?. 不会短路\nconst auto* transparency = ::ii::common::Config::instance().options->appearance.get()->transparency.get();\nreturn transparency->automatic.get() ? this->autoContentTransparency.get() : transparency->contentTransparency.get();",
   "kind": "binding (optional chaining)",
   "context": "root.contentTransparency",
   "expected": "double",
@@ -48,7 +48,7 @@
   "form": "expression"
  },
  "cc673afc055b": {
-  "cpp": null,
+  "cpp": "std::map<std::string, double>{{\"wght\", 450}}",
   "kind": "binding (ObjectPattern)",
   "context": "root/font/variableAxes.numbers",
   "expected": "std::map<std::string, double>",
@@ -56,7 +56,7 @@
   "form": "expression"
  },
  "d3040177591c": {
-  "cpp": null,
+  "cpp": "// y = 0.5768x^2 - 0.759x + 0.2896\nconst double x = this->wallpaperVibrancy.get();\nconst double y = 0.5768 * (x * x) - 0.759 * (x) + 0.2896;\n// Math.min/Math.max 遇 NaN 得 NaN（wallpaperVibrancy 在取色前是 NaN）\nconst double clamped = std::isnan(y) ? js::NaN : std::max(0.0, std::min(0.22, y));\nreturn clamped - 0.12 * (this->m3colors.get()->darkmode.get() ? 0 : 1);",
   "kind": "binding (Block)",
   "context": "root.autoBackgroundTransparency",
   "expected": "double",
@@ -64,7 +64,7 @@
   "form": "expression"
  },
  "f8e1145e7257": {
-  "cpp": null,
+  "cpp": "std::map<std::string, double>{{\"wght\", 550}}",
   "kind": "binding (ObjectPattern)",
   "context": "root/font/variableAxes.title",
   "expected": "std::map<std::string, double>",

@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from . import dom
 from .qmltypes import TypeInfo
 from .registry import BuiltinRef, ComponentRef, Registry, TypeRef
-from .typemap import JSON, QML_BASIC, QT_CPP, RUNTIME, VarTypes, qualified_class, runtime_for
+from .typemap import JSON, QML_BASIC, QT_CPP, RUNTIME, VarTypes, cpp_name, qualified_class, runtime_for
 
 
 @dataclass(frozen=True)
@@ -130,10 +130,10 @@ ATTACHED: dict[str, dict[str, tuple[str, str]]] = {
             "bottomMargin": "double",
         }.items()
     },
-    # On a PanelWindow (`namespace` is a C++ keyword).
+    # On a PanelWindow.
     "WlrLayershell": {
         "layer": ("layershell.layer", "qs::WlrLayer"),
-        "namespace": ("layershell.nameSpace", "std::string"),
+        "namespace": ("layershell.namespace_", "std::string"),
         "keyboardFocus": ("layershell.keyboardFocus", "qs::WlrKeyboardFocus"),
     },
 }
@@ -250,8 +250,7 @@ class TypeSystem:
             element, ref = self._qt_type(inner.rstrip("*").strip(), inner.endswith("*"))
             return (f"std::vector<{element}>" if element else None), ref
         if cpp.endswith("::Enum"):
-            # Quickshell's enums are namespaces holding `enum Enum`: WlrLayer::Enum -> qs::WlrLayer.
-            return "qs::" + cpp.removesuffix("::Enum").rsplit("::", 1)[-1], None
+            return self.quickshell_enum(cpp.removesuffix("::Enum")), None
         if is_pointer and cpp == "QQmlComponent":
             return "Component<Object>", None  # sourceComponent, delegate: an implicit component
         if is_pointer:
@@ -263,6 +262,24 @@ class TypeSystem:
                     return (f"{runtime.cpp}*" if runtime else None), ref
             return None, None
         return QT_CPP.get(cpp), None
+
+    def quickshell_enum(self, owner_cpp: str) -> str:
+        """C++ type of Quickshell's `X::Enum`: an enum class qs::X when X only holds the enum
+        (WlrLayer), the nested qs::X::Enum when X is a real class (SystemClock)."""
+        short = owner_cpp.rsplit("::", 1)[-1]
+        info = self.registry.builtins.by_cpp.get(owner_cpp) or next(
+            (i for i in self.registry.builtins.by_cpp.values() if i.cpp_name.rsplit("::", 1)[-1] == short), None)
+        if info is not None and (info.properties or info.signals or info.overloads):
+            return f"qs::{short}::Enum"
+        return f"qs::{short}"
+
+    def signal_member(self, ref: AnyType | None, name: str) -> str:
+        """C++ member of a signal: its name, unless reserved or a property has it too (MouseArea's
+        `pressed` is both; the property keeps the name and the signal is `pressedSignal`)."""
+        prop = self.prop(ref, name) if ref is not None else None
+        if prop is not None and prop.kind == "property":
+            return f"{name}Signal"
+        return cpp_name(name)
 
     def _builtin_view(self, ref: BuiltinRef) -> TypeView:
         info: TypeInfo = self.registry.builtin_info(ref)
@@ -281,7 +298,7 @@ class TypeSystem:
                     cpp, obj = self._qt_type(p.cpp_type, True)
                 if p.is_list and cpp is not None:
                     cpp = f"std::vector<{cpp}>"
-                view.props[p.name] = Prop(p.name, cpp, p.name, object_type=obj, is_list=p.is_list,
+                view.props[p.name] = Prop(p.name, cpp, cpp_name(p.name), object_type=obj, is_list=p.is_list,
                                           readonly=p.is_readonly, owner=ref,
                                           component_of=ref if cpp == "Component<Object>" else None)
         groups: dict[str, dict[str, tuple[str, str]]] = {}
@@ -321,6 +338,9 @@ class TypeSystem:
             if isinstance(ref, ComponentRef):
                 cpp = f"::{qualified_class(ref)}*"  # var-types writes components by their bare name
             return cpp, ref
+        if name == "list<var>" and (listed := self.var_types.lookup(owner, p.name)) is not None:
+            inner = listed.removeprefix("std::vector<").removesuffix(">").strip()
+            return listed, self._type_of_cpp(owner, inner)
         if name.startswith("list<") and name.endswith(">"):
             inner, ref = self._declared_type(owner, dom.PropertyDef(p.name, name[5:-1]))
             return (f"std::vector<{inner}>" if inner else None), ref
@@ -349,7 +369,7 @@ class TypeSystem:
             if nested is not None and (cpp is None or p.type_name in ("QtObject", "var") or ref is not None):
                 ref = AnonRef(owner, path + (p.name,), nested.type_name) if nested.properties else self.resolve(owner, nested.type_name)
                 cpp = f"{self.view(ref).cpp_class}*" if ref is not None else None
-            view.props[p.name] = Prop(p.name, cpp, p.name, object_type=ref, is_list=p.is_list,
+            view.props[p.name] = Prop(p.name, cpp, cpp_name(p.name), object_type=ref, is_list=p.is_list,
                                       readonly=p.is_readonly, owner=view.ref)
 
     def _component_view(self, ref: ComponentRef) -> TypeView:

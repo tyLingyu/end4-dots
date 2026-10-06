@@ -9,6 +9,23 @@ from .registry import SHELL_ROOT, BuiltinRef, ComponentRef
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 
+# Names that can't be C++ members: keywords, and the <cstdio>/<cerrno> macros.
+CPP_RESERVED = set("""
+alignas alignof and and_eq asm auto bitand bitor bool break case catch char char8_t char16_t char32_t class
+compl concept const consteval constexpr constinit const_cast continue co_await co_return co_yield decltype
+default delete do double dynamic_cast else enum explicit export extern false float for friend goto if inline
+int long mutable namespace new noexcept not not_eq nullptr operator or or_eq private protected public register
+reinterpret_cast requires return short signed sizeof static static_assert static_cast struct switch template
+this thread_local throw true try typedef typeid typename union unsigned using virtual void volatile wchar_t
+while xor xor_eq stdin stdout stderr errno assert NULL EOF
+""".split())
+
+
+def cpp_name(name: str) -> str:
+    """A QML member name as a C++ member: reserved names get a `_` suffix (`stdout_`)."""
+    return f"{name}_" if name in CPP_RESERVED else name
+
+
 # Untyped values: JSON whose objects keep insertion order, as JS objects do (runtime/js.h).
 JSON = "js::Json"
 
@@ -153,6 +170,22 @@ def qualified_class(ref: ComponentRef) -> str:
     class), so other headers can forward-declare it."""
     name = f"{ref.path.stem}_{ref.inline}" if ref.inline else ref.path.stem
     return "::".join(["ii", *namespace_parts(ref), name])
+
+
+def component_for_class(qualified: str) -> ComponentRef | None:
+    """The component a generated class name belongs to: ii::services::Notifications_Notif ->
+    services/Notifications.qml (inline Notif). Nested classes resolve to their outer class."""
+    parts = qualified.strip(":").split("::")
+    if parts[:1] != ["ii"]:
+        return None
+    for end in range(len(parts), 1, -1):
+        *ns, cls = parts[1:end]
+        stem, _, inline = cls.partition("_")
+        for base in (SHELL_ROOT / "modules" / "ii", SHELL_ROOT / "modules", SHELL_ROOT):
+            path = base.joinpath(*ns) / f"{stem}.qml"
+            if path.exists() and namespace_parts(ComponentRef(path.resolve())) == ns:
+                return ComponentRef(path.resolve(), inline or None)
+    return None
 
 
 def generated_header(ref: ComponentRef) -> str:

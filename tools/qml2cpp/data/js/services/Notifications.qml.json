@@ -75,7 +75,7 @@
   "cpp": null,
   "kind": "statements (FunctionExpression)",
   "context": "root/notifFileView.onLoadFailed",
-  "expected": "handler body, parameters (const qs::FileViewError& error)",
+  "expected": "handler body, parameters (const qs::FileViewError::Enum& error)",
   "code": "(error) => {\n            if(error == FileViewError.FileNotFound) {\n                console.log(\"[Notifications] File not found, creating new file.\")\n                root.list = []\n                notifFileView.setText(stringifyList(root.list));\n            } else {\n                console.log(\"[Notifications] Error loading file: \" + error)\n            }\n        }",
   "form": "body"
  },

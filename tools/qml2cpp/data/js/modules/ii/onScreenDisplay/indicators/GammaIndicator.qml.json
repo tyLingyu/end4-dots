@@ -6,13 +6,5 @@
   "expected": "double",
   "code": "Hyprsunset.gamma / 100 ?? 0.5",
   "form": "expression"
- },
- "b91dd8cde912": {
-  "cpp": null,
-  "kind": "binding (call tr)",
-  "context": "rotateIcon.name",
-  "expected": "std::string",
-  "code": "Translation.tr(\"Gamma\")",
-  "form": "expression"
  }
 }

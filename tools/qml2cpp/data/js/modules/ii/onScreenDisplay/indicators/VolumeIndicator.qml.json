@@ -1,12 +1,4 @@
 {
- "723ab1460358": {
-  "cpp": null,
-  "kind": "binding (call tr)",
-  "context": "osdValues.name",
-  "expected": "std::string",
-  "code": "Translation.tr(\"Volume\")",
-  "form": "expression"
- },
  "88e119fe0372": {
   "cpp": null,
   "kind": "binding (optional chaining)",

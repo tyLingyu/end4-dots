@@ -40,9 +40,12 @@ python3 -m qml2cpp gen --deps <qml...>    # 重新生成，看桩是否消失
 - **分组和附加属性**：`anchors.*` 是 `anchors().*`，`font.*` 是 `font.*`，`border.*` 是 `border.*`，`Layout.*` 是 `layout().*`。PanelWindow 的 `anchors.top` 等是布尔值，`margins.*` 是边距，`WlrLayershell.layer`/`namespace` 对应 `layershell.layer`/`layershell.nameSpace`。完整的表见 `qml2cpp/tsys.py` 的 `GROUPS`/`ATTACHED`。
 - **信号**：信号是成员 `Signal<Args...> name`。发射用 `x->name.emit(args...)`，连接用 `x->name.connectForever(lambda)`（与对象同寿命）。属性变化信号 `onFooChanged` 是 `x->foo.changed()`。
 - **函数**：方法与 JS 函数同名，是成员函数。
+- **改名规则**（`qml2cpp/typemap.py` 的 `cpp_name`、`tsys.py` 的 `signal_member`）：
+  - C++ 关键字和 `stdout`/`stderr`/`stdin`/`errno` 等宏名加 `_` 后缀，例如 `proc->stdout_`、`layershell.namespace_`。
+  - 属性和信号同名时，属性保留原名，信号加 `Signal` 后缀。例如 MouseArea 的 `pressed` 属性写成 `pressed.get()`，`onPressed` 写成 `pressedSignal`；FileView 的 `loaded` 信号写成 `loadedSignal`。
 - **id**：在构造函数里是成员（`osdTimeout`），在工厂里是局部变量。名字看生成的 `.h`/`.cpp`。
 - **单例**：本项目的单例写成 `::ii::services::Audio::instance()`（类名见生成的头文件）。Quickshell 的单例写成 `qs::Quickshell::instance()`、`qs::Hyprland::instance()`、`qs::Pipewire::instance()`。
-- **Quickshell 类型**：在 `ii::qs` 里，写成 `qs::Process`、`qs::FileView` 等，API 与 `.qmltypes` 逐一对应（`/usr/lib/qt6/qml/Quickshell/**/*.qmltypes`），按上面的属性、信号、方法规则命名。枚举 `X.Value` 写成 `qs::X::Value`。C++ 关键字作名字时加后缀，例如 `namespace` 写成 `nameSpace`。类型映射见 `qml2cpp/typemap.py`。
+- **Quickshell 类型**：在 `ii::qs` 里，写成 `qs::Process`、`qs::FileView` 等，API 与 `.qmltypes` 逐一对应（`/usr/lib/qt6/qml/Quickshell/**/*.qmltypes`），按上面的属性、信号、方法规则命名。枚举 `X.Value` 写成 `qs::X::Value`。类型映射见 `qml2cpp/typemap.py`。
 - **类型**：`string` 是 `std::string`，`real` 是 `double`，`color` 是 `Color`，`list<T>` 是 `std::vector<T>`。`property var` 的类型以生成的 `.h` 为准，结构体在 `shell/src/ii/var_structs.h`。没有固定结构的值用 `js::Json`（`nlohmann::ordered_json`）。
 - **Component**：`comp.createObject(parent)` 写成 `comp.createObject(*parent)`；带初始属性的 `createObject(p, { a: x })` 写成 `comp.createObject(*p, [&](T& o) { o.a.set(x); })`。
 - **颜色**：`Qt.rgba`、`Qt.hsla`、`c.hslHue` 等对应 `qt::rgba`、`qt::hsla`、`qt::hslHue(c)`（`shell/src/runtime/color.h`）。颜色分量是 `c.r`/`c.g`/`c.b`/`c.a`。

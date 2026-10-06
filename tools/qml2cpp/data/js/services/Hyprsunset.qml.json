@@ -1,6 +1,6 @@
 {
  "265fbb99ae05": {
-  "cpp": null,
+  "cpp": "temperatureActive.set(false);\n// console.log(\"[Hyprsunset] Disabling\");\nqs::Quickshell::instance().execDetached(\n    std::vector<std::string>{\"bash\", \"-c\", \"hyprctl hyprsunset temperature \" + js::toString(defaultColorTemperature.get())});",
   "kind": "statements (TemplateLiteral)",
   "context": "root.disableTemperature",
   "expected": "handler body, parameters ()",
@@ -8,7 +8,7 @@
   "form": "body"
  },
  "2d8655ad7512": {
-  "cpp": null,
+  "cpp": "const std::vector<std::string> parts = js::split(to.get(), \":\");\n// without a colon parts[1] is undefined, and Number(undefined) is NaN\nconst double value = parts.size() > 1 ? js::toNumber(parts[1]) : js::NaN;\nreturn std::isfinite(value) ? static_cast<int>(value) : 0;  // an int property stores NaN as 0 (ToInt32)",
   "kind": "binding (ArrayMemberExpression)",
   "context": "root.toMinute",
   "expected": "int",
@@ -16,7 +16,7 @@
   "form": "expression"
  },
  "34a16b3c18a7": {
-  "cpp": null,
+  "cpp": "auto* options = ::ii::common::Config::instance().options;\nauto* light = options != nullptr ? options->light.get() : nullptr;\nauto* night = light != nullptr ? light->night.get() : nullptr;\nreturn night != nullptr ? night->to.get() : std::string(\"06:30\");",
   "kind": "binding (optional chaining)",
   "context": "root.to",
   "expected": "std::string",
@@ -24,7 +24,7 @@
   "form": "expression"
  },
  "416ab02a5a3f": {
-  "cpp": null,
+  "cpp": "auto* options = ::ii::common::Config::instance().options;\nauto* light = options != nullptr ? options->light.get() : nullptr;\nauto* night = light != nullptr ? light->night.get() : nullptr;\nreturn night != nullptr ? night->colorTemperature.get() : 5000;",
   "kind": "binding (optional chaining)",
   "context": "root.colorTemperature",
   "expected": "int",
@@ -32,7 +32,7 @@
   "form": "expression"
  },
  "49301c2f10c6": {
-  "cpp": null,
+  "cpp": "const std::string output = js::trim(stateCollector->text.get());\nif (js::length(output) == 0 || js::startsWith(output, \"Couldn't\")) {\n  temperatureActive.set(false);\n} else {\n  // `output != root.defaultColorTemperature` compares loosely: the string goes through Number()\n  temperatureActive.set(js::toNumber(output) != defaultColorTemperature.get());  // 6000 is the default when off\n}\n// console.log(\"[Hyprsunset] Fetched state:\", output, \"->\", root.temperatureActive);",
   "kind": "statements (call trim)",
   "context": "root/fetchProc/stdout.onStreamFinished",
   "expected": "handler body, parameters ()",
@@ -40,7 +40,7 @@
   "form": "body"
  },
  "4b6302d02b9b": {
-  "cpp": null,
+  "cpp": "manualActive.set(std::nullopt);\nfirstEvaluation.set(true);\nthis->reEvaluate();",
   "kind": "statements (name undefined)",
   "context": "root.onAutomaticChanged",
   "expected": "handler body, parameters ()",
@@ -48,7 +48,7 @@
   "form": "body"
  },
  "52e5deefca06": {
-  "cpp": null,
+  "cpp": "const double value = js::toNumber(js::split(to.get(), \":\")[0]);\nreturn std::isfinite(value) ? static_cast<int>(value) : 0;  // an int property stores NaN as 0 (ToInt32)",
   "kind": "binding (ArrayMemberExpression)",
   "context": "root.toHour",
   "expected": "int",
@@ -56,7 +56,7 @@
   "form": "expression"
  },
  "5349fd834dfe": {
-  "cpp": null,
+  "cpp": "temperatureActive.set(true);\n\n// console.log(\"[Hyprsunset] Enabling\");\nthis->startHyprsunset();\nqs::Quickshell::instance().execDetached(\n    std::vector<std::string>{\"bash\", \"-c\", \"hyprctl hyprsunset temperature \" + js::toString(colorTemperature.get())});",
   "kind": "statements (TemplateLiteral)",
   "context": "root.enableTemperature",
   "expected": "handler body, parameters ()",
@@ -64,23 +64,25 @@
   "form": "body"
  },
  "736d77897eaf": {
-  "cpp": null,
+  "cpp": "if (!manualActive.get().has_value()) {\n  manualActive.set(temperatureActive.get());\n  manualActiveHour.set(clockHour.get());\n  manualActiveMinute.set(clockMinute.get());\n}\n\nmanualActive.set(active.has_value() ? *active : !*manualActive.get());\nif (*manualActive.get()) {\n  this->enableTemperature();\n} else {\n  this->disableTemperature();\n}",
   "kind": "function",
   "context": "root.toggleTemperature",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function toggleTemperature(active) { if (root.manualActive === undefined) {\n            root.manualActive = root.temperatureActive;\n            root.manualActiveHour = root.clockHour;\n            root.manualActiveMinute = root.clockMinute;\n        }\n\n        root.manualActive = active !== undefined ? active : !root.manualActive;\n        if (root.manualActive) {\n            root.enableTemperature();\n        } else {\n            root.disableTemperature();\n        } }",
-  "form": "function"
+  "form": "function",
+  "signature": "void toggleTemperature(std::optional<bool> active = std::nullopt)"
  },
  "80ec13754607": {
-  "cpp": null,
+  "cpp": "// Math.min/Math.max propagate NaN, and an int property stores NaN as 0 (ToInt32)\nthis->gamma.set(std::isnan(gamma) ? 0 : static_cast<int>(std::max(gammaLowerLimit.get(), std::min(100.0, gamma))));\n\nthis->gammaChangeAttempt.emit();\n\nthis->startHyprsunset();\nqs::Quickshell::instance().execDetached(\n    std::vector<std::string>{\"bash\", \"-c\", \"hyprctl hyprsunset gamma \" + js::toString(this->gamma.get())});",
   "kind": "function",
   "context": "root.setGamma",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function setGamma(gamma) { root.gamma = Math.max(root.gammaLowerLimit, Math.min(100, gamma));\n\n        root.gammaChangeAttempt();\n\n        root.startHyprsunset();\n        Quickshell.execDetached([\"bash\", \"-c\", `hyprctl hyprsunset gamma ${root.gamma}`]); }",
-  "form": "function"
+  "form": "function",
+  "signature": "void setGamma(double gamma)"
  },
  "86324640c2a5": {
-  "cpp": null,
+  "cpp": "qs::Quickshell::instance().execDetached(std::vector<std::string>{\"bash\", \"-c\", \"pidof hyprsunset || hyprsunset\"});",
   "kind": "statements (TemplateLiteral)",
   "context": "root.startHyprsunset",
   "expected": "handler body, parameters ()",
@@ -88,7 +90,7 @@
   "form": "body"
  },
  "8789aabcbc2d": {
-  "cpp": null,
+  "cpp": "auto* options = ::ii::common::Config::instance().options;\nauto* light = options != nullptr ? options->light.get() : nullptr;\nauto* night = light != nullptr ? light->night.get() : nullptr;\n// Config?.ready ?? true: the singleton exists and `ready` is a bool, so this is Config.ready\nreturn night != nullptr && night->automatic.get() && ::ii::common::Config::instance().ready.get();",
   "kind": "binding (optional chaining)",
   "context": "root.automatic",
   "expected": "bool",
@@ -96,7 +98,7 @@
   "form": "expression"
  },
  "8d60c8d96c26": {
-  "cpp": null,
+  "cpp": "if (!temperatureActive.get()) {\n  return;\n}\nqs::Quickshell::instance().execDetached(std::vector<std::string>{\n    \"hyprctl\", \"hyprsunset\", \"temperature\",\n    js::toString(::ii::common::Config::instance().options->light.get()->night.get()->colorTemperature.get())});",
   "kind": "statements (TemplateLiteral)",
   "context": "root/Connections.0.Connections.onColorTemperatureChanged",
   "expected": "handler body, parameters (; `target` is the ::ii::common::Config::ConfigOptionsJsonAdapterLightNight*)",
@@ -104,7 +106,7 @@
   "form": "body"
  },
  "9ab84924788c": {
-  "cpp": null,
+  "cpp": "const std::vector<std::string> parts = js::split(from.get(), \":\");\n// without a colon parts[1] is undefined, and Number(undefined) is NaN\nconst double value = parts.size() > 1 ? js::toNumber(parts[1]) : js::NaN;\nreturn std::isfinite(value) ? static_cast<int>(value) : 0;  // an int property stores NaN as 0 (ToInt32)",
   "kind": "binding (ArrayMemberExpression)",
   "context": "root.fromMinute",
   "expected": "int",
@@ -112,23 +114,16 @@
   "form": "expression"
  },
  "9d07f21fab39": {
-  "cpp": null,
+  "cpp": "if (from < to) {\n  return t >= from && t <= to;\n}\n// Wrapped around midnight\nreturn t >= from || t <= to;",
   "kind": "function",
   "context": "root.inBetween",
   "expected": "signature (C++ declaration) + cpp (function body statements)",
   "code": "function inBetween(t, from, to) { if (from < to) {\n            return (t >= from && t <= to);\n        } else {\n            // Wrapped around midnight\n            return (t >= from || t <= to);\n        } }",
-  "form": "function"
- },
- "a76c94d35b52": {
-  "cpp": null,
-  "kind": "statements (call setGamma)",
-  "context": "root/updateHyprsunset.onTriggered",
-  "expected": "handler body, parameters ()",
-  "code": "{\n            root.ensureState();\n            root.setGamma(root.gamma);\n        }",
-  "form": "body"
+  "form": "function",
+  "signature": "bool inBetween(double t, double from, double to)"
  },
  "bc928a411746": {
-  "cpp": null,
+  "cpp": "auto* options = ::ii::common::Config::instance().options;\nauto* light = options != nullptr ? options->light.get() : nullptr;\nauto* night = light != nullptr ? light->night.get() : nullptr;\nreturn night != nullptr ? night->from.get() : std::string(\"19:00\");",
   "kind": "binding (optional chaining)",
   "context": "root.from",
   "expected": "std::string",
@@ -136,7 +131,7 @@
   "form": "expression"
  },
  "c4a9566f6bf5": {
-  "cpp": null,
+  "cpp": "const double value = js::toNumber(js::split(from.get(), \":\")[0]);\nreturn std::isfinite(value) ? static_cast<int>(value) : 0;  // an int property stores NaN as 0 (ToInt32)",
   "kind": "binding (ArrayMemberExpression)",
   "context": "root.fromHour",
   "expected": "int",
@@ -144,7 +139,7 @@
   "form": "expression"
  },
  "cd3810476727": {
-  "cpp": null,
+  "cpp": "// console.log(\"[Hyprsunset] Ensuring state:\", root.shouldBeOn, \"Automatic mode:\", root.automatic);\nif (!automatic.get() || manualActive.get().has_value()) {\n  return;\n}\nif (shouldBeOn.get()) {\n  this->enableTemperature();\n} else {\n  this->disableTemperature();\n}",
   "kind": "statements (name undefined)",
   "context": "root.ensureState",
   "expected": "handler body, parameters ()",
@@ -152,7 +147,7 @@
   "form": "body"
  },
  "df0191b5f7ae": {
-  "cpp": null,
+  "cpp": "const double t = clockHour.get() * 60.0 + clockMinute.get();\nconst double fromTime = fromHour.get() * 60.0 + fromMinute.get();\nconst double toTime = toHour.get() * 60.0 + toMinute.get();\nconst double manualActiveTime = manualActiveHour.get() * 60.0 + manualActiveMinute.get();\n\nif (manualActive.get().has_value()\n    && (this->inBetween(fromTime, manualActiveTime, t) || this->inBetween(toTime, manualActiveTime, t))) {\n  manualActive.set(std::nullopt);\n}\nshouldBeOn.set(this->inBetween(t, fromTime, toTime));\nif (firstEvaluation.get()) {\n  firstEvaluation.set(false);\n  this->ensureState();\n}",
   "kind": "statements (name undefined)",
   "context": "root.reEvaluate",
   "expected": "handler body, parameters ()",

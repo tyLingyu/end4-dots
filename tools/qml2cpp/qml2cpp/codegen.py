@@ -15,7 +15,7 @@ from .jsstore import JsStore
 from .registry import SHELL_ROOT, BuiltinRef, ComponentRef
 from .tsys import ATTACHED, AnonRef, AnyType, TypeSystem
 from .structs import HEADER as STRUCTS_HEADER
-from .typemap import JSON, RUNTIME, generated_header, namespace_parts, qualified_class, runtime_for
+from .typemap import JSON, RUNTIME, component_for_class, generated_header, namespace_parts, qualified_class, runtime_for
 
 # Properties ii sets that have no effect in ii-shell's renderer.
 IGNORED = {"renderType", "antialiasing", "smooth", "font.hintingPreference", "layer.smooth", "linkColor"}
@@ -104,6 +104,19 @@ class ComponentGen:
                 runtime = next((r for r in RUNTIME.values() if r.cpp == word), None)
                 if runtime is not None:
                     self.header_includes.add(runtime.header)
+
+    def scan_includes(self, code: str) -> None:
+        """Headers for the classes the final code names, filled translations included."""
+        for m in re.finditer(r"::ii(?:::\w+)+", code):
+            ref = component_for_class(m.group(0))
+            if ref is not None and ref.path != self.ref.path:
+                self.includes.add(generated_header(ref))
+        for m in re.finditer(r"\bqs::(\w+)", code):
+            runtime = next((r for r in RUNTIME.values() if r.cpp == f"qs::{m.group(1)}"), None)
+            if runtime is not None:
+                self.includes.add(runtime.header)
+        if re.search(r"\bqt::", code):
+            self.includes.add("runtime/qt.h")
 
     def is_visual(self, t: AnyType | None) -> bool:
         return t is not None and self.ts.view(t).is_visual
@@ -507,14 +520,14 @@ class ComponentGen:
         name = handler_name[2:3].lower() + handler_name[3:]
         params = self.ts.signal(e.type, name)
         if params is not None:
-            return self.member_of(e.var, name), params
+            return self.member_of(e.var, self.ts.signal_member(e.type, name)), params
         if name.endswith("Changed") and (prop := self.ts.prop(e.type, name[: -len("Changed")])) is not None:
             if prop.kind == "property":
                 return f"{self.member_of(e.var, prop.access)}.changed()", []
         return None
 
     def connect_lines(self, signal: str, params: list[tuple[str, str | None]], body: list[str], connect: str) -> list[str]:
-        decls = ", ".join(f"const {t}& {n}" for n, t in params)
+        decls = ", ".join(f"[[maybe_unused]] const {t}& {n}" for n, t in params)
         return [f"{signal}.{connect}([=, this]({decls}) {{", *(f"  {line}" for line in body), "});"]
 
     def handler(self, e: Emitted, b: dom.Binding) -> None:
@@ -625,7 +638,7 @@ class ComponentGen:
         for m in self.component.root.methods:
             if m.kind == "signal":
                 params = self.ts.signal(self.ref, m.name) or []
-                out.append(f"Signal<{', '.join(t or JSON for _, t in params)}> {m.name};")
+                out.append(f"Signal<{', '.join(t or JSON for _, t in params)}> {self.ts.signal_member(self.ref, m.name)};")
                 self.uses_type(JSON if any(t is None for _, t in params) else None)
         for p in self.component.root.properties:
             prop = self.view.props[p.name]
@@ -640,7 +653,7 @@ class ComponentGen:
             else:
                 cpp = prop.cpp_type or f"{JSON} /* TODO type */"
                 self.uses_type(cpp)
-                out.append(f"Property<{cpp}> {p.name};")
+                out.append(f"Property<{cpp}> {prop.access};")
         return out
 
     def alias_wiring(self) -> None:
@@ -686,6 +699,7 @@ class ComponentGen:
                 self.includes.add(generated_header(r))
             elif (runtime := runtime_for(r)) is not None:
                 self.includes.add(runtime.header)
+        self.scan_includes("\n".join(self.body + self.definitions))
 
         base = self.class_of(self.view.base) or "Object"
         singleton = self.view.is_singleton
@@ -707,9 +721,17 @@ class ComponentGen:
         ]
         self.defn = [
             *([f"{self.cls}& {self.cls}::instance() {{",
-               f"  static {self.cls} object;",
-               "  object.complete();",
-               "  return object;",
+               "  // Published before it is constructed: bindings reached while constructing (an inline",
+               "  // component reading its singleton, singletons reading each other) get the object under",
+               "  // construction and re-evaluate once its properties are set, as in QML. A function-local",
+               "  // static object would throw recursive_init_error instead.",
+               f"  static {self.cls}* self = nullptr;",
+               "  if (self == nullptr) {",
+               f"    self = static_cast<{self.cls}*>(::operator new(sizeof({self.cls})));",
+               f"    new (self) {self.cls}();",
+               "    self->complete();",
+               "  }",
+               "  return *self;",
                "}", ""] if singleton else []),
             f"{self.cls}::{self.cls}() {{",
             *(f"  {line}" for line in self.body),
