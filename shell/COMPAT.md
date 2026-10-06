@@ -1,61 +1,45 @@
-# 阶段 3 待实现清单
+# 阶段 3：运行时与 Quickshell 兼容层
 
-qml2cpp 为 OSD 及其依赖（24 个 QML 文件）生成的代码引用了下面这些东西，但它们还不存在。清单来自生成代码的 include、各文件的 JS 译文，以及填写译文时的报告。API 的命名约定见 [`tools/qml2cpp/FILL.md`](../tools/qml2cpp/FILL.md)，概括如下：
+OSD（`modules/ii/onScreenDisplay`）及其依赖共 24 个 QML 文件，由 [`tools/qml2cpp`](../tools/qml2cpp) 生成到 `src/ii/`。这些代码现在能编译，也能无头运行（`tests/generated/osd_test.cpp`）：
 
-- 属性是 `Property<T>`，信号是 `Signal<...>`，方法与 QML 同名。
-- 保留字加 `_` 后缀；属性与信号同名时，信号加 `Signal` 后缀。
-- Quickshell 类型在 `ii::qs`，与 `.qmltypes` 逐一对应。
+- 面板随 `GlobalStates.osdVolumeOpen` 加载、卸载；
+- 指示器按 URL 加载；
+- Config 写出的默认 `config.json` 与真实 Quickshell 写出的**逐字节相同**。
 
-## 运行时（`src/runtime`）
+API 命名约定见 [`tools/qml2cpp/FILL.md`](../tools/qml2cpp/FILL.md)。行为以 Qt 6.11 / Quickshell 7511545 的源码为准，移植处在代码中注明出处。
 
-| 头文件 | 内容 |
+## 已完成（3a）
+
+| 部分 | 内容 |
 |---|---|
-| `geometry.h` | `Point`、`Size`、`Rect`（值类型，带 `operator==`） |
-| `datetime.h` | `DateTime` |
-| `timer.h` | `Timer`：`interval`、`running`、`repeat`、`triggeredOnStart`、`triggered`、`start/stop/restart`。Qt 的行为：`triggeredOnStart` 加不重复的计时器会触发两次，启动时一次，到期一次 |
-| `connections.h` | `Connections`：`target`（`Property<Object*>`）、`setConnector(fn(Object*, std::vector<Connection>&))`，target 变化时重连，target 为空时不连 |
-| `loader.h` | `Loader`：`active`、`sourceComponent`（`Component<Object>`）、`source`（相对 QML 文件的 URL，需要生成器提供 URL 到工厂的注册表）、`item` |
-| `mouse_area.h` | `MouseArea`：`hoverEnabled`、`entered`，`pressed` 属性和 `pressedSignal` 信号 |
-| `canvas.h` | `Canvas`：`getContext("2d")`（跨帧保留状态，不支持的 id 返回 nullptr）、`requestPaint()`、`Signal<const Rect&> paint`。`Context2D`：`clearRect`、`setStrokeStyle(Color)`、`setLineWidth`（忽略 ≤0 和非有限值）、`lineWidth()`、`setLineCap("butt"/"round"/"square")`、`beginPath`、`moveTo`、`lineTo`（空路径时等于 moveTo，忽略非有限坐标）、`stroke` |
-| `effects.h` | `RectangularShadow`：`radius`、`blur`、`spread`、`offset`（`Point`）、`color`、`cached` |
-| `controls.h` | `ProgressBar`（QtQuick.Templates 的属性） |
-| `qt.h` | `qt::formatDateTime(DateTime, format)`（`Qt.locale().toString`，系统 locale，含本地化的星期和月份名）、`qt::locale().name()`、`qt::resolvedUrl(url, qmlFile)`、`qt::vector2d`、`qt::StandardPaths::standardLocations(...)`（返回 `file://` URL，无末尾斜杠；Cache 和 State 位置在 quickshell 下是 `~/.cache/quickshell`、`~/.local/state/quickshell`） |
-| `js.h` | `js::dateNow()`（`Date.now()`，毫秒，double） |
+| 运行时 | Timer（QQmlTimer 语义）、Connections、Loader（deleteLater 卸载，`source` 走生成的组件表）、MouseArea（InputArea）、Canvas + Context2D（Cairo）、RectangularShadow（Qt 的几何与着色器）、Control/ProgressBar、FrameAnimation、`alwaysRunToEnd`、驱动动画组的 Behavior、`Object::deleteLater`、FdWatch、geometry/datetime、`qt.h`（formatDateTime、resolvedUrl、StandardPaths、locale）、`js::deref`（JS 的 TypeError） |
+| 兼容层 | Process / SplitParser / StdioCollector（fork/exec + pidfd）、SystemClock、FileView（读写）、JsonAdapter/JsonObject（生成的反射，Qt 的 JSON 格式）、Variants（委托）、ObjectModel、Scope/Singleton、ShellScreen、Quickshell（路径、execDetached）、IpcHandler（注册） |
+| 生成器 | Variants 委托、Behavior 动画组与内联动画组件、JsonObject 反射、模板字符串、字符串/数组方法、全局转换函数、组件表、单对象默认属性、可空指针访问 |
 
-还缺几项运行时能力：
+## 3b：系统集成（API 已有，行为未接）
 
-- `Object::destroy()`（QML 的 `destroy()`）：要延迟执行，NotifTimer 会在自己的 `triggered` 里销毁自己。
-- 指向对象的属性在对象销毁后自动置空并发出 `changed()`（QPointer 语义）。Notifications 依赖这一点。
-- 能驱动动画组的 Behavior：`SequentialAnimation`/`ParallelAnimation` 里的 `PropertyAction {}` 在那一刻写入新值（StyledText 的文字动画）。
-- `Animation::alwaysRunToEnd`。
-- 单例的退出顺序：`instance()` 创建后从不销毁，退出时需要显式清理（例如结束 Process 子进程、写回文件）。
-
-## Quickshell 兼容层（`src/compat`，命名空间 `ii::qs`）
-
-| 头文件 | 内容 |
+| 部分 | 要做的 |
 |---|---|
-| `scope.h` | `Scope`、`Singleton` |
-| `panel_window.h` | `PanelWindow`：`anchors.{left,right,top,bottom}`（bool）、`margins.*`、`exclusiveZone`、`exclusionMode`、`layershell.{layer,namespace_,keyboardFocus}`、`color`、`visible`、`implicitWidth/Height`（int）、`screen`、`mask`（`Region*`）、`contentItem()`。`Region`（`item` 等）。枚举 `WlrLayer`、`WlrKeyboardFocus`、`ExclusionMode` |
-| `screen.h` | `ShellScreen`（`name` 等） |
-| `quickshell.h` | 单例 `Quickshell`：`screens`、`shellPath()`、`execDetached(std::vector<std::string>)` |
-| `hyprland.h` | 单例 `Hyprland`（`focusedMonitor`）、`HyprlandMonitor`（`name`）、`HyprlandWorkspace`、`GlobalShortcut`（`name`、`description`，`pressed` 属性和 `pressedSignal` 信号） |
-| `ipc.h` | `IpcHandler`：`target`、`addFunction(name, fn(args) -> std::string)` |
-| `process.h` | `Process`：`command`、`running`、`stdout_`（`DataStreamParser*`）、`exited(int, int)`。`StdioCollector`：`text`、`streamFinished`。`SplitParser`：`read(std::string)` |
-| `file_view.h` | `FileView`：`path`（去掉 `file://`）、`text()`、`setText()`、`reload()`、`loaded` 属性和 `loadedSignal` 信号、`loadFailed(FileViewError::Enum)`、`fileChanged`、`adapterUpdated`、`blockWrites`、`watchChanges`、`writeAdapter()`。`JsonAdapter`、`JsonObject`：读写 JSON 需要按属性名反射，由生成器为其子类生成 `toJson`/`fromJson`/按路径设值（Config 的 `setNestedValue` 也依赖它） |
-| `system_clock.h` | `SystemClock`：`date`、`precision`（`SystemClock::Enum`：`Hours`、`Minutes`、`Seconds`） |
-| `pipewire.h` | 单例 `Pipewire`（`defaultAudioSink/Source`、`nodes`、`ready`）。`PwNode`（`audio`、`isSink`、`isStream`、`name`、`description`、`properties`）。`PwNodeAudio`（`volume`、`muted`、`volumes`）：`volume` 的变化信号就是 `volumes.changed()`，与 Quickshell 的 `volumesChanged` 一致，任一声道变化都触发。`PwObjectTracker`（`objects`） |
-| `notifications.h` | `NotificationServer`：`trackedNotifications`、`notification(Notification*)`，以及能力属性。`Notification`：`id`、`tracked`（可写）、`expireTimeout`（毫秒）、`appName`、`appIcon`、`summary`、`body`、`image`、`urgency`、`actions`、`hints`（`js::Json`）、`dismiss()`。`NotificationAction`：`identifier`、`text`、`invoke()`。枚举 `NotificationUrgency` |
-| `object_model.h` | `UntypedObjectModel`：`values`（`std::vector<Object*>`） |
-| `color_quantizer.h` | `ColorQuantizer`：`source`、`depth`、`rescaleSize`、`colors` |
-| `variants.h` | `Variants` 与委托运行时，见下 |
+| `compat/hyprland` | Hyprland IPC：请求 socket 与 socket2 事件，monitors/workspaces/toplevels、focusedMonitor、`dispatch`、`rawEvent` |
+| `GlobalShortcut` | hyprland-global-shortcuts-v1，appid `iishell` |
+| `compat/ipc` | `ii-shell ipc call <target> <function>` 的 socket 服务端与命令行 |
+| `compat/pipewire` | libpipewire：节点、默认 sink/source、PwNodeAudio 的 volume/muted/volumes（`volume` 通过 `volumes.changed()` 通知） |
+| `FileView` | `watchChanges`（inotify），Quickshell 写入后靠它重新加载并让 `Config.ready` 变为 true |
+| `ColorQuantizer` | 移植 Quickshell 的量化算法 |
+| `compat/notifications` | org.freedesktop.Notifications 服务端（OSD 用不到，通知界面移植时做） |
 
-## 生成器要补的
+## 3c：上屏
 
-- **委托**：`Variants`、`Repeater` 等以 Component 为默认属性的类型。要按模型项实例化，并设置 `required property modelData`/`index`。Brightness 目前在这里留了桩。
-- **Loader 的 `source:` URL**：需要 URL 到生成类工厂的注册表。
-- **JsonObject/JsonAdapter 的反射**：见上。
-- **动画组**：Behavior 驱动动画组；Behavior 带 id 或自有属性。这两种目前都生成桩。
-- **非单例外层文件的 id**：内联组件引用它时需要外层对象的指针（StyledText 的 `Anim`）。
+- **PanelWindow**：用 Noctalia 的 LayerSurface 实现，含 anchors/margins/exclusiveZone/layer/namespace/mask，`contentItem` 渲染进窗口。
+- **Quickshell.screens**：由 Wayland 输出填充。
+- **Canvas**：像素上传为纹理。
+- **main.cpp**：把 FdWatch 交给主循环、设置 `Loader::setResolver(generatedComponent)`、创建 OnScreenDisplay。
+- **验收**：与 qs 的 OSD 做视觉对比，并测量内存（目标 ≤150 MB PSS）。
+
+## 生成器以后要补的
+
+- **委托**：Repeater、Instantiator 的委托（Variants 已完成），以及 `index` 与模型角色。
+- **内联组件**：引用非单例外层文件的 id，以及带声明的内联动画组件。
 - **var 类型的信号参数**：例如 `Notifications.notify(notification: var)`，现在是 `js::Json`。
 - **多余的 `this` 捕获**：没用到 `this` 的 lambda 也捕获了它（clang 的 `-Wunused-lambda-capture`）。
 
@@ -76,4 +60,5 @@ qml2cpp 为 OSD 及其依赖（24 个 QML 文件）生成的代码引用了下�
 - `SystemInfo`：输出里没有逗号时，解构会抛错，`windowingSystem` 保持不变。
 - `WavyLine`：`x === 0` 的分支永远不会执行。
 - `StyledText`：`onCompleted` 冻结了 `originalX/Y` 的绑定。
+- Quickshell 的 `SplitParser`：标记之后紧跟的字节不会被当作下一个标记的开头，所以 `"a\n\nb"` 读出 `"a"` 和 `"\nb"`（已原样移植）。
 - var-types 中记录的其他问题见 `tools/qml2cpp/data/README.md`。
