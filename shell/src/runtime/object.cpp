@@ -1,5 +1,7 @@
 #include "runtime/object.h"
 
+#include "core/deferred_call.h"
+
 #include <algorithm>
 
 namespace ii {
@@ -20,6 +22,14 @@ namespace ii {
     m_owned.erase(it);
     released->m_owner = nullptr;
     return released;
+  }
+
+  void Object::deleteLater() {
+    if (m_owner == nullptr) {
+      return;
+    }
+    std::shared_ptr<Object> pending(m_owner->release(this).release());
+    DeferredCall::callLater([pending] {});  // destroyed with the queued call, after it has run
   }
 
   void Object::complete() {

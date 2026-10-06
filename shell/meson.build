@@ -109,6 +109,17 @@ _protocol_sources += custom_target('wlr-layer-shell-unstable-v1-client-source',
 # ── ii-shell ──────────────────────────────────────────────────────────────────
 ii_sources = files(
   'src/app/main_loop.cpp',
+  'src/compat/color_quantizer.cpp',
+  'src/compat/file_view.cpp',
+  'src/compat/hyprland.cpp',
+  'src/compat/ipc.cpp',
+  'src/compat/notifications.cpp',
+  'src/compat/panel_window.cpp',
+  'src/compat/pipewire.cpp',
+  'src/compat/process.cpp',
+  'src/compat/quickshell.cpp',
+  'src/compat/system_clock.cpp',
+  'src/compat/variants.cpp',
   'src/core/deferred_call.cpp',
   'src/core/files/directory_scanner.cpp',
   'src/core/files/file_watcher.cpp',
@@ -154,6 +165,7 @@ ii_sources = files(
   'src/render/programs/lockscreen_transition_program.cpp',
   'src/render/programs/rect_program.cpp',
   'src/render/programs/screen_corner_program.cpp',
+  'src/render/programs/shadow_program.cpp',
   'src/render/programs/spinner_program.cpp',
   'src/render/programs/wallpaper_mask_program.cpp',
   'src/render/programs/wallpaper_program.cpp',
@@ -171,17 +183,26 @@ ii_sources = files(
   'src/render/wallpaper_renderer.cpp',
   'src/runtime/anchors.cpp',
   'src/runtime/animation.cpp',
+  'src/runtime/canvas.cpp',
   'src/runtime/color.cpp',
+  'src/runtime/connections.cpp',
+  'src/runtime/controls.cpp',
   'src/runtime/easing.cpp',
+  'src/runtime/fd_watch.cpp',
+  'src/runtime/effects.cpp',
   'src/runtime/item.cpp',
   'src/runtime/js.cpp',
   'src/runtime/layout.cpp',
+  'src/runtime/loader.cpp',
+  'src/runtime/mouse_area.cpp',
   'src/runtime/object.cpp',
   'src/runtime/positioner.cpp',
+  'src/runtime/qt.cpp',
   'src/runtime/property.cpp',
   'src/runtime/rectangle.cpp',
   'src/runtime/text.cpp',
   'src/runtime/text_layout.cpp',
+  'src/runtime/timer.cpp',
   'src/system/app_identity.cpp',
   'src/system/desktop_entry.cpp',
   'src/system/internal_app_metadata.cpp',
@@ -232,6 +253,18 @@ ii_core_dep = declare_dependency(
   include_directories: ii_include,
   dependencies: ii_dependencies,
 )
+
+# qml2cpp's output (tools/qml2cpp), when it has been generated: src/ii/meson.build lists it.
+if import('fs').exists('src/ii/meson.build')
+  subdir('src/ii')
+  ii_generated = static_library('ii-generated',
+    ii_generated_sources,
+    dependencies: ii_core_dep,
+    # QML scoping: a function's parameters may share names with the component's properties.
+    cpp_args: ii_cpp_args + ['-Wno-shadow'],
+  )
+  ii_generated_dep = declare_dependency(link_with: ii_generated, dependencies: ii_core_dep)
+endif
 
 # LSan suppressions must be linked into each executable (see the file).
 ii_exe_sources = get_option('b_sanitize').contains('address') ? files('src/core/lsan_suppressions.cpp') : []

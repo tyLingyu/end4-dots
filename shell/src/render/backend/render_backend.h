@@ -16,6 +16,7 @@ struct wl_surface;
 struct WallpaperDrawParams;
 struct WallpaperMaskDrawParams;
 struct LockscreenTransitionDrawParams;
+struct ShadowStyle;
 
 class RenderFramebuffer {
 public:
@@ -141,6 +142,11 @@ public:
   ) = 0;
   virtual void drawImage(const RenderImageDraw& draw) = 0;
   virtual void drawGlyph(const RenderGlyphDraw& draw) = 0;
+  // ii-shell: QtQuick.Effects RectangularShadow.
+  virtual void drawShadow(
+      float surfaceWidth, float surfaceHeight, float width, float height, const ShadowStyle& style,
+      const Mat3& transform
+  ) = 0;
   virtual void drawSpinner(
       float surfaceWidth, float surfaceHeight, float width, float height, const SpinnerStyle& style,
       const Mat3& transform

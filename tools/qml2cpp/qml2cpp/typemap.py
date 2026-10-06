@@ -115,6 +115,8 @@ RUNTIME: dict[str, Runtime] = {
     "QtQml/Connections": Runtime("Connections", "runtime/connections.h", False),
     "QtQuick/Loader": Runtime("Loader", "runtime/loader.h", True),
     "QtQuick/MouseArea": Runtime("MouseArea", "runtime/mouse_area.h", True),
+    "QtQuick/MouseEvent": Runtime("MouseEvent", "runtime/mouse_area.h", False),
+    "QtQuick/WheelEvent": Runtime("WheelEvent", "runtime/mouse_area.h", False),
     "QtQuick/Canvas": Runtime("Canvas", "runtime/canvas.h", True),
     "QtQuick/FrameAnimation": Runtime("FrameAnimation", "runtime/animation.h", False),
     "QtQuick.Effects/RectangularShadow": Runtime("RectangularShadow", "runtime/effects.h", True),

@@ -26,6 +26,7 @@ enum class NodeType : std::uint8_t {
   Wallpaper,
   LockscreenTransition,
   RenderProxy,
+  Shadow, // ii-shell: RectangularShadow
 };
 
 enum class NodeInvalidation : std::uint8_t {

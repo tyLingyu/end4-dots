@@ -133,9 +133,9 @@ ATTACHED: dict[str, dict[str, tuple[str, str]]] = {
     },
     # On a PanelWindow.
     "WlrLayershell": {
-        "layer": ("layershell.layer", "qs::WlrLayer"),
+        "layer": ("layershell.layer", "qs::WlrLayer::Enum"),
         "namespace": ("layershell.namespace_", "std::string"),
-        "keyboardFocus": ("layershell.keyboardFocus", "qs::WlrKeyboardFocus"),
+        "keyboardFocus": ("layershell.keyboardFocus", "qs::WlrKeyboardFocus::Enum"),
     },
 }
 
@@ -267,14 +267,9 @@ class TypeSystem:
         return QT_CPP.get(cpp), None
 
     def quickshell_enum(self, owner_cpp: str) -> str:
-        """C++ type of Quickshell's `X::Enum`: an enum class qs::X when X only holds the enum
-        (WlrLayer), the nested qs::X::Enum when X is a real class (SystemClock)."""
-        short = owner_cpp.rsplit("::", 1)[-1]
-        info = self.registry.builtins.by_cpp.get(owner_cpp) or next(
-            (i for i in self.registry.builtins.by_cpp.values() if i.cpp_name.rsplit("::", 1)[-1] == short), None)
-        if info is not None and (info.properties or info.signals or info.overloads):
-            return f"qs::{short}::Enum"
-        return f"qs::{short}"
+        """C++ type of Quickshell's `X::Enum`: compat declares every one as `X { enum Enum }`, so
+        the type is qs::X::Enum and a value qs::X::Value."""
+        return f"qs::{owner_cpp.rsplit('::', 1)[-1]}::Enum"
 
     def change_signal(self, ref: AnyType, prop: Prop) -> str:
         """What `on<Prop>Changed` connects to: the property's NOTIFY signal. Usually its own

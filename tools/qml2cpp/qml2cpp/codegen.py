@@ -158,6 +158,10 @@ class ComponentGen:
                 self.includes.add(runtime.header)
         if re.search(r"\bqt::", code):
             self.includes.add("runtime/qt.h")
+        for namespace, header in (("Align", "runtime/layout.h"), ("WrapMode", "runtime/text.h"), ("Elide", "runtime/text.h"),
+                                  ("MouseButton", "runtime/mouse_area.h"), ("Easing", "runtime/easing.h")):
+            if re.search(rf"\b{namespace}::|\beasingTypeFromQt\b" if namespace == "Easing" else rf"\b{namespace}::", code):
+                self.includes.add(header)
         for m in re.finditer(r"\bii::(\w+)\b(?!::)", code):
             runtime = next((r for r in RUNTIME.values() if r.cpp == m.group(1)), None)
             if runtime is not None:
@@ -231,6 +235,9 @@ class ComponentGen:
                 if child.id:
                     self.ids[child.id] = var
             self.emitted(Emitted(var, child, child_type, child_path))
+            if isinstance(child_type, BuiltinRef) and child_type.name == "Loader":
+                # `source:` URLs are relative to the QML file that declares the loader.
+                self.body.append(f'{var.cpp}->setSourceBase("{self.ref.path.relative_to(SHELL_ROOT)}");')
             self._children(child, var, child_type, child_path)
             self._object_values(child, var, child_type.path if isinstance(child_type, AnonRef) else (), child_path)
 
@@ -573,12 +580,14 @@ class ComponentGen:
         if handler_name.startswith("Component."):
             return self.member_of(e.var, "completed"), []
         name = handler_name[2:3].lower() + handler_name[3:]
-        params = self.ts.signal(e.type, name)
-        if params is not None:
-            return self.member_of(e.var, self.ts.signal_member(e.type, name)), params
+        # A property's change first: .qmltypes also lists NOTIFY signals (valueChanged) as signals,
+        # but the runtime notifies through the property itself.
         if name.endswith("Changed") and (prop := self.ts.prop(e.type, name[: -len("Changed")])) is not None:
             if prop.kind == "property":
                 return self.member_of(e.var, self.ts.change_signal(e.type, prop)), []
+        params = self.ts.signal(e.type, name)
+        if params is not None:
+            return self.member_of(e.var, self.ts.signal_member(e.type, name)), params
         return None
 
     def connect_lines(self, signal: str, params: list[tuple[str, str | None]], body: list[str], connect: str) -> list[str]:

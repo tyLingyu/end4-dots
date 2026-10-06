@@ -616,6 +616,13 @@ void GlesRenderBackend::drawGlyph(const RenderGlyphDraw& draw) {
   );
 }
 
+void GlesRenderBackend::drawShadow(
+    float surfaceWidth, float surfaceHeight, float width, float height, const ShadowStyle& style, const Mat3& transform
+) {
+  m_shadowProgram.ensureInitialized();
+  m_shadowProgram.draw(surfaceWidth, surfaceHeight, width, height, style, transform);
+}
+
 void GlesRenderBackend::drawSpinner(
     float surfaceWidth, float surfaceHeight, float width, float height, const SpinnerStyle& style, const Mat3& transform
 ) {
@@ -761,6 +768,7 @@ void GlesRenderBackend::destroyGpuObjects() {
   m_imageProgram.destroy();
   m_glyphProgram.destroy();
   m_spinnerProgram.destroy();
+  m_shadowProgram.destroy();
   m_countdownRingProgram.destroy();
   m_screenCornerProgram.destroy();
   m_audioSpectrumProgram.destroy();
@@ -781,6 +789,7 @@ void GlesRenderBackend::abandonGpuObjects() noexcept {
   m_imageProgram.abandon();
   m_glyphProgram.abandon();
   m_spinnerProgram.abandon();
+  m_shadowProgram.abandon();
   m_countdownRingProgram.abandon();
   m_screenCornerProgram.abandon();
   m_audioSpectrumProgram.abandon();

@@ -20,6 +20,7 @@
 #include "render/scene/node.h"
 #include "render/scene/rect_node.h"
 #include "render/scene/screen_corner_node.h"
+#include "render/scene/shadow_node.h"
 #include "render/scene/spinner_node.h"
 #include "render/scene/text_node.h"
 #include "render/scene/wallpaper_node.h"
@@ -449,6 +450,13 @@ void RenderContext::renderNode(
           renderScale, sw, sh, 0.0F, 0.0F, icon->codepoint(), icon->fontSize(), color, worldTransform
       );
     }
+    break;
+  }
+  case NodeType::Shadow: {
+    const auto* shadow = static_cast<const ShadowNode*>(node);
+    auto style = shadow->style();
+    style.color.a *= effectiveOpacity;
+    m_backend->drawShadow(sw, sh, node->width(), node->height(), style, worldTransform);
     break;
   }
   case NodeType::Spinner: {

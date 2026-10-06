@@ -33,6 +33,12 @@ namespace ii {
     void adopt(std::unique_ptr<Object> object);
     std::unique_ptr<Object> release(Object* object);
 
+    // QObject::deleteLater / QML destroy(): the owner gives the object up now, and it is destroyed
+    // once the current event has been handled, so it is safe from inside the object's own
+    // handlers. An object without an owner belongs to whoever holds it and is left alone.
+    void deleteLater();
+    void destroy() { deleteLater(); }
+
     // Marks construction as finished (QML: the component is completed), owned objects first,
     // then runs componentComplete() and emits completed (`Component.onCompleted`). Generated
     // code calls this once on the root of each instantiated component. Idempotent.

@@ -300,6 +300,9 @@ namespace ii::js {
   // JSON.stringify(value, null, indent): JS number formatting, key order kept; indent <= 0 is compact.
   [[nodiscard]] std::string stringify(const Json& value, int indent = 0);
 
+  // Date.now(): milliseconds since the epoch.
+  [[nodiscard]] double dateNow();
+
   // ── console ────────────────────────────────────────────────────────────────
 
   // console.log(a, b, ...) joins its arguments with spaces.

@@ -57,12 +57,17 @@ namespace ii {
     // Writable: binding `running` to a condition starts and stops the animation.
     Property<bool> running;
     Property<int> loops{1};
+    // stop() (or running = false) lets the current loop finish first, as in Qt. A Behavior or a
+    // group stops its animation outright (stopNow), which Qt does too.
+    Property<bool> alwaysRunToEnd;
     Signal<> started;
     Signal<> stopped;
     Signal<> finished;
 
     void start();
     void stop();
+    // Stops immediately, whatever alwaysRunToEnd says.
+    void stopNow();
     void restart();
     // Jumps to the end values and stops.
     void complete();
@@ -92,6 +97,7 @@ namespace ii {
 
     double m_startTime = 0.0;
     int m_loop = 0;
+    int m_stopAfterLoop = -1;  // alwaysRunToEnd: finish this loop, then stop
     bool m_registered = false;
     bool m_settingRunning = false;
     Animation* m_group = nullptr;
@@ -316,7 +322,7 @@ namespace ii {
     bool intercept(const T& value) override {
       if (m_animation == nullptr || !enabled.peek() || !isCompleted()) {
         if (m_animation != nullptr) {
-          m_animation->stop();
+          m_animation->stopNow();
         }
         m_targetValue = value;
         return false;
@@ -327,7 +333,7 @@ namespace ii {
       }
       m_targetValue = value;
       if (active) {
-        m_animation->stop();
+        m_animation->stopNow();
       }
       const T current = m_target.peek();
       if (!active && current == value) {
@@ -341,6 +347,29 @@ namespace ii {
     Property<T>& m_target;
     BehaviorAnimation<T>* m_animation = nullptr;
     std::optional<T> m_targetValue;
+  };
+
+  // QML FrameAnimation: triggered once per frame while running (on the animation driver), with
+  // frame timing in seconds as QQuickFrameAnimation reports it.
+  class FrameAnimation : public Animation {
+  public:
+    Property<bool> paused;
+    Property<int> currentFrame;
+    Property<double> frameTime;
+    Property<double> smoothFrameTime;
+    Property<double> elapsedTime;
+    Signal<> triggered;
+
+    void reset();
+
+  protected:
+    [[nodiscard]] double loopDuration() const override { return std::numeric_limits<double>::infinity(); }
+    void begin() override;
+    void update(double time) override;
+
+  private:
+    double m_lastTime = -1.0;
+    double m_pausedFor = 0.0;
   };
 
 } // namespace ii
