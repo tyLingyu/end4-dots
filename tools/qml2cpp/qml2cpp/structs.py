@@ -1,0 +1,148 @@
+"""The structs var-types.json infers for `property var` values, as one generated header.
+
+Each struct gets a defaulted operator== (deleted, and so ignored by Property<T>, when a field
+isn't comparable) and, when every field converts to JSON, to_json/from_json for js::Json
+(key order kept, as in JS) that use the JSON key names, so translated `JSON.parse` code can
+read them.
+"""
+from __future__ import annotations
+
+import re
+
+from .registry import SHELL_ROOT, ComponentRef
+from .typemap import VarTypes, qualified_class
+
+HEADER = "ii/var_structs.h"
+
+_SCALARS = {"bool", "int", "double", "std::string", "js::Json"}
+# Types the runtime provides (some still planned), and the header that declares each.
+_RUNTIME_HEADERS = {
+    "ii::Color": "runtime/color.h",
+    "ii::Point": "runtime/geometry.h",
+    "ii::Size": "runtime/geometry.h",
+    "ii::Rect": "runtime/geometry.h",
+    "ii::DateTime": "runtime/datetime.h",
+    "ii::Easing": "runtime/easing.h",
+}
+_STD = {"std::vector": "<vector>", "std::optional": "<optional>", "std::map": "<map>", "std::function": "<functional>",
+        "std::regex": "<regex>", "std::string": "<string>"}
+_KEYWORDS = {"class", "namespace", "default", "delete", "new", "operator", "template", "this", "union", "register"}
+
+
+def _components() -> dict[str, ComponentRef]:
+    """Every component of the shell by bare name, as var-types.json writes them (`Notif*`)."""
+    out: dict[str, ComponentRef] = {}
+    for path in sorted(SHELL_ROOT.rglob("*.qml")):
+        out.setdefault(path.stem, ComponentRef(path.resolve()))
+        for name in re.findall(r"^\s*component\s+(\w+)\s*:", path.read_text(), re.M):
+            out.setdefault(name, ComponentRef(path.resolve(), name))
+    return out
+
+
+def render(var_types: VarTypes) -> tuple[str, list[str]]:
+    """The header, and the type names that have no C++ definition yet."""
+    structs = var_types.structs
+    components = _components()
+    includes = {'"runtime/js.h"', "<string>"}
+    forwards: set[str] = set()
+    unknown: set[str] = set()
+
+    def cpp_type(text: str) -> str:
+        for name, header in _STD.items():
+            if name in text:
+                includes.add(header)
+        for name, header in _RUNTIME_HEADERS.items():
+            if name in text:
+                includes.add(f'"{header}"')
+
+        def word(m: re.Match) -> str:
+            name = m.group(0)
+            if name in structs or name in _SCALARS or name.startswith(("std::", "ii::", "js::")) or name in ("void", "const"):
+                return name
+            if name.startswith("qs::"):
+                forwards.add(f"namespace ii::qs {{ class {name[4:]}; }}")
+                return name
+            if name in components:
+                ns, _, cls = qualified_class(components[name]).rpartition("::")
+                forwards.add(f"namespace {ns} {{ class {cls}; }}")
+                return f"::{ns}::{cls}"
+            unknown.add(name)
+            return name
+
+        return re.sub(r"[A-Za-z_][\w:]*", word, text.replace("nlohmann::json", "js::Json"))
+
+    # Definition order: a struct after every struct its fields mention.
+    order: list[str] = []
+
+    def visit(name: str, stack: tuple[str, ...] = ()) -> None:
+        if name in order or name in stack:
+            return
+        for t in structs[name].values():
+            for dep in re.findall(r"[A-Za-z_]\w*", t):
+                if dep in structs and dep != name:
+                    visit(dep, stack + (name,))
+        order.append(name)
+
+    for name in sorted(structs):
+        visit(name)
+
+    def jsonable(t: str, top: bool = True) -> bool:
+        t = t.replace("nlohmann::json", "js::Json").strip()
+        if top and t.startswith("std::optional<") and t.endswith(">"):
+            return jsonable(t[len("std::optional<"):-1], False)  # only a field itself may be optional
+        if "std::optional" in t:
+            return False
+        words = set(re.findall(r"[A-Za-z_][\w:]*", t)) - {"std::vector", "std::map"}
+        return all(w in _SCALARS or w in structs and all(jsonable(f) for f in structs[w].values()) for w in words)
+
+    body: list[str] = []
+    for name in order:
+        fields = structs[name]
+        members = {key: (f"{key}_" if key in _KEYWORDS else key) for key in fields}
+        body.append(f"struct {name} {{")
+        for key, t in fields.items():
+            body.append(f"  {cpp_type(t)} {members[key]}{{}};")
+        body.append("")
+        body.append(f"  friend bool operator==(const {name}&, const {name}&) = default;")
+        body.append("};")
+        if all(jsonable(t) for t in fields.values()):
+            body.append(f"inline void to_json(js::Json& j, const {name}& v) {{")
+            body.append("  j = js::Json::object();")
+            for key, t in fields.items():
+                if t.strip().startswith("std::optional<"):
+                    body.append(f'  if (v.{members[key]}) j["{key}"] = *v.{members[key]};  // nullopt: no key, like undefined')
+                else:
+                    body.append(f'  j["{key}"] = v.{members[key]};')
+            body.append("}")
+            body.append(f"inline void from_json(const js::Json& j, {name}& v) {{")
+            for key, t in fields.items():
+                t = t.strip().replace("nlohmann::json", "js::Json")
+                if t.startswith("std::optional<"):
+                    inner = cpp_type(t[len("std::optional<"):-1])
+                    body.append(f'  if (j.contains("{key}") && !j.at("{key}").is_null()) v.{members[key]} = j.at("{key}").get<{inner}>();')
+                else:
+                    body.append(f'  if (j.contains("{key}")) j.at("{key}").get_to(v.{members[key]});')
+            body.append("}")
+        body.append("")
+
+    aliases = [f"using {name} = js::Json;  // TODO: no C++ type yet" for name in sorted(unknown)]
+    std_includes = sorted(i for i in includes if i.startswith("<"))
+    own_includes = sorted(i for i in includes if i.startswith('"'))
+    lines = [
+        "#pragma once",
+        "// Generated by qml2cpp from tools/qml2cpp/data/var-types.json: the shapes of `property var` values.",
+        "",
+        *(f"#include {i}" for i in own_includes),
+        *([""] if own_includes else []),
+        *(f"#include {i}" for i in std_includes),
+        "",
+        *sorted(forwards),
+        "",
+        "namespace ii {",
+        "",
+        *([*(f"  {a}" for a in aliases), ""] if aliases else []),
+        *(f"  {line}" if line else "" for line in body),
+        "} // namespace ii",
+        "",
+    ]
+    return "\n".join(lines), sorted(unknown)

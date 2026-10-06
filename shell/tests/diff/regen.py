@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Regenerate tests/diff/expected/*.json by running every case in cases/ through Qt (qml6).
+"""Regenerate tests/diff/expected/*.json by running every case in cases/ through Qt (qml6),
+and every *_dump.qml script (easing, color, js: <name>_dump.qml -> expected/<name>.json).
 
 The C++ diff test compares ii-shell's runtime against these files, so Qt itself is only
 needed when a case is added or changed, not to run the test suite.
@@ -22,24 +23,31 @@ ENV = {
 }
 
 
-def dump(case: Path) -> dict:
-    proc = subprocess.run(
-        ["qml6", str(HERE / "dump.qml"), "--", str(case)],
-        env=ENV, capture_output=True, text=True, timeout=30,
-    )
-    for line in (proc.stdout + proc.stderr).splitlines():
+def run(args: list[str], name: str) -> dict:
+    proc = subprocess.run(["qml6", *args], env=ENV, capture_output=True, text=True, timeout=30)
+    for line in (proc.stdout + proc.stderr).split("\n"):  # not splitlines(): U+2028 occurs in the data
         marker = line.find("II_DUMP ")
         if marker >= 0:
             return json.loads(line[marker + len("II_DUMP "):])
-    raise RuntimeError(f"{case.name}: no dump\n{proc.stderr}")
+    raise RuntimeError(f"{name}: no dump\n{proc.stderr}")
+
+
+def dump(case: Path) -> dict:
+    return run([str(HERE / "dump.qml"), "--", str(case)], case.name)
 
 
 def main() -> int:
     EXPECTED.mkdir(exist_ok=True)
-    names = sys.argv[1:] or sorted(p.stem for p in CASES.glob("*.qml"))
+    scripts = {p.stem.removesuffix("_dump"): p for p in HERE.glob("*_dump.qml")}
+    names = sys.argv[1:] or [*sorted(p.stem for p in CASES.glob("*.qml")), *sorted(scripts)]
     for name in names:
-        data = dump(CASES / f"{name}.qml")
-        (EXPECTED / f"{name}.json").write_text(json.dumps(data, indent=1, sort_keys=True) + "\n")
+        if name in scripts:
+            data = run([str(scripts[name])], name)
+            text = json.dumps(data, indent=0, ensure_ascii=False, sort_keys=True)
+        else:
+            data = dump(CASES / f"{name}.qml")
+            text = json.dumps(data, indent=1, sort_keys=True) + "\n"
+        (EXPECTED / f"{name}.json").write_text(text)
         print(f"{name}: {len(data)} items")
     return 0
 

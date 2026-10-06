@@ -8,6 +8,9 @@ namespace ii {
   // padding, at their own sizes, and sizes itself to fit (implicitWidth/implicitHeight).
   class Positioner : public Item {
   public:
+    // Owned objects (children) go first, while this object's own members are intact: their
+    // teardown notifies, and this object's bindings may still run.
+    ~Positioner() override { destroyOwned(); }
     Property<double> spacing;
     Property<double> padding;
     Property<double> leftPadding;

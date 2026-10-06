@@ -1,0 +1,18 @@
+{
+ "43ba7e61483e": {
+  "cpp": "// ii: target 是 var，JS 动态读 target.radius。Rectangle（及以它为根的组件）有 radius；\n// 其他 Item（如 WallpaperDirectoryItem 的 Loader、TodoWidget 的 FloatingActionButton）没有，读到 undefined。\n// RectangularShadow.radius 不可重置：绑定得到 undefined 时 QML 报 \"Unable to assign [undefined] to double\"\n// 并保留原值（初始 0）。target 为 null 时 JS 抛 TypeError，同样保留原值；C++ 构造期 target 还没赋值时也走这里。\nauto* targetRect = dynamic_cast<::ii::Rectangle*>(this->target.get());\nif (targetRect == nullptr) {\n  return this->radius.peek();\n}\nreturn targetRect->radius.get();",
+  "kind": "binding (unknown member radius)",
+  "context": "root.radius",
+  "expected": "double",
+  "code": "target.radius",
+  "form": "expression"
+ },
+ "87846338f33d": {
+  "cpp": "qt::vector2d(0.0, 1.0)",
+  "kind": "binding (name Qt)",
+  "context": "root.offset",
+  "expected": "Point",
+  "code": "Qt.vector2d(0.0, 1.0)",
+  "form": "expression"
+ }
+}

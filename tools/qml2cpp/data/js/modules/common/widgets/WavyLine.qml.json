@@ -1,0 +1,18 @@
+{
+ "7bda2c83eba6": {
+  "cpp": "// Appearance 是单例，Appearance?. 不会短路；colors.colPrimary 恒有定义，?? 的默认值不会用到\nreturn ::ii::common::Appearance::instance().colors.get()->colPrimary.get();",
+  "kind": "binding (operator ??)",
+  "context": "root.color",
+  "expected": "Color",
+  "code": "Appearance?.colors.colPrimary ?? \"#685496\"",
+  "form": "expression"
+ },
+ "bf3c11cdac05": {
+  "cpp": "auto* ctx = this->getContext(\"2d\");\nif (ctx == nullptr) {\n  return;  // JS 里在 null 上调 clearRect 抛 TypeError，处理函数就此中止\n}\nctx->clearRect(0, 0, this->width.get(), this->height.get());\n\nconst double amplitude = this->lineWidth.get() * this->amplitudeMultiplier.get();\nconst double freq = this->frequency.get();  // JS 的局部变量 frequency（改名以免遮蔽成员）\nconst double phase = js::dateNow() / 400.0;\nconst double centerY = this->height.get() / 2;\n\nctx->setStrokeStyle(this->color.get());\n// 上下文忽略非正、非有限的 lineWidth（保留上次的值，初始 1），所以下面的循环读回上下文里实际的值\nctx->setLineWidth(this->lineWidth.get());\nctx->setLineCap(\"round\");\nctx->beginPath();\nconstexpr double kPi = 3.141592653589793;  // Math.PI\nfor (double px = ctx->lineWidth() / 2; px <= this->width.get() - ctx->lineWidth() / 2; px += 1) {\n  const double waveY = centerY + amplitude * std::sin(freq * 2 * kPi * px / this->fullLength.get() + phase);\n  // ii: 上下文的 lineWidth 恒为正，px 从 lineWidth / 2 起，px === 0 永不成立，总走 lineTo；\n  // 空路径上的 lineTo 按 Canvas 规则先开一条子路径（等同 moveTo）\n  if (px == 0) {\n    ctx->moveTo(px, waveY);\n  } else {\n    ctx->lineTo(px, waveY);\n  }\n}\nctx->stroke();",
+  "kind": "statements (call getContext)",
+  "context": "root.onPaint",
+  "expected": "handler body, parameters (Rect const& region)",
+  "code": "{\n        var ctx = getContext(\"2d\");\n        ctx.clearRect(0, 0, width, height);\n\n        var amplitude = root.lineWidth * root.amplitudeMultiplier;\n        var frequency = root.frequency;\n        var phase = Date.now() / 400.0;\n        var centerY = height / 2;\n\n        ctx.strokeStyle = root.color;\n        ctx.lineWidth = root.lineWidth;\n        ctx.lineCap = \"round\";\n        ctx.beginPath();\n        for (var x = ctx.lineWidth / 2; x <= root.width - ctx.lineWidth / 2; x += 1) {\n            var waveY = centerY + amplitude * Math.sin(frequency * 2 * Math.PI * x / root.fullLength + phase);\n            if (x === 0)\n                ctx.moveTo(x, waveY);\n            else\n                ctx.lineTo(x, waveY);\n        }\n        ctx.stroke();\n    }",
+  "form": "body"
+ }
+}

@@ -1,0 +1,226 @@
+{
+ "01f76a8a44ef": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(config.get() + \"/illogical-impulse\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.shellConfig",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.config}/illogical-impulse`)",
+  "form": "expression"
+ },
+ "1d5ba4309cc3": {
+  "cpp": "shellConfig.get() + \"/\" + shellConfigName.get()",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.shellConfigPath",
+  "expected": "std::string",
+  "code": "`${Directories.shellConfig}/${Directories.shellConfigName}`",
+  "form": "expression"
+ },
+ "204de1661bf5": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(\"/var/lib/AccountsService/icons/\" + ::ii::services::SystemInfo::instance().username.get())",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.userAvatarPathAccountsService",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`/var/lib/AccountsService/icons/${SystemInfo.username}`)",
+  "form": "expression"
+ },
+ "259a2ce665df": {
+  "cpp": "qt::StandardPaths::standardLocations(qt::StandardPaths::MusicLocation).at(0)",
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.music",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.MusicLocation)[0]",
+  "form": "expression"
+ },
+ "346a191011a3": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(state.get() + \"/user/generated/colors.json\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.generatedMaterialThemePath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.state}/user/generated/colors.json`)",
+  "form": "expression"
+ },
+ "36914237e1ab": {
+  "cpp": "qt::StandardPaths::standardLocations(qt::StandardPaths::StateLocation).at(0)",
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.state",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.StateLocation)[0]",
+  "form": "expression"
+ },
+ "375c9de70238": {
+  "cpp": "// Cleanup on init\nqs::Quickshell::instance().execDetached(std::vector<std::string>{\"mkdir\", \"-p\", shellConfig.get()});\nqs::Quickshell::instance().execDetached(std::vector<std::string>{\"mkdir\", \"-p\", favicons.get()});\nqs::Quickshell::instance().execDetached(\n    std::vector<std::string>{\"bash\", \"-c\", \"rm -rf '\" + coverArt.get() + \"'; mkdir -p '\" + coverArt.get() + \"'\"});\nqs::Quickshell::instance().execDetached(\n    std::vector<std::string>{\"bash\", \"-c\", \"rm -rf '\" + latexOutput.get() + \"'; mkdir -p '\" + latexOutput.get() + \"'\"});\nqs::Quickshell::instance().execDetached(\n    std::vector<std::string>{\"bash\", \"-c\", \"rm -rf '\" + cliphistDecode.get() + \"'; mkdir -p '\" + cliphistDecode.get() + \"'\"});\nqs::Quickshell::instance().execDetached(std::vector<std::string>{\"mkdir\", \"-p\", userActions.get()});\nqs::Quickshell::instance().execDetached(std::vector<std::string>{\"rm\", \"-rf\", tempImages.get()});",
+  "kind": "statements (cannot assign std::vector<std::string> to std::string)",
+  "context": "root.Component.onCompleted",
+  "expected": "handler body, parameters ()",
+  "code": "{\n        Quickshell.execDetached([\"mkdir\", \"-p\", `${shellConfig}`])\n        Quickshell.execDetached([\"mkdir\", \"-p\", `${favicons}`])\n        Quickshell.execDetached([\"bash\", \"-c\", `rm -rf '${coverArt}'; mkdir -p '${coverArt}'`])\n        Quickshell.execDetached([\"bash\", \"-c\", `rm -rf '${latexOutput}'; mkdir -p '${latexOutput}'`])\n        Quickshell.execDetached([\"bash\", \"-c\", `rm -rf '${cliphistDecode}'; mkdir -p '${cliphistDecode}'`])\n        Quickshell.execDetached([\"mkdir\", \"-p\", `${userActions}`])\n        Quickshell.execDetached([\"rm\", \"-rf\", `${tempImages}`])\n    }",
+  "form": "body"
+ },
+ "46edff9cc44c": {
+  "cpp": "// ii: home 是不带结尾斜杠的 URL（file:///home/user），这里得到 /home/user.face.icon，不是 ~/.face.icon\nreturn ::ii::common::functions::FileUtils::instance().trimFileProtocol(home.get() + \".face.icon\");",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.userAvatarPathRicersAndWeirdSystems2",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.home}.face.icon`)",
+  "form": "expression"
+ },
+ "52ddc612c9f4": {
+  "cpp": "qt::StandardPaths::standardLocations(qt::StandardPaths::MoviesLocation).at(0)",
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.videos",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.MoviesLocation)[0]",
+  "form": "expression"
+ },
+ "6be9431e03bf": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(cache.get() + \"/media/favicons\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.favicons",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.cache}/media/favicons`)",
+  "form": "expression"
+ },
+ "7d3a74563163": {
+  "cpp": "// ii: home 是不带结尾斜杠的 URL（file:///home/user），这里得到 /home/user.face，不是 ~/.face\nreturn ::ii::common::functions::FileUtils::instance().trimFileProtocol(home.get() + \".face\");",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.userAvatarPathRicersAndWeirdSystems",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.home}.face`)",
+  "form": "expression"
+ },
+ "98fba5c11d24": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(scriptPath.get() + \"/videos/record.sh\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.recordScriptPath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.scriptPath}/videos/record.sh`)",
+  "form": "expression"
+ },
+ "9b96469c282c": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(cache.get() + \"/media/latex\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.latexOutput",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.cache}/media/latex`)",
+  "form": "expression"
+ },
+ "a17cb5ca8b6f": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(cache.get() + \"/media/coverart\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.coverArt",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.cache}/media/coverart`)",
+  "form": "expression"
+ },
+ "a3c7907bb082": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(cache.get() + \"/conflict-killer\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.conflictCachePath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.cache}/conflict-killer`)",
+  "form": "expression"
+ },
+ "c079d1e07099": {
+  "cpp": "qt::StandardPaths::standardLocations(qt::StandardPaths::ConfigLocation).at(0)",
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.config",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.ConfigLocation)[0]",
+  "form": "expression"
+ },
+ "c0efe1c0f2f9": {
+  "cpp": "qt::StandardPaths::standardLocations(qt::StandardPaths::HomeLocation).at(0)",
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.home",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]",
+  "form": "expression"
+ },
+ "c3011fa00a8a": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(state.get() + \"/user/notes.txt\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.notesPath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.state}/user/notes.txt`)",
+  "form": "expression"
+ },
+ "d2153003993c": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(shellConfig.get() + \"/actions\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.userActions",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.shellConfig}/actions`)",
+  "form": "expression"
+ },
+ "d87a751b1792": {
+  "cpp": "qt::StandardPaths::standardLocations(qt::StandardPaths::DownloadLocation).at(0)",
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.downloads",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.DownloadLocation)[0]",
+  "form": "expression"
+ },
+ "daf0a737017d": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(cache.get() + \"/notifications/notifications.json\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.notificationsPath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.cache}/notifications/notifications.json`)",
+  "form": "expression"
+ },
+ "ddc6d14bed02": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(scriptPath.get() + \"/colors/switchwall.sh\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.wallpaperSwitchScriptPath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/switchwall.sh`)",
+  "form": "expression"
+ },
+ "e6b2030d2ff2": {
+  "cpp": "qt::StandardPaths::standardLocations(qt::StandardPaths::GenericCacheLocation).at(0)",
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.genericCache",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.GenericCacheLocation)[0]",
+  "form": "expression"
+ },
+ "e7af3967874d": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(\"/tmp/quickshell/media/cliphist\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.cliphistDecode",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`/tmp/quickshell/media/cliphist`)",
+  "form": "expression"
+ },
+ "eab4acd8c2b0": {
+  "cpp": "::ii::common::functions::FileUtils::instance().trimFileProtocol(state.get() + \"/user/todo.json\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root.todoPath",
+  "expected": "std::string",
+  "code": "FileUtils.trimFileProtocol(`${Directories.state}/user/todo.json`)",
+  "form": "expression"
+ },
+ "f0fc6f2bcc5e": {
+  "cpp": "qt::StandardPaths::standardLocations(qt::StandardPaths::CacheLocation).at(0)",
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.cache",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.CacheLocation)[0]",
+  "form": "expression"
+ },
+ "f7e08f850711": {
+  "cpp": "qt::StandardPaths::standardLocations(qt::StandardPaths::DocumentsLocation).at(0)",
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.documents",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]",
+  "form": "expression"
+ },
+ "faf724030160": {
+  "cpp": "qt::StandardPaths::standardLocations(qt::StandardPaths::PicturesLocation).at(0)",
+  "kind": "binding (ArrayMemberExpression)",
+  "context": "root.pictures",
+  "expected": "std::string",
+  "code": "StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]",
+  "form": "expression"
+ }
+}

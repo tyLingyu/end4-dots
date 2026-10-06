@@ -76,7 +76,7 @@ namespace ii {
       animation->start();
       animation->m_settingRunning = false;
     } else {
-      animation->stop();
+      animation->stopNow();
     }
   }
 
@@ -87,6 +87,7 @@ namespace ii {
     auto& driver = AnimationDriver::instance();
     m_startTime = driver.now();
     m_loop = 0;
+    m_stopAfterLoop = -1;
     m_registered = true;
     driver.add(this);
     if (!m_settingRunning) {
@@ -104,6 +105,17 @@ namespace ii {
     if (!m_registered) {
       return;
     }
+    if (alwaysRunToEnd.peek()) {
+      m_stopAfterLoop = m_loop;  // tick() finishes when this loop ends
+      return;
+    }
+    stopNow();
+  }
+
+  void Animation::stopNow() {
+    if (!m_registered) {
+      return;
+    }
     m_registered = false;
     AnimationDriver::instance().remove(this);
     setRunningInternally(false);
@@ -111,7 +123,7 @@ namespace ii {
   }
 
   void Animation::restart() {
-    stop();
+    stopNow();
     start();
   }
 
@@ -141,6 +153,11 @@ namespace ii {
       return;
     }
     const int loop = static_cast<int>(elapsed / length);
+    if (m_stopAfterLoop >= 0 && loop > m_stopAfterLoop) {
+      update(length);
+      finish();
+      return;
+    }
     if (loop != m_loop) {
       update(length); // finish the previous loop (fires trailing actions)
       m_loop = loop;
@@ -259,6 +276,39 @@ namespace ii {
       const double length = loopLength * std::max(child->loops.peek(), 1);
       child->update(time >= length || loopLength <= 0.0 ? loopLength : std::fmod(time, loopLength));
     }
+  }
+
+  // ── FrameAnimation ──────────────────────────────────────────────────────────
+
+  void FrameAnimation::reset() {
+    m_lastTime = -1.0;
+    currentFrame.writeDirect(0);
+    elapsedTime.writeDirect(0.0);
+    frameTime.writeDirect(0.0);
+    smoothFrameTime.writeDirect(0.0);
+  }
+
+  void FrameAnimation::begin() {
+    reset();
+    m_pausedFor = 0.0;
+  }
+
+  void FrameAnimation::update(double time) {
+    if (paused.peek()) {
+      if (m_lastTime >= 0.0) {
+        m_pausedFor += time - m_lastTime;
+        m_lastTime = time;
+      }
+      return;
+    }
+    const double frame = m_lastTime < 0.0 ? 0.0 : (time - m_lastTime) / 1000.0;
+    m_lastTime = time;
+    frameTime.writeDirect(frame);
+    // QQuickFrameAnimation smooths with a factor of 0.1.
+    smoothFrameTime.writeDirect(currentFrame.peek() == 0 ? frame : smoothFrameTime.peek() * 0.9 + frame * 0.1);
+    elapsedTime.writeDirect((time - m_pausedFor) / 1000.0);
+    currentFrame.writeDirect(currentFrame.peek() + 1);
+    triggered.emit();
   }
 
 } // namespace ii

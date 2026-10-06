@@ -1,0 +1,60 @@
+{
+ "27c10f7008a9": {
+  "cpp": "js::replace(::ii::common::Directories::instance().videos.get(), \"file://\", \"\")",
+  "kind": "binding (call replace)",
+  "context": "root/configFileView/configOptionsJsonAdapter/screenRecord.savePath",
+  "expected": "std::string",
+  "code": "Directories.videos.replace(\"file://\",\"\")",
+  "form": "expression"
+ },
+ "5217b7614509": {
+  "cpp": "if (error == qs::FileViewError::FileNotFound) {\n  configFileView->writeAdapter();\n}",
+  "kind": "statements (FunctionExpression)",
+  "context": "root/configFileView.onLoadFailed",
+  "expected": "handler body, parameters (qs::FileViewError::Enum const& error)",
+  "code": "error => {\n            if (error == FileViewError.FileNotFound) {\n                writeAdapter();\n            }\n        }",
+  "form": "body"
+ },
+ "86b61c4aea90": {
+  "cpp": "js::Json json;\ntry {\n  json = js::parse(fileText);\n} catch (const std::invalid_argument&) {\n  return;\n}\n// JS 真值。null 同时代表 undefined。\nconst auto truthy = [](const js::Json& v) {\n  if (v.is_null()) {\n    return false;\n  }\n  if (v.is_boolean()) {\n    return v.get<bool>();\n  }\n  if (v.is_number()) {\n    return v.get<double>() != 0;\n  }\n  if (v.is_string()) {\n    return !v.get_ref<const std::string&>().empty();\n  }\n  return true;  // 对象、数组\n};\n// v?.key：只有 JSON 对象有这些键，其他值（null、数字、字符串、数组）读到 undefined，记为 null\nconst auto member = [](const js::Json& v, const char* key) {\n  if (v.is_object()) {\n    if (const auto it = v.find(key); it != v.end()) {\n      return *it;\n    }\n  }\n  return js::Json();\n};\n// notifications.monitor -> notifications.forceMonitor\nconst js::Json notifications = member(json, \"notifications\");\nconst js::Json oldMonitor = member(notifications, \"monitor\");\nif (truthy(oldMonitor) && !truthy(member(notifications, \"forceMonitor\"))) {\n  auto* forceMonitor = this->options->notifications.get()->forceMonitor.get();\n  // ?? 只替换 null/undefined；赋给 bool 属性时 V4 按 JS 真值转换\n  const js::Json enable = member(oldMonitor, \"enable\");\n  forceMonitor->enable.set(enable.is_null() ? false : truthy(enable));\n  // 赋给 string 属性：数字、布尔经 QVariant 转成字符串；对象、数组转换失败，V4 抛出异常\n  const js::Json name = member(oldMonitor, \"name\");\n  if (name.is_null()) {\n    forceMonitor->name.set(\"\");\n  } else if (name.is_string()) {\n    forceMonitor->name.set(name.get<std::string>());\n  } else if (name.is_boolean()) {\n    forceMonitor->name.set(name.get<bool>() ? \"true\" : \"false\");\n  } else if (name.is_number()) {\n    forceMonitor->name.set(js::toString(name.get<double>()));\n  } else {\n    throw std::runtime_error(std::string(\"Cannot assign \") + (name.is_object() ? \"QVariantMap\" : \"QVariantList\") +\n                             \" to QString\");\n  }\n}",
+  "kind": "function",
+  "context": "root.migrateRenamedOptions",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function migrateRenamedOptions(fileText) { let json;\n        try {\n            json = JSON.parse(fileText);\n        } catch (e) {\n            return;\n        }\n        // notifications.monitor -> notifications.forceMonitor\n        const oldMonitor = json?.notifications?.monitor;\n        if (oldMonitor && !json.notifications.forceMonitor) {\n            root.options.notifications.forceMonitor.enable = oldMonitor.enable ?? false;\n            root.options.notifications.forceMonitor.name = oldMonitor.name ?? \"\";\n        } }",
+  "form": "function",
+  "signature": "void migrateRenamedOptions(const std::string& fileText)"
+ },
+ "c7b1389dbf74": {
+  "cpp": "std::vector<std::string> keys = js::split(nestedKey, \".\");\nqs::JsonObject* obj = this->options;  // an alias of the adapter\n// Traverse the parent objects. In QML a missing or non-object step is replaced by a new JS\n// object ({}), which isn't part of the adapter and so changes nothing that is saved; here the\n// call stops instead (a deviation that changes nothing observable).\nfor (std::size_t i = 0; i + 1 < keys.size(); ++i) {\n  qs::JsonObject* next = obj != nullptr ? obj->child(keys[i]) : nullptr;\n  if (next == nullptr) {\n    js::warn(\"setNestedValue:\", nestedKey, \"does not name a nested option\");\n    return;\n  }\n  obj = next;\n}\n// Convert value to correct type using JSON.parse when safe\njs::Json convertedValue = value;\nif (value.is_string()) {\n  const std::string trimmed = js::trim(value.get<std::string>());\n  if (trimmed == \"true\" || trimmed == \"false\" || !std::isnan(js::toNumber(trimmed))) {\n    try {\n      convertedValue = js::parse(trimmed);\n    } catch (const std::exception&) {\n      convertedValue = value;\n    }\n  }\n}\nobj->setValue(keys.back(), convertedValue);",
+  "kind": "function",
+  "context": "root.setNestedValue",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function setNestedValue(nestedKey, value) { let keys = nestedKey.split(\".\");\n        let obj = root.options;\n        let parents = [obj];\n\n        // Traverse and collect parent objects\n        for (let i = 0; i < keys.length - 1; ++i) {\n            if (!obj[keys[i]] || typeof obj[keys[i]] !== \"object\") {\n                obj[keys[i]] = {};\n            }\n            obj = obj[keys[i]];\n            parents.push(obj);\n        }\n\n        // Convert value to correct type using JSON.parse when safe\n        let convertedValue = value;\n        if (typeof value === \"string\") {\n            let trimmed = value.trim();\n            if (trimmed === \"true\" || trimmed === \"false\" || !isNaN(Number(trimmed))) {\n                try {\n                    convertedValue = JSON.parse(trimmed);\n                } catch (e) {\n                    convertedValue = value;\n                }\n            }\n        }\n\n        obj[keys[keys.length - 1]] = convertedValue; }",
+  "form": "function",
+  "signature": "void setNestedValue(const std::string& nestedKey, const js::Json& value)"
+ },
+ "e0a04d56aab9": {
+  "cpp": "try {\n  this->migrateRenamedOptions(configFileView->text());\n} catch (const std::runtime_error& e) {\n  // QML 打印异常并中止处理函数，ready 不会被设置\n  js::warn(e.what());\n  return;\n}\nthis->ready.set(true);",
+  "kind": "statements (call text)",
+  "context": "root/configFileView.onLoaded",
+  "expected": "handler body, parameters ()",
+  "code": "{\n            root.migrateRenamedOptions(text());\n            root.ready = true;\n        }",
+  "form": "body"
+ },
+ "e77f4badf1fe": {
+  "cpp": "std::vector<QuickToggleEntry>{\n  QuickToggleEntry{.type = \"network\", .size = 2},\n  QuickToggleEntry{.type = \"bluetooth\", .size = 2},\n  QuickToggleEntry{.type = \"idleInhibitor\", .size = 1},\n  QuickToggleEntry{.type = \"mic\", .size = 1},\n  QuickToggleEntry{.type = \"audio\", .size = 2},\n  QuickToggleEntry{.type = \"nightLight\", .size = 2},\n  QuickToggleEntry{.type = \"powerProfile\", .size = 1},\n  QuickToggleEntry{.type = \"cloudflareWarp\", .size = 1},\n  QuickToggleEntry{.type = \"screenSnip\", .size = 1},\n  QuickToggleEntry{.type = \"colorPicker\", .size = 1},\n  QuickToggleEntry{.type = \"musicRecognition\", .size = 1}\n}",
+  "kind": "binding (ObjectPattern)",
+  "context": "root/configFileView/configOptionsJsonAdapter/sidebar/quickToggles/android.toggles",
+  "expected": "std::vector<QuickToggleEntry>",
+  "code": "[\n                            { \"size\": 2, \"type\": \"network\" },\n                            { \"size\": 2, \"type\": \"bluetooth\" },\n                            { \"size\": 1, \"type\": \"idleInhibitor\" },\n                            { \"size\": 1, \"type\": \"mic\" },\n                            { \"size\": 2, \"type\": \"audio\" },\n                            { \"size\": 2, \"type\": \"nightLight\" },\n                            { \"size\": 1, \"type\": \"powerProfile\" },\n                            { \"size\": 1, \"type\": \"cloudflareWarp\" },\n                            { \"size\": 1, \"type\": \"screenSnip\" },\n                            { \"size\": 1, \"type\": \"colorPicker\" },\n                            { \"size\": 1, \"type\": \"musicRecognition\" }\n                        ]",
+  "form": "expression"
+ },
+ "f93fbcb8f01c": {
+  "cpp": "std::string(\"~/.config/hypr/hyprland/scripts/launch_first_available.sh \\\"pavucontrol-qt\\\" \\\"pavucontrol\\\"\")",
+  "kind": "binding (TemplateLiteral)",
+  "context": "root/configFileView/configOptionsJsonAdapter/apps.volumeMixer",
+  "expected": "std::string",
+  "code": "`~/.config/hypr/hyprland/scripts/launch_first_available.sh \"pavucontrol-qt\" \"pavucontrol\"`",
+  "form": "expression"
+ }
+}

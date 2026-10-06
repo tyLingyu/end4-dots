@@ -29,4 +29,8 @@ namespace ii {
     friend bool operator==(const Easing&, const Easing&) = default;
   };
 
+  // QEasingCurve::Type values (`Easing.BezierSpline` is 45 in QML) to the types implemented here;
+  // unknown values fall back to Linear.
+  [[nodiscard]] Easing::Type easingTypeFromQt(int qtType);
+
 } // namespace ii

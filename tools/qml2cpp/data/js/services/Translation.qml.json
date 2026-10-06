@@ -1,0 +1,123 @@
+{
+ "064072d48914": {
+  "cpp": "this->path.set(std::string(\"\"));\nthis->path.set(this->translationsDir.get() + \"/\" + this->languageCode.get() + \".json\");\nthis->reload();",
+  "kind": "statements (TemplateLiteral)",
+  "context": "translationReader.reread",
+  "expected": "handler body, parameters ()",
+  "code": "translationReader.path = \"\";\n            translationReader.path = `${translationReader.translationsDir}/${translationReader.languageCode}.json`;\n            translationReader.reload();",
+  "form": "body"
+ },
+ "0d0c81d117d9": {
+  "cpp": "js::log(\"[Translation] Language changed to\", this->languageCode.get());  // print(...)\ntranslationFileView->languageCode.set(this->languageCode.get());\ngeneratedTranslationFileView->languageCode.set(this->languageCode.get());\ntranslationFileView->reread();\ngeneratedTranslationFileView->reread();",
+  "kind": "statements (call print)",
+  "context": "root.onLanguageCodeChanged",
+  "expected": "handler body, parameters ()",
+  "code": "{\n        print(\"[Translation] Language changed to\", root.languageCode);\n        translationFileView.languageCode = root.languageCode;\n        generatedTranslationFileView.languageCode = root.languageCode;\n        translationFileView.reread();\n        generatedTranslationFileView.reread();\n    }",
+  "form": "body"
+ },
+ "27dcaeae2ebf": {
+  "cpp": "if (exitCode != 0) {\n  this->languagesScanned.emit(js::Json(std::vector<std::string>{\"en_US\"}));\n}",
+  "kind": "statements (FunctionExpression)",
+  "context": "translationScanner.onExited",
+  "expected": "handler body, parameters (int const& exitCode, int const& exitStatus)",
+  "code": "(exitCode, exitStatus) => {\n            if (exitCode !== 0) {\n                translationScanner.languagesScanned([\"en_US\"]);\n            }\n        }",
+  "form": "body"
+ },
+ "57c016bbc4c0": {
+  "cpp": "// new Set([...availableLanguages, ...availableGeneratedLanguages])：去重，保留首次出现的顺序\nstd::vector<std::string> combined;\nfor (const std::string& language : this->availableLanguages.get()) {\n  if (!js::includes(combined, language)) {\n    combined.push_back(language);\n  }\n}\nfor (const std::string& language : this->availableGeneratedLanguages.get()) {\n  if (!js::includes(combined, language)) {\n    combined.push_back(language);\n  }\n}\nreturn js::sorted(std::move(combined));  // Array.from(combined).sort()",
+  "kind": "binding (Block)",
+  "context": "root.allAvailableLanguages",
+  "expected": "std::vector<std::string>",
+  "code": "{\n        const combined = new Set([...root.availableLanguages, ...root.availableGeneratedLanguages]);\n        return Array.from(combined).sort();\n    }",
+  "form": "expression"
+ },
+ "5cdf1be34476": {
+  "cpp": "const std::string output = languagesCollector->text.get();\n// ii: 输出为空时（目录里没有 .json，或目录不存在）\"\".split('\\n') 得到 [\"\"]，语言列表里会有一个空字符串\nconst std::vector<std::string> files = js::map(js::split(js::trim(output), \"\\n\"), [](const std::string& f) { return js::trim(f); });\nthis->languagesScanned.emit(js::Json(files));",
+  "kind": "statements (FunctionExpression)",
+  "context": "translationScanner/stdout.onStreamFinished",
+  "expected": "handler body, parameters ()",
+  "code": "{\n                const output = languagesCollector.text;\n                const files = output.trim().split('\\n').map(f => f.trim());\n                translationScanner.languagesScanned(files);\n            }",
+  "form": "body"
+ },
+ "6914e02933c0": {
+  "cpp": "std::map<std::string, std::string>{}",
+  "kind": "binding (ObjectPattern)",
+  "context": "root.translations",
+  "expected": "std::map<std::string, std::string>",
+  "code": "({})",
+  "form": "expression"
+ },
+ "6bcbc0dc50de": {
+  "cpp": "this->contentLoaded.emit(js::Json::object());",
+  "kind": "statements (FunctionExpression)",
+  "context": "translationReader.onLoadFailed",
+  "expected": "handler body, parameters (qs::FileViewError::Enum const& error)",
+  "code": "error => {\n            translationReader.contentLoaded({});\n        }",
+  "form": "body"
+ },
+ "73c643974253": {
+  "cpp": "std::map<std::string, std::string>{}",
+  "kind": "binding (ObjectPattern)",
+  "context": "root.generatedTranslations",
+  "expected": "std::map<std::string, std::string>",
+  "code": "({})",
+  "form": "expression"
+ },
+ "7ab64b391cc4": {
+  "cpp": "// ii: Config 是单例，Config?. 恒非空；options.language.ui 是 string 属性，不会是 null/undefined，?? \"auto\" 不生效\nconst std::string configLang = ::ii::common::Config::instance().options->language.get()->ui.get();\n\nif (configLang != \"auto\") {\n  return configLang;\n}\n\nreturn qt::locale().name();",
+  "kind": "binding (Block)",
+  "context": "root.languageCode",
+  "expected": "std::string",
+  "code": "{\n        var configLang = Config?.options.language.ui ?? \"auto\";\n\n        if (configLang !== \"auto\")\n            return configLang;\n\n        return Qt.locale().name;\n    }",
+  "form": "expression"
+ },
+ "81e228a10466": {
+  "cpp": "// ii: data 是 JSON.parse 的结果。translations/*.json 的值都是字符串（var-types），generatedTranslations 是 map<string, string>：\n// 取对象里的字符串值；非对象（数组、null 等）当作空表\nstd::map<std::string, std::string> table;\nif (data.is_object()) {\n  for (const auto& item : data.items()) {\n    if (item.value().is_string()) {\n      table[item.key()] = item.value().get<std::string>();\n    }\n  }\n}\nthis->generatedTranslations.set(std::move(table));\nthis->isLoading.set(false);",
+  "kind": "statements (FunctionExpression)",
+  "context": "root/generatedTranslationFileView.onContentLoaded",
+  "expected": "handler body, parameters (js::Json const& data)",
+  "code": "(data) => {\n            root.generatedTranslations = data;\n            root.isLoading = false;\n        }",
+  "form": "body"
+ },
+ "8722a40a5efc": {
+  "cpp": "this->availableLanguages.set(languages.get<std::vector<std::string>>());  // [...languages]",
+  "kind": "statements (FunctionExpression)",
+  "context": "root/scanLanguagesProcess.onLanguagesScanned",
+  "expected": "handler body, parameters (js::Json const& languages)",
+  "code": "(languages) => {\n            root.availableLanguages = [...languages];\n        }",
+  "form": "body"
+ },
+ "9143522293c0": {
+  "cpp": "// Special cases\nif (text.empty()) {  // !text\n  return \"\";\n}\nconst std::string& key = text;  // text.toString()\n// ii: root?.translations?. 的 ?. 不生效：两个属性恒为对象（这里是 map），hasOwnProperty 即 contains\n// ii: isLoading 从不被设为 true，这个条件实际只看两个表里有没有 key\nif (this->isLoading.get() || (!this->translations.get().contains(key) && !this->generatedTranslations.get().contains(key))) {\n  return key;\n}\n\n// Normal cases\n// translations[key] || generatedTranslations[key] || key：缺失（undefined）和 \"\" 都为假\nconst auto lookup = [&key](const std::map<std::string, std::string>& table) -> std::string {\n  const auto it = table.find(key);\n  return it == table.end() ? std::string() : it->second;\n};\nstd::string translation = lookup(this->translations.get());\nif (translation.empty()) {\n  translation = lookup(this->generatedTranslations.get());\n}\nif (translation.empty()) {\n  translation = key;\n}\nconst std::string& keepSuffix = this->translationKeepSuffix.get();\nif (js::endsWith(translation, keepSuffix)) {\n  translation = js::trim(js::substring(translation, 0, js::length(translation) - js::length(keepSuffix)));\n}\nreturn translation;",
+  "kind": "function",
+  "context": "root.tr",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function tr(text) { if (!text) return \"\";\n        var key = text.toString();\n        if (root.isLoading || (!root?.translations?.hasOwnProperty(key) && !root?.generatedTranslations?.hasOwnProperty(key)))\n            return key;\n        \n        // Normal cases\n        var translation = root.translations[key] || root.generatedTranslations[key] || key;\n        // print(key, \"-> [\", root.translations[key], root.generatedTranslations[key], key, \"] ->\", translation);\n        if (translation.endsWith(root.translationKeepSuffix)) {\n            translation = translation.substring(0, translation.length - root.translationKeepSuffix.length).trim();\n        }\n        return translation; }",
+  "form": "function",
+  "signature": "std::string tr(const std::string& text)"
+ },
+ "c5289e41b32a": {
+  "cpp": "this->availableGeneratedLanguages.set(languages.get<std::vector<std::string>>());  // [...languages]",
+  "kind": "statements (FunctionExpression)",
+  "context": "root/scanGeneratedLanguagesProcess.onLanguagesScanned",
+  "expected": "handler body, parameters (js::Json const& languages)",
+  "code": "(languages) => {\n            root.availableGeneratedLanguages = [...languages];\n        }",
+  "form": "body"
+ },
+ "d5a8165c27a2": {
+  "cpp": "// ii: data 是 JSON.parse 的结果。translations/*.json 的值都是字符串（var-types），translations 是 map<string, string>：\n// 取对象里的字符串值；非对象（数组、null 等）当作空表\nstd::map<std::string, std::string> table;\nif (data.is_object()) {\n  for (const auto& item : data.items()) {\n    if (item.value().is_string()) {\n      table[item.key()] = item.value().get<std::string>();\n    }\n  }\n}\nthis->translations.set(std::move(table));\nthis->isLoading.set(false);",
+  "kind": "statements (FunctionExpression)",
+  "context": "root/translationFileView.onContentLoaded",
+  "expected": "handler body, parameters (js::Json const& data)",
+  "code": "(data) => {\n            root.translations = data;\n            root.isLoading = false;\n        }",
+  "form": "body"
+ },
+ "f5d0b1369c72": {
+  "cpp": "// ii: try 里只有 JSON.parse 会抛（SyntaxError）；contentLoaded 的处理函数抛出的异常在 QML 里不会传回发射处，\n// 所以发射放在 try 外面\njs::Json jsonData;\ntry {\n  jsonData = js::parse(this->text());\n} catch (const std::invalid_argument& e) {\n  js::log(\"[Translation] Failed to load translations:\", std::string(\"SyntaxError: \") + e.what());  // console.log(e) 打印 e.toString()\n  this->contentLoaded.emit(js::Json::object());\n  return;\n}\nthis->contentLoaded.emit(jsonData);",
+  "kind": "statements (TryStatement)",
+  "context": "translationReader.onLoaded",
+  "expected": "handler body, parameters ()",
+  "code": "{\n            var textContent = \"\";\n            try {\n                textContent = text();\n                var jsonData = JSON.parse(textContent);\n                translationReader.contentLoaded(jsonData);\n            } catch (e) {\n                console.log(\"[Translation] Failed to load translations:\", e);\n                translationReader.contentLoaded({});\n            }\n        }",
+  "form": "body"
+ }
+}

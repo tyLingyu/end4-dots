@@ -63,6 +63,9 @@ namespace ii {
   //  - cell edges snap to whole pixels, then the item is aligned in its cell and snapped again.
   class LinearLayout : public Item {
   public:
+    // Owned objects (children) go first, while this object's own members are intact: their
+    // teardown notifies, and this object's bindings may still run.
+    ~LinearLayout() override { destroyOwned(); }
     Property<double> spacing{5.0};
 
     void polish() override;

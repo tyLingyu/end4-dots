@@ -6,6 +6,7 @@
 #include "render/programs/audio_spectrum_program.h"
 #include "render/programs/blur_program.h"
 #include "render/programs/countdown_ring_program.h"
+#include "render/programs/shadow_program.h"
 #include "render/programs/effect_program.h"
 #include "render/programs/fancy_audio_visualizer_program.h"
 #include "render/programs/glyph_program.h"
@@ -58,6 +59,10 @@ public:
   ) override;
   void drawImage(const RenderImageDraw& draw) override;
   void drawGlyph(const RenderGlyphDraw& draw) override;
+  void drawShadow(
+      float surfaceWidth, float surfaceHeight, float width, float height, const ShadowStyle& style,
+      const Mat3& transform
+  ) override;
   void drawSpinner(
       float surfaceWidth, float surfaceHeight, float width, float height, const SpinnerStyle& style,
       const Mat3& transform
@@ -126,6 +131,7 @@ private:
   ImageProgram m_imageProgram;
   GlyphProgram m_glyphProgram;
   SpinnerProgram m_spinnerProgram;
+  ShadowProgram m_shadowProgram;
   CountdownRingProgram m_countdownRingProgram;
   ScreenCornerProgram m_screenCornerProgram;
   AudioSpectrumProgram m_audioSpectrumProgram;

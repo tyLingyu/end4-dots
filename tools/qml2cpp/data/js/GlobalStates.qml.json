@@ -1,0 +1,23 @@
+{
+ "0aa456c374ae": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/GlobalShortcut.0.onPressed",
+  "expected": "void",
+  "code": "{\n            root.superDown = true\n        }"
+ },
+ "496d48f8f882": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root.onSidebarRightOpenChanged",
+  "expected": "void",
+  "code": "{\n        if (GlobalStates.sidebarRightOpen) {\n            Notifications.timeoutAll();\n            Notifications.markAllRead();\n        }\n    }"
+ },
+ "5d14bfcea062": {
+  "cpp": null,
+  "kind": "handler",
+  "context": "root/GlobalShortcut.0.onReleased",
+  "expected": "void",
+  "code": "{\n            root.superDown = false\n        }"
+ }
+}

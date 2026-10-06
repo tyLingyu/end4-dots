@@ -2,10 +2,11 @@
 
 ## `var-types.json`
 
-ii 中全部 292 个 `property var`（`extract_vars.py` 抽取，源码基于 `e595b6ae`）对应的 C++ 类型，供 qml2cpp 生成属性声明时使用。
+ii 中全部 292 个 `property var` 与 47 个 `property list<var>`（共 339 条，`extract_vars.py` 抽取，源码基于 `e595b6ae`）对应的 C++ 类型，供 qml2cpp 生成属性声明时使用。
 
-- `structs`：推断出的 56 个结构体（字段名 → 类型）。
-- `properties`：每个属性的 `file` / `line` / `name` / `cpp_type`，以及 `kind`、`confidence`（high 274 / medium 15 / low 3）、`evidence`、`notes`。
+- `structs`：推断出的 57 个结构体（字段名 → 类型）。
+- `properties`：每个属性的 `file` / `line` / `name` / `cpp_type`，以及 `kind`、`confidence`（high 320 / medium 16 / low 3）、`evidence`、`notes`。
+- `list<var>` 条目的 `kind` 为 `"list"`，`cpp_type` 是整个列表类型（如 `std::vector<qs::PwNode*>`），不是元素类型。
 
 类型由子代理逐个阅读源码与引用推断，再统一合并：同形结构合并为一个名字，同名不同形的取字段并集。
 `confidence` 不是 `high` 的条目在翻译到对应文件时需人工确认。
@@ -42,3 +43,7 @@ ii 中全部 292 个 `property var`（`extract_vars.py` 抽取，源码基于 `e
 - `SelectionDialog`、`WeekRow` 在整个仓库中没有被使用（对应 3 条 low 置信度）。
 - `Weather.location` 初始化声明了 `lon`，但读写都用 `.long`，结构体按 `lon` 统一。
 - `Images.thumbnailSizes` 依赖对象键的插入顺序，换成 `std::map` 后需按尺寸遍历。
+- `MultiTurnProcess.sequence` 的元素是命令数组或回调函数之一，用 `ProcessStep` 表示：`callback` 非空即回调步，否则执行 `command`（空 `command` 表示沿用上一个回调设好的命令）。JS 里回调的返回值会作为下一步的输入，但没有调用方返回值，所以回调取 `void`（medium）。
+- `Emojis.fuzzyQuery` 的 sloppy 分支引用了 `sloppySearch`、`entries`、`scoreThreshold`，这些只在 `Cliphist.qml` 中存在，在这里是死代码。
+- `RegionSelection.windowRegions` 用全局坐标的窗口去和已减去显示器偏移的 `layerRegions` 求交，显示器不在 (0, 0) 时过滤结果有偏差。
+- `TaskbarApps.apps` 以 `appId.toLowerCase()` 为键，`togglePin` 收到的是小写 id，含大写字母的已固定应用无法取消固定，只会再添加一个小写副本。

@@ -1,0 +1,50 @@
+{
+ "42e246de5bf2": {
+  "cpp": "// Appearance 是单例，Appearance?. 不会短路；font.pixelSize.small 恒有定义，?? 的默认值不会用到\nreturn ::ii::common::Appearance::instance().font.get()->pixelSize.get()->small.get();",
+  "kind": "binding (operator ??)",
+  "context": "root.iconSize",
+  "expected": "double",
+  "code": "Appearance?.font.pixelSize.small ?? 16",
+  "form": "expression"
+ },
+ "7880e8f23a3a": {
+  "cpp": "// Appearance 是单例，Appearance?. 不会短路；animation.elementMoveFast.duration 恒有定义，?? 的默认值不会用到\nreturn ::ii::common::Appearance::instance().animation.get()->elementMoveFast.get()->duration.get();",
+  "kind": "binding (operator ??)",
+  "context": "root.fill.Behavior/NumberAnimation.duration",
+  "expected": "int",
+  "code": "Appearance?.animation.elementMoveFast.duration ?? 200",
+  "form": "expression"
+ },
+ "8f851e58f4d5": {
+  "cpp": "// Appearance 是单例，Appearance?. 不会短路；font.family.iconMaterial 恒有定义，?? 的默认值不会用到\nreturn ::ii::common::Appearance::instance().font.get()->family.get()->iconMaterial.get();",
+  "kind": "binding (operator ??)",
+  "context": "root.font.family",
+  "expected": "std::string",
+  "code": "Appearance?.font.family.iconMaterial ?? \"Material Symbols Rounded\"",
+  "form": "expression"
+ },
+ "99289ff0c4e9": {
+  "cpp": "std::map<std::string, double>{{\"FILL\", this->truncatedFill.get()}, {\"opsz\", this->iconSize.get()}}",
+  "kind": "binding (ObjectPattern)",
+  "context": "root.font.variableAxes",
+  "expected": "std::map<std::string, double>",
+  "code": "{ \n            \"FILL\": truncatedFill,\n            // \"wght\": font.weight,\n            // \"GRAD\": 0,\n            \"opsz\": iconSize,\n        }",
+  "form": "expression"
+ },
+ "d08245d9fcbd": {
+  "cpp": "// toFixed 得到字符串，写进 real 属性时按 JS 的 Number() 转回数字\nreturn js::toNumber(js::toFixed(this->fill.get(), 1));",
+  "kind": "binding (call toFixed)",
+  "context": "root.truncatedFill",
+  "expected": "double",
+  "code": "fill.toFixed(1)",
+  "form": "expression"
+ },
+ "fe4b6ec040bb": {
+  "cpp": "// Appearance 是单例，Appearance?. 不会短路；elementMoveFast.type/bezierCurve 恒有定义，?? 的默认值不会用到\na2->easing.bind([=, this] {\n  const auto* fast = ::ii::common::Appearance::instance().animation.get()->elementMoveFast.get();\n  return Easing{.type = easingTypeFromQt(fast->type.get()), .bezierCurve = fast->bezierCurve.get()};\n}, \"MaterialSymbol/NumberAnimation.easing\");",
+  "kind": "easing (operator ??)",
+  "context": "root.fill.Behavior/NumberAnimation.easing",
+  "expected": "Easing",
+  "code": "easing.bezierCurve: Appearance?.animation.elementMoveFast.bezierCurve ?? [0.34, 0.80, 0.34, 1.00, 1, 1]; easing.type: Appearance?.animation.elementMoveFast.type ?? Easing.BezierSpline",
+  "form": "statements"
+ }
+}

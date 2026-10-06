@@ -172,6 +172,10 @@
    "width": "double",
    "height": "double"
   },
+  "ProcessStep": {
+   "command": "std::vector<std::string>",
+   "callback": "std::function<void(const std::string&)>"
+  },
   "QuickDirectory": {
    "icon": "std::string",
    "name": "std::string",
@@ -3706,6 +3710,553 @@
    "confidence": "high",
    "evidence": "settings.qml:213 Repeater delegate modelData is one element of root.pages; reads .icon, .iconRotation, .name",
    "notes": "Reuses SettingsPage from entry 289."
+  },
+  {
+   "file": "modules/common/Config.qml",
+   "line": 449,
+   "name": "pinnedItems",
+   "modifiers": [],
+   "cpp_type": "std::vector<std::string>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Config.qml:449 default [\"Fcitx\"]; TrayService.qml:12-13 tests .includes(i.id) against SystemTrayItem ids, :29-34,45 push(itemId) / filter(id => id !== itemId)",
+   "notes": "Tray item ids (SystemTrayItem.id). Persisted in the config JSON."
+  },
+  {
+   "file": "modules/common/Config.qml",
+   "line": 497,
+   "name": "toggles",
+   "modifiers": [],
+   "cpp_type": "std::vector<QuickToggleEntry>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Config.qml:497-509 literal [{size, type}, ...]; AndroidQuickToggleButton.qml:191-215 push({type, size: 1}), splice, swap, toggleList[index].size = 3 - size; read via AndroidQuickPanel.toggles",
+   "notes": "Reuses QuickToggleEntry. Edited in place through the Config tree (the C++ side needs mutable access and a change notification). AndroidQuickPanel guards against null elements (`if (!togglesList[i]) continue`, `toggle && ...`), which a std::vector of values cannot hold; skip nulls when loading the JSON."
+  },
+  {
+   "file": "modules/common/Persistent.qml",
+   "line": 148,
+   "name": "laps",
+   "modifiers": [],
+   "cpp_type": "std::vector<int>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Persistent.qml:148 default []; TimerService.qml:140 push(stopwatchTime) (property int, 10 ms ticks), :128,135 reset to []; mirrored by TimerService.stopwatchLaps (std::vector<int>) and read as numbers in Stopwatch.qml:90,139-140",
+   "notes": "Same element type as TimerService.stopwatchLaps. Persisted in the states JSON."
+  },
+  {
+   "file": "modules/common/models/WorkspaceModel.qml",
+   "line": 23,
+   "name": "biggestWindow",
+   "modifiers": [],
+   "cpp_type": "std::vector<std::optional<HyprlandClient>>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "WorkspaceModel.qml:23-27 occupied.map(... HyprlandData.biggestWindowForWorkspace(wsId)), which returns a windowList element or null (HyprlandData.qml:73-80); Workspaces.qml:219,370 index it and test truthiness / read .class",
+   "notes": "Reuses HyprlandClient. One slot per shown workspace; std::nullopt for an empty workspace. Element type matches Workspaces.qml:219 biggestWindow (std::optional<HyprlandClient>)."
+  },
+  {
+   "file": "modules/common/utils/MultiTurnProcess.qml",
+   "line": 10,
+   "name": "sequence",
+   "modifiers": [],
+   "cpp_type": "std::vector<ProcessStep>",
+   "kind": "list",
+   "confidence": "medium",
+   "evidence": "MultiTurnProcess.qml:23-39 step(): an element is either a function (called with the previous stdout, typeof === \"function\") or a command array (assigned to Process.command when non-empty). Callers: GCloudVision.qml:27-38,49-73, GCloudTranslate.qml:36-51, GoogleCloud.qml:59-79, ScreenTextOverlay.qml:310-320 pass [string...] commands and (out) => {...} callbacks",
+   "notes": "Heterogeneous list (command | callback), encoded as ProcessStep: a set `callback` marks a function step, otherwise `command` is run; an empty `command` (GoogleCloud.qml:65 `[]`) re-runs the command the previous callback set on the Process. In JS a callback's return value becomes the next step's output, but no caller returns anything, so callbacks are void and the following step gets an empty string. Medium because the union encoding (vs std::variant) is a design choice."
+  },
+  {
+   "file": "modules/common/widgets/ConfigSelectionArray.qml",
+   "line": 12,
+   "name": "options",
+   "modifiers": [],
+   "cpp_type": "std::vector<SelectionOption>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "ConfigSelectionArray.qml:12-23 default [{displayName, icon, value}, ...]; Repeater delegate modelData (line 32, SelectionOption) reads .displayName/.icon/.value; option literals in modules/settings/*.qml have the same keys",
+   "notes": "Reuses SelectionOption (value stays nlohmann::json: bool | int | string per instance, see ConfigSelectionArray.currentValue)."
+  },
+  {
+   "file": "modules/common/widgets/MaterialLoadingIndicator.qml",
+   "line": 24,
+   "name": "shapes",
+   "modifiers": [],
+   "cpp_type": "std::vector<MaterialShape::Shape>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "MaterialLoadingIndicator.qml:24-32 literal of MaterialShape.Shape.* values; :78 shape: root.shapes[root.shapeIndex] (MaterialShape.shape is MaterialShape::Shape), :55 cycles shapeIndex modulo length",
+   "notes": "Enum declared in MaterialShape.qml."
+  },
+  {
+   "file": "modules/common/widgets/NotificationAppIcon.qml",
+   "line": 24,
+   "name": "urgentShapes",
+   "modifiers": [],
+   "cpp_type": "std::vector<MaterialShape::Shape>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "NotificationAppIcon.qml:24-27 literal [MaterialShape.Shape.VerySunny, MaterialShape.Shape.SoftBurst]; :28 random element assigned to shape (MaterialShape::Shape)",
+   "notes": ""
+  },
+  {
+   "file": "modules/common/widgets/WaveVisualizer.qml",
+   "line": 9,
+   "name": "points",
+   "modifiers": [],
+   "cpp_type": "std::vector<double>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "WaveVisualizer.qml:9 no initializer; only binder is PlayerControl.qml:141 points: root.visualizerPoints (list<real>, MediaControls.qml:25 parses `;`-separated numbers); onPaint sums points[idx] arithmetically",
+   "notes": ""
+  },
+  {
+   "file": "modules/common/widgets/WaveVisualizer.qml",
+   "line": 10,
+   "name": "smoothPoints",
+   "modifiers": [],
+   "cpp_type": "std::vector<double>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "WaveVisualizer.qml:33-43 reset to [] then push(sum / count) (moving average of points), fill(0) when not live; read as root.smoothPoints[i] / maxVal",
+   "notes": "Scratch buffer written and read only inside onPaint; could be a local in the port."
+  },
+  {
+   "file": "modules/common/widgets/WeekRow.qml",
+   "line": 15,
+   "name": "model",
+   "modifiers": [],
+   "cpp_type": "std::vector<WeekDay>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "WeekRow.qml:15-31 builds 7 objects {date, day, month, year, today} (Date, getDate(), getMonth()+1, getFullYear(), sameDate bool); used as Repeater model whose delegate is WeekRow.qml:34 `required property var model` (WeekDay)",
+   "notes": "Reuses WeekDay. WeekRow is not used anywhere in the repo; the type follows from the initializer alone."
+  },
+  {
+   "file": "modules/ii/background/Background.qml",
+   "line": 37,
+   "name": "relevantWindows",
+   "modifiers": [],
+   "cpp_type": "std::vector<HyprlandClient>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Background.qml:37 HyprlandData.windowList.filter(...).sort(...) (windowList is std::vector<HyprlandClient>); :38-39 read relevantWindows[i]?.workspace.id",
+   "notes": "Reuses HyprlandClient. Filtered copy of windowList (monitor id and non-special workspace), sorted by workspace id."
+  },
+  {
+   "file": "modules/ii/bar/SysTray.qml",
+   "line": 21,
+   "name": "pinnedItems",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::SystemTrayItem*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "SysTray.qml:21 = TrayService.pinnedItems; LockSurface.qml:286 binds SystemTray.items.values.filter(...); :134-139 ScriptModel values whose delegate has `required property SystemTrayItem modelData`",
+   "notes": "Non-owning pointers to Quickshell tray items."
+  },
+  {
+   "file": "modules/ii/bar/SysTray.qml",
+   "line": 22,
+   "name": "unpinnedItems",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::SystemTrayItem*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "SysTray.qml:22 = TrayService.unpinnedItems; :117-121 Repeater model whose delegate has `required property SystemTrayItem modelData`; .length read at :24,77,107,112",
+   "notes": "Non-owning pointers to Quickshell tray items."
+  },
+  {
+   "file": "modules/ii/lock/PasswordChars.qml",
+   "line": 71,
+   "name": "charShapes",
+   "modifiers": [],
+   "cpp_type": "std::vector<MaterialShape::Shape>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "PasswordChars.qml:71-79 literal of MaterialShape.Shape.* values; :80 shape: charShapes[index % length]",
+   "notes": ""
+  },
+  {
+   "file": "modules/ii/overlay/OverlayContext.qml",
+   "line": 10,
+   "name": "availableWidgets",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<OverlayWidgetInfo>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "OverlayContext.qml:10-18 literal [{identifier, materialSymbol}, ...]; read as modelData in OverlayTaskbar.qml:44 and StyledOverlayWidget.qml:30 (OverlayWidgetInfo)",
+   "notes": "Reuses OverlayWidgetInfo."
+  },
+  {
+   "file": "modules/ii/overlay/OverlayContext.qml",
+   "line": 23,
+   "name": "clickableWidgets",
+   "modifiers": [],
+   "cpp_type": "std::vector<ii::Item*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "OverlayContext.qml:36-44 registerClickableWidget(widget) push / filter by identity; only caller StyledOverlayWidget.qml:99 passes contentItem (`required property Item`); Overlay.qml:35 maps each to a Region { item: widget }",
+   "notes": "Non-owning pointers, compared by identity."
+  },
+  {
+   "file": "modules/ii/overlay/resources/Resources.qml",
+   "line": 18,
+   "name": "resources",
+   "modifiers": [],
+   "cpp_type": "std::vector<ResourceInfo>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Resources.qml:18-37 literal [{icon, name, history, maxAvailableString}, ...] with history from ResourceUsage.*UsageHistory (list<real>); delegate at :63 (ResourceInfo) reads root.resources[index]",
+   "notes": "Reuses ResourceInfo. Rebuilt whenever the ResourceUsage histories change."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 83,
+   "name": "windowRegions",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<WindowRegion>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:83-93 map(window => ({at: [x, y], size: [w, h], class, title})) over HyprlandClient windows; :165 find(region => ...), :233 passed to filterImageRegions, :413 ScriptModel values for the delegate at :421 (WindowRegion)",
+   "notes": "Reuses WindowRegion (`class` -> class_). Upstream: filterWindowRegionsByLayers compares the windows in global coordinates against layerRegions, which are already offset to monitor-local coordinates, so the overlap test is skewed on a monitor not at (0, 0)."
+  },
+  {
+   "file": "modules/ii/regionSelector/RegionSelection.qml",
+   "line": 94,
+   "name": "layerRegions",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<LayerRegion>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "RegionSelection.qml:94-115 map(layer => ({at: [x, y], size: [w, h], namespace})) over HyprlandMonitorLayers.levels[\"2\"], offset by the monitor position; :153 find(...), :443 ScriptModel values for the delegate at :451 (LayerRegion)",
+   "notes": "Reuses LayerRegion (`namespace` -> namespace_). Empty when the monitor has no top-level layers."
+  },
+  {
+   "file": "modules/ii/screenTranslator/ScreenTextOverlay.qml",
+   "line": 271,
+   "name": "boundingVertices",
+   "modifiers": [],
+   "cpp_type": "std::vector<VisionVertex>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "ScreenTextOverlay.qml:271 = modelData.boundingBox.vertices where modelData is a VisionParagraph (VisionBoundingPoly.vertices is std::vector<VisionVertex>); :272-279 read [0..3].x / .y",
+   "notes": "Reuses VisionVertex. Indexes 0, 1 and 3 unchecked; Vision always returns 4 vertices."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/AndroidQuickPanel.qml",
+   "line": 34,
+   "name": "toggles",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<QuickToggleEntry>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "AndroidQuickPanel.qml:34 = Config.options.sidebar.quickToggles.android.toggles (Config.qml:497) or []; read via .some(toggle => toggle.type ...) and toggleRowsForList",
+   "notes": "Reuses QuickToggleEntry. Null elements are skipped by the readers (see Config.toggles)."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/AndroidQuickPanel.qml",
+   "line": 35,
+   "name": "toggleRows",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<std::vector<QuickToggleEntry>>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "AndroidQuickPanel.qml:42-60 toggleRowsForList packs toggles into rows of total size <= columns; :82 row delegate modelData is std::vector<QuickToggleEntry>, :84-86 sums rows[i].length",
+   "notes": "Rows of QuickToggleEntry."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/AndroidQuickPanel.qml",
+   "line": 36,
+   "name": "unusedToggles",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<QuickToggleEntry>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "AndroidQuickPanel.qml:36-39 availableToggleTypes not in toggles, mapped to {type, size: 1}",
+   "notes": "Reuses QuickToggleEntry."
+  },
+  {
+   "file": "modules/ii/sidebarRight/quickToggles/AndroidQuickPanel.qml",
+   "line": 40,
+   "name": "unusedToggleRows",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<std::vector<QuickToggleEntry>>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "AndroidQuickPanel.qml:40 toggleRowsForList(unusedToggles); :142 row delegate modelData is std::vector<QuickToggleEntry>",
+   "notes": "Same shape as toggleRows."
+  },
+  {
+   "file": "modules/ii/sidebarRight/volumeMixer/VolumeDialogContent.qml",
+   "line": 13,
+   "name": "appPwNodes",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<qs::PwNode*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "VolumeDialogContent.qml:13 = Audio.outputAppNodes or Audio.inputAppNodes (Pipewire nodes); :23 ScriptModel values for the delegate at :30 (qs::PwNode*)",
+   "notes": "Non-owning pointers to Pipewire nodes."
+  },
+  {
+   "file": "modules/ii/sidebarRight/volumeMixer/VolumeDialogContent.qml",
+   "line": 14,
+   "name": "devices",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<qs::PwNode*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "VolumeDialogContent.qml:14 = Audio.outputDevices or Audio.inputDevices; :46 map(node => Audio.friendlyDeviceName(node)), :47-56 findIndex / index to pick the default sink or source",
+   "notes": "Non-owning pointers to Pipewire nodes."
+  },
+  {
+   "file": "services/Audio.qml",
+   "line": 43,
+   "name": "outputAppNodes",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<qs::PwNode*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Audio.qml:33-37 appNodes(true) = Pipewire.nodes.values.filter(sink && audio && isStream); read by VolumeDialogContent.appPwNodes",
+   "notes": "Non-owning pointers to Pipewire nodes. The upstream comment notes it was list<var> only because list<PwNode> broke ScriptModel."
+  },
+  {
+   "file": "services/Audio.qml",
+   "line": 44,
+   "name": "inputAppNodes",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<qs::PwNode*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Audio.qml:33-37 appNodes(false) = Pipewire.nodes.values.filter(source && audio && isStream); read by VolumeDialogContent.appPwNodes",
+   "notes": "Non-owning pointers to Pipewire nodes."
+  },
+  {
+   "file": "services/Audio.qml",
+   "line": 45,
+   "name": "outputDevices",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<qs::PwNode*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Audio.qml:38-42 devices(true) = Pipewire.nodes.values.filter(sink && audio && !isStream); read by VolumeDialogContent.devices",
+   "notes": "Non-owning pointers to Pipewire nodes."
+  },
+  {
+   "file": "services/Audio.qml",
+   "line": 46,
+   "name": "inputDevices",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<qs::PwNode*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Audio.qml:38-42 devices(false) = Pipewire.nodes.values.filter(source && audio && !isStream); read by VolumeDialogContent.devices",
+   "notes": "Non-owning pointers to Pipewire nodes."
+  },
+  {
+   "file": "services/BluetoothStatus.qml",
+   "line": 29,
+   "name": "connectedDevices",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::BluetoothDevice*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "BluetoothStatus.qml:29 Bluetooth.devices.values.filter(d => d.connected).sort(sortFunction); sortFunction reads .name",
+   "notes": "Non-owning pointers to Quickshell Bluetooth devices."
+  },
+  {
+   "file": "services/BluetoothStatus.qml",
+   "line": 30,
+   "name": "pairedButNotConnectedDevices",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::BluetoothDevice*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "BluetoothStatus.qml:30 Bluetooth.devices.values.filter(d => d.paired && !d.connected).sort(sortFunction)",
+   "notes": "Non-owning pointers to Quickshell Bluetooth devices."
+  },
+  {
+   "file": "services/BluetoothStatus.qml",
+   "line": 31,
+   "name": "unpairedDevices",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::BluetoothDevice*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "BluetoothStatus.qml:31 Bluetooth.devices.values.filter(d => !d.paired && !d.connected).sort(sortFunction)",
+   "notes": "Non-owning pointers to Quickshell Bluetooth devices."
+  },
+  {
+   "file": "services/BluetoothStatus.qml",
+   "line": 32,
+   "name": "friendlyDeviceList",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::BluetoothDevice*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "BluetoothStatus.qml:32-36 concatenation of the three lists above; BluetoothDialog.qml:47 ScriptModel values for BluetoothDeviceItem (device: qs::BluetoothDevice*)",
+   "notes": "Non-owning pointers to Quickshell Bluetooth devices."
+  },
+  {
+   "file": "services/Emojis.qml",
+   "line": 17,
+   "name": "list",
+   "modifiers": [],
+   "cpp_type": "std::vector<std::string>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Emojis.qml:53 root.list = lines.map(line => line.trim()); :18-21 preparedEntries maps each to {name: Fuzzy.prepare(a), entry: a} (FuzzyStringEntry, entry std::string)",
+   "notes": "Upstream: the sloppy-search branch of fuzzyQuery (Emojis.qml:23-31) reads root.sloppySearch, entries and root.scoreThreshold, which exist only in Cliphist.qml, so it is dead code here."
+  },
+  {
+   "file": "services/GlobalFocusGrab.qml",
+   "line": 17,
+   "name": "persistent",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::PanelWindow*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "GlobalFocusGrab.qml:29-40 addPersistent/removePersistent (indexOf / push / splice); callers Bar.qml:80, VerticalBar.qml:79, OnScreenKeyboard.qml:62 pass PanelWindow roots; spread into HyprlandFocusGrab.windows (:65)",
+   "notes": "Non-owning, compared by identity."
+  },
+  {
+   "file": "services/GlobalFocusGrab.qml",
+   "line": 18,
+   "name": "dismissable",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::PanelWindow*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "GlobalFocusGrab.qml:42-53 addDismissable/removeDismissable; callers Overview.qml:48, SidebarRight.qml:36, WallpaperSelector.qml:44, MediaControls.qml:112, Cheatsheet.qml:58 pass PanelWindows; :65 reads w.focusable (a PanelWindow property) and w.contentItem",
+   "notes": "Non-owning, compared by identity. dismiss() clears it."
+  },
+  {
+   "file": "services/LauncherSearch.qml",
+   "line": 167,
+   "name": "results",
+   "modifiers": [],
+   "cpp_type": "std::vector<LauncherSearchResult*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "LauncherSearch.qml:167-... every branch returns arrays of resultComp.createObject(null, {...}) (LauncherSearchResult); SearchBar.qml:95-96 reads results[0].name, SearchWidget.qml:190,197 feeds them to the result ScriptModel (modelData LauncherSearchResult*)",
+   "notes": "Ownership: parentless objects re-created on every evaluation and never destroyed upstream; the C++ side must own them (e.g. keep the previous batch alive until the model is replaced)."
+  },
+  {
+   "file": "services/Network.qml",
+   "line": 26,
+   "name": "friendlyWifiNetworks",
+   "modifiers": [
+    "readonly"
+   ],
+   "cpp_type": "std::vector<WifiAccessPoint*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Network.qml:26-32 [...wifiNetworks].sort(...) where wifiNetworks is list<WifiAccessPoint> (:24); sort reads .active/.strength; WifiDialog.qml:40 ScriptModel values",
+   "notes": "WifiAccessPoint is services/network/WifiAccessPoint.qml; objects owned by Network (createObject(root, ...)), so non-owning pointers."
+  },
+  {
+   "file": "services/Notifications.qml",
+   "line": 23,
+   "name": "actions",
+   "modifiers": [],
+   "cpp_type": "std::vector<NotifAction>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "Notifications.qml:23-26 (inline component Notif) notification?.actions.map(action => ({identifier, text})) ?? []; NotificationItem.qml:273-281 Repeater model, delegate modelData NotifAction reads .text/.identifier; serialized by notifToJSON (:48), restored as [] (:275)",
+   "notes": "Reuses NotifAction. Plain copies of the Quickshell NotificationAction fields, not qs::NotificationAction*; the action is looked up again by identifier on invoke (:245)."
+  },
+  {
+   "file": "services/TaskbarApps.qml",
+   "line": 23,
+   "name": "apps",
+   "modifiers": [],
+   "cpp_type": "std::vector<TaskbarAppEntry*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "TaskbarApps.qml:23-60 builds one appEntryComp.createObject(null, {appId, toplevels, pinned}) per key (TaskbarAppEntry inline component, :62-67); DockApps.qml:51 ScriptModel values, delegate modelData TaskbarAppEntry*",
+   "notes": "Ownership: parentless objects re-created on every evaluation; the C++ side must own them. Includes a sentinel entry with appId \"SEPARATOR\" between pinned and unpinned apps. Upstream: keys are appId.toLowerCase(), and DockAppButton.qml:78 calls togglePin with that lowered id, so a pinned id with capitals (e.g. org.gnome.Nautilus) can never be unpinned, only duplicated in lower case."
+  },
+  {
+   "file": "services/TaskbarApps.qml",
+   "line": 65,
+   "name": "toplevels",
+   "modifiers": [
+    "required"
+   ],
+   "cpp_type": "std::vector<qs::Toplevel*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "TaskbarApps.qml:65 (inline component TaskbarAppEntry) filled from ToplevelManager.toplevels.values (:44-50); DockAppButton.qml:18,70 reads .activated / calls .activate(), DockApps.qml:154-159 delegate modelData qs::Toplevel*",
+   "notes": "Non-owning pointers to Wayland toplevels."
+  },
+  {
+   "file": "services/TrayService.qml",
+   "line": 12,
+   "name": "itemsInUserList",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::SystemTrayItem*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "TrayService.qml:12 SystemTray.items.values.filter(i => pinnedItems.includes(i.id) && ...); reads .id/.status",
+   "notes": "Non-owning pointers to Quickshell tray items."
+  },
+  {
+   "file": "services/TrayService.qml",
+   "line": 13,
+   "name": "itemsNotInUserList",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::SystemTrayItem*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "TrayService.qml:13 SystemTray.items.values.filter(i => !pinnedItems.includes(i.id) && ...)",
+   "notes": "Non-owning pointers to Quickshell tray items."
+  },
+  {
+   "file": "services/TrayService.qml",
+   "line": 16,
+   "name": "pinnedItems",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::SystemTrayItem*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "TrayService.qml:16 one of itemsInUserList / itemsNotInUserList depending on invertPins; :37-38 isPinned reads pinnedItems[i].id; SysTray.qml:21 binds it",
+   "notes": "Non-owning pointers to Quickshell tray items."
+  },
+  {
+   "file": "services/TrayService.qml",
+   "line": 17,
+   "name": "unpinnedItems",
+   "modifiers": [],
+   "cpp_type": "std::vector<qs::SystemTrayItem*>",
+   "kind": "list",
+   "confidence": "high",
+   "evidence": "TrayService.qml:17 the other of itemsInUserList / itemsNotInUserList; SysTray.qml:22 binds it",
+   "notes": "Non-owning pointers to Quickshell tray items."
   }
  ]
 }
