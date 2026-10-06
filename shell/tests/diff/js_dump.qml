@@ -90,7 +90,12 @@ QtObject {
             ["key=value; k2=v2", "(\\w+)=(\\w+)", ""], ["key=value; k2=v2", "(\\w+)=(\\w+)", "g"], ["abc", "", "g"],
             ["a, b ,c", "\\s*,\\s*", ""], ["one  two\tthree", "\\s+", ""], ["x(y)?z", "(y)?z", ""], ["line1\nline2", "^line", "gm"],
             ["Display 1\nDisplay 2", "Display (\\d)", "g"], ["", "x", ""], ["", "", ""], ["2024-01-05", "(\\d+)-(\\d+)", ""],
-            ["file:///home/user", "^file://", ""], ["aaa", "a*?", "g"], ["test", "^\\d+$", ""], ["12345", "^\\d+$", ""]
+            ["file:///home/user", "^file://", ""], ["aaa", "a*?", "g"], ["test", "^\\d+$", ""], ["12345", "^\\d+$", ""],
+            // Found while translating ii: ^ with g, non-ASCII classes, JS \s and ., a literal {, UTF-16 indices.
+            ["(a) (b) x", "^ *\\([^)]*\\) *", "g"], ["【歌名】标题【x】", "【[^】]*】", "g"], ["a\u00a0b\u3000c d", "\\s", "g"],
+            ["a\u00a0b\u3000c d", "\\S+", "g"], ["a\u2028b", "a.b", ""], ["a\nb a-b", "a.b", "g"], ["x{1}y{22}", "{(\\d+)}", "g"],
+            ["😀a😀ab", "a", "g"], ["word boundary", "\\bb", "g"], ["Ünïcödé", "[^a-z]", "g"], ["ab{", "b{", ""],
+            ["曲名 - 歌手 [MV]", "\\s*\\[[^\\]]*\\]", "g"]
         ]
         for (const [t, p, f] of regexCases) {
             const re = new RegExp(p, f)
@@ -102,6 +107,17 @@ QtObject {
             add("reReplaceFn", [t, p, f], t.replace(new RegExp(p, f), (...a) => "{" + a[0].length + "}"))
             add("reSplit", [t, p, f], t.split(new RegExp(p, f)).map(x => x === undefined ? "" : x))
             add("reSplitLimit", [t, p, f, 2], t.split(new RegExp(p, f), 2).map(x => x === undefined ? "" : x))
+            const execRe = new RegExp(p, f)
+            const found = []
+            let em
+            for (let guard = 0; (em = execRe.exec(t)) !== null && guard < 50; ++guard) {
+                found.push([String(em.index), String(execRe.lastIndex), Array.from(em, x => x === undefined ? "" : x)])
+                if (!execRe.global)
+                    break
+                if (em[0].length === 0)
+                    execRe.lastIndex++
+            }
+            add("reExecAll", [t, p, f], found)
         }
         const jsonCases = ['{"b":1,"a":[1,2.5,{"c":null}],"s":"q\\"u\\n\\u0001é"}', '[]', '{}', '[[],{}]', '1.0', '1e21',
             '0.1', '-0', '{"x":{"y":{"z":[true,false]}}}', '"tab\\there"', '123456789', '1.5e-7']

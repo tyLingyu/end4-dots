@@ -19,7 +19,7 @@
   "cpp": "if (exitCode != 0) {\n  this->languagesScanned.emit(js::Json(std::vector<std::string>{\"en_US\"}));\n}",
   "kind": "statements (FunctionExpression)",
   "context": "translationScanner.onExited",
-  "expected": "handler body, parameters (const int& exitCode, const int& exitStatus)",
+  "expected": "handler body, parameters (int const& exitCode, int const& exitStatus)",
   "code": "(exitCode, exitStatus) => {\n            if (exitCode !== 0) {\n                translationScanner.languagesScanned([\"en_US\"]);\n            }\n        }",
   "form": "body"
  },
@@ -51,7 +51,7 @@
   "cpp": "this->contentLoaded.emit(js::Json::object());",
   "kind": "statements (FunctionExpression)",
   "context": "translationReader.onLoadFailed",
-  "expected": "handler body, parameters (const qs::FileViewError::Enum& error)",
+  "expected": "handler body, parameters (qs::FileViewError::Enum const& error)",
   "code": "error => {\n            translationReader.contentLoaded({});\n        }",
   "form": "body"
  },
@@ -75,7 +75,7 @@
   "cpp": "// ii: data 是 JSON.parse 的结果。translations/*.json 的值都是字符串（var-types），generatedTranslations 是 map<string, string>：\n// 取对象里的字符串值；非对象（数组、null 等）当作空表\nstd::map<std::string, std::string> table;\nif (data.is_object()) {\n  for (const auto& item : data.items()) {\n    if (item.value().is_string()) {\n      table[item.key()] = item.value().get<std::string>();\n    }\n  }\n}\nthis->generatedTranslations.set(std::move(table));\nthis->isLoading.set(false);",
   "kind": "statements (FunctionExpression)",
   "context": "root/generatedTranslationFileView.onContentLoaded",
-  "expected": "handler body, parameters (const js::Json& data)",
+  "expected": "handler body, parameters (js::Json const& data)",
   "code": "(data) => {\n            root.generatedTranslations = data;\n            root.isLoading = false;\n        }",
   "form": "body"
  },
@@ -83,7 +83,7 @@
   "cpp": "this->availableLanguages.set(languages.get<std::vector<std::string>>());  // [...languages]",
   "kind": "statements (FunctionExpression)",
   "context": "root/scanLanguagesProcess.onLanguagesScanned",
-  "expected": "handler body, parameters (const js::Json& languages)",
+  "expected": "handler body, parameters (js::Json const& languages)",
   "code": "(languages) => {\n            root.availableLanguages = [...languages];\n        }",
   "form": "body"
  },
@@ -100,7 +100,7 @@
   "cpp": "this->availableGeneratedLanguages.set(languages.get<std::vector<std::string>>());  // [...languages]",
   "kind": "statements (FunctionExpression)",
   "context": "root/scanGeneratedLanguagesProcess.onLanguagesScanned",
-  "expected": "handler body, parameters (const js::Json& languages)",
+  "expected": "handler body, parameters (js::Json const& languages)",
   "code": "(languages) => {\n            root.availableGeneratedLanguages = [...languages];\n        }",
   "form": "body"
  },
@@ -108,7 +108,7 @@
   "cpp": "// ii: data 是 JSON.parse 的结果。translations/*.json 的值都是字符串（var-types），translations 是 map<string, string>：\n// 取对象里的字符串值；非对象（数组、null 等）当作空表\nstd::map<std::string, std::string> table;\nif (data.is_object()) {\n  for (const auto& item : data.items()) {\n    if (item.value().is_string()) {\n      table[item.key()] = item.value().get<std::string>();\n    }\n  }\n}\nthis->translations.set(std::move(table));\nthis->isLoading.set(false);",
   "kind": "statements (FunctionExpression)",
   "context": "root/translationFileView.onContentLoaded",
-  "expected": "handler body, parameters (const js::Json& data)",
+  "expected": "handler body, parameters (js::Json const& data)",
   "code": "(data) => {\n            root.translations = data;\n            root.isLoading = false;\n        }",
   "form": "body"
  },

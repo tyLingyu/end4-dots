@@ -7,6 +7,7 @@ quickshell understands it. Dumps are cached by file content hash.
 from __future__ import annotations
 
 import hashlib
+import re
 import json
 import subprocess
 from dataclasses import dataclass, field
@@ -49,6 +50,7 @@ class Method:
     parameters: list[tuple[str, str]]  # (name, type name; "" when untyped)
     body: Script | None
     returns: str | None = None  # `function f(): string`: the annotated return type
+    rest: bool = False  # the last parameter is `...name` (qmldom does not say; read from the source)
 
 
 @dataclass
@@ -201,6 +203,17 @@ def _component(node: dict, inline: bool) -> Component:
     return Component(name=node["name"], root=_object(node["objects"][0]), enums=enums, is_inline=inline)
 
 
+def _all_objects(obj: QmlObject):
+    yield obj
+    for child in obj.children:
+        yield from _all_objects(child)
+    for b in obj.bindings:
+        if b.value.obj is not None:
+            yield from _all_objects(b.value.obj)
+        for o in b.value.objects:
+            yield from _all_objects(o)
+
+
 def load(path: Path) -> QmlFile:
     item = _dump(path)["currentItem"]
     components = item["components"]
@@ -221,4 +234,10 @@ def load(path: Path) -> QmlFile:
             uri = str((path.parent / uri.strip('"')).resolve())
         imports.append(Import(uri=uri, alias=imp.get("importId") or None, is_directory=is_dir))
     is_singleton = any(p.get("name") == "Singleton" for p in item.get("pragmas", []))
+    text = path.read_text()
+    for comp in [main, *inline.values()]:
+        for obj in _all_objects(comp.root):
+            for m in obj.methods:
+                if m.kind == "function" and re.search(rf"function\s+{re.escape(m.name)}\s*\([^)]*\.\.\.", text):
+                    m.rest = True
     return QmlFile(path=path, imports=imports, is_singleton=is_singleton, component=main, inline_components=inline)

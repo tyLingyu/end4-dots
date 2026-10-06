@@ -11,7 +11,7 @@
   "cpp": "username.set(js::trim(data));",
   "kind": "statements (FunctionExpression)",
   "context": "root/getUsername/stdout.onRead",
-  "expected": "handler body, parameters (const std::string& data)",
+  "expected": "handler body, parameters (std::string const& data)",
   "code": "data => {\n                root.username = data.trim()\n            }",
   "form": "body"
  },

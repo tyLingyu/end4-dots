@@ -194,14 +194,6 @@ namespace ii::js {
       return out;
     }
 
-    std::vector<std::string> groups(const std::cmatch& m) {
-      std::vector<std::string> out;
-      for (std::size_t i = 0; i < m.size(); ++i) {
-        out.push_back(m[i].matched ? m[i].str() : std::string());
-      }
-      return out;
-    }
-
     void quote(std::string_view text, std::string& out) {
       static constexpr char kHex[] = "0123456789abcdef";
       out += '"';
@@ -697,52 +689,157 @@ namespace ii::js {
   }
 
   // ── Regular expressions ────────────────────────────────────────────────────
-
-  Regex::Regex(std::string_view pattern, std::string_view flags) : m_empty(pattern.empty()) {
-    auto syntax = std::regex::ECMAScript;
-    for (const char flag : flags) {
-      if (flag == 'g') {
-        m_global = true;
-      } else if (flag == 'i') {
-        syntax |= std::regex::icase;
-      } else if (flag == 'm') {
-        syntax |= std::regex::multiline;
-      }
-    }
-    m_re = std::regex(pattern.begin(), pattern.end(), syntax);
-  }
+  //
+  // Matching runs on UTF-32 text (std::wregex; wchar_t is 32-bit here) so classes and `.` see
+  // whole characters, and the pattern is rewritten where std's ECMAScript differs from V4's.
+  // Positions reported to callers are UTF-16 indices, as in JS.
 
   namespace {
 
-    // Byte length of the code point at text[i] (1 for a malformed byte).
-    std::size_t codePointLength(std::string_view text, std::size_t i) {
-      std::size_t next = i;
-      decode(text, next);
-      return std::max<std::size_t>(next - i, 1);
+    std::wstring wide(std::string_view text) {
+      std::wstring out;
+      out.reserve(text.size());
+      std::size_t i = 0;
+      while (i < text.size()) {
+        out += static_cast<wchar_t>(decode(text, i));
+      }
+      return out;
+    }
+
+    std::string narrow(std::wstring_view text) {
+      std::string out;
+      out.reserve(text.size());
+      for (const wchar_t c : text) {
+        encode(static_cast<char32_t>(c), out);
+      }
+      return out;
+    }
+
+    // UTF-16 length of text[0, n): characters above U+FFFF are two code units in JS.
+    int utf16Index(std::wstring_view text, std::size_t n) {
+      int index = 0;
+      for (std::size_t k = 0; k < n; ++k) {
+        index += text[k] > 0xFFFF ? 2 : 1;
+      }
+      return index;
+    }
+
+    std::size_t fromUtf16Index(std::wstring_view text, int index) {
+      std::size_t k = 0;
+      for (int i = 0; k < text.size() && i < index; ++k) {
+        i += text[k] > 0xFFFF ? 2 : 1;
+      }
+      return k;
+    }
+
+    // JS \s: WhiteSpace and LineTerminator (std's \s is ASCII only). Raw characters, with one
+    // range, so the text goes inside a character class.
+    constexpr std::wstring_view kJsSpaces =
+        L"\t\n\v\f\r    -     　﻿";
+
+    bool asciiDigit(wchar_t c) { return c >= L'0' && c <= L'9'; }
+
+    // A JS pattern as std::wregex reads it with the same meaning: \s and . as JS defines them,
+    // a `{` or `}` that is not a quantifier taken literally (V4 allows it, std throws), and the
+    // JS-only classes [] (nothing) and [^] (anything).
+    std::wstring translatePattern(std::wstring_view p) {
+      std::wstring out;
+      bool inClass = false;
+      for (std::size_t i = 0; i < p.size(); ++i) {
+        const wchar_t c = p[i];
+        if (c == L'\\' && i + 1 < p.size()) {
+          const wchar_t n = p[++i];
+          if (n == L's' && inClass) {
+            out += kJsSpaces;
+          } else if ((n == L's' || n == L'S') && !inClass) {
+            out += n == L's' ? L"[" : L"[^";
+            out += kJsSpaces;
+            out += L']';
+          } else {
+            out += c;
+            out += n;  // (\S inside a class keeps std's ASCII meaning)
+          }
+          continue;
+        }
+        if (inClass) {
+          inClass = c != L']';
+          out += c;
+          continue;
+        }
+        if (c == L'[') {
+          if (p.substr(i, 2) == L"[]") {
+            out += L"(?!)";
+            i += 1;
+          } else if (p.substr(i, 3) == L"[^]") {
+            out += L"[\\s\\S]";
+            i += 2;
+          } else {
+            inClass = true;
+            out += c;
+          }
+        } else if (c == L'.') {
+          out += L"[^\n\r  ]";
+        } else if (c == L'{') {
+          std::size_t j = i + 1;
+          const std::size_t digitsStart = j;
+          while (j < p.size() && asciiDigit(p[j])) {
+            ++j;
+          }
+          const bool digits = j > digitsStart;
+          if (digits && j < p.size() && p[j] == L',') {
+            ++j;
+            while (j < p.size() && asciiDigit(p[j])) {
+              ++j;
+            }
+          }
+          if (digits && j < p.size() && p[j] == L'}') {
+            out += p.substr(i, j - i + 1);
+            i = j;
+          } else {
+            out += L"\\{";
+          }
+        } else if (c == L'}') {
+          out += L"\\}";
+        } else {
+          out += c;
+        }
+      }
+      return out;
+    }
+
+    std::vector<std::string> groups(const std::wsmatch& m) {
+      std::vector<std::string> out;
+      for (std::size_t i = 0; i < m.size(); ++i) {
+        out.push_back(m[i].matched ? narrow(m[i].str()) : std::string());
+      }
+      return out;
+    }
+
+    // Search from `pos` without losing what precedes it: ^ and \b see the previous character.
+    bool searchFrom(const std::wstring& text, std::size_t pos, std::wsmatch& m, const Regex& re) {
+      const auto flags = pos > 0 ? std::regex_constants::match_prev_avail : std::regex_constants::match_default;
+      return std::regex_search(text.begin() + static_cast<std::ptrdiff_t>(pos), text.end(), m, re.re(), flags);
     }
 
     // Successive matches as RegExp.prototype.exec finds them with lastIndex: after an empty
     // match, the search resumes one character later (std::regex_iterator retries non-empty).
-    template <typename F> void forEachMatch(std::string_view text, const Regex& re, bool all, F&& fn) {
+    template <typename F> void forEachMatch(const std::wstring& text, const Regex& re, bool all, F&& fn) {
       std::size_t pos = 0;
-      std::cmatch m;
-      while (pos <= text.size()) {
-        if (!std::regex_search(text.data() + pos, text.data() + text.size(), m, re.re())) {
-          return;
-        }
+      std::wsmatch m;
+      while (pos <= text.size() && searchFrom(text, pos, m, re)) {
         const std::size_t start = pos + static_cast<std::size_t>(m.position(0));
         const std::size_t end = start + static_cast<std::size_t>(m.length(0));
         fn(m, start, end);
         if (!all) {
           return;
         }
-        pos = end == start ? end + (end < text.size() ? codePointLength(text, end) : 1) : end;
+        pos = end == start ? end + 1 : end;
       }
     }
 
     // GetSubstitution: $$, $&, $`, $', $n and $nn (when there is such a group; else literal).
-    std::string substitute(std::string_view replacement, const std::cmatch& m, std::string_view text, std::size_t start,
-                           std::size_t end) {
+    std::string substitute(std::string_view replacement, const std::wsmatch& m, std::wstring_view text,
+                           std::size_t start, std::size_t end) {
       std::string out;
       const std::size_t groupCount = m.size() - 1;
       for (std::size_t i = 0; i < replacement.size(); ++i) {
@@ -755,11 +852,11 @@ namespace ii::js {
         if (next == '$') {
           out += '$', ++i;
         } else if (next == '&') {
-          out += text.substr(start, end - start), ++i;
+          out += narrow(text.substr(start, end - start)), ++i;
         } else if (next == '`') {
-          out += text.substr(0, start), ++i;
+          out += narrow(text.substr(0, start)), ++i;
         } else if (next == '\'') {
-          out += text.substr(end), ++i;
+          out += narrow(text.substr(end)), ++i;
         } else if (next >= '0' && next <= '9') {
           std::size_t n = static_cast<std::size_t>(next - '0');
           std::size_t used = 1;
@@ -770,7 +867,8 @@ namespace ii::js {
             }
           }
           if (n >= 1 && n <= groupCount) {
-            out += m[static_cast<int>(n)].matched ? m[static_cast<int>(n)].str() : std::string();
+            const auto& group = m[static_cast<int>(n)];
+            out += group.matched ? narrow(group.str()) : std::string();
             i += used;
           } else {
             out += '$';
@@ -784,23 +882,65 @@ namespace ii::js {
 
   } // namespace
 
-  bool test(const Regex& re, std::string_view text) { return std::regex_search(text.begin(), text.end(), re.re()); }
+  Regex::Regex(std::string_view pattern, std::string_view flags) : m_empty(pattern.empty()) {
+    auto syntax = std::regex::ECMAScript;
+    for (const char flag : flags) {
+      if (flag == 'g') {
+        m_global = true;
+      } else if (flag == 'i') {
+        syntax |= std::regex::icase;
+      } else if (flag == 'm') {
+        syntax |= std::regex::multiline;
+      }
+    }
+    m_re = std::wregex(translatePattern(wide(pattern)), syntax);
+  }
+
+  bool test(const Regex& re, std::string_view text) {
+    const std::wstring w = wide(text);
+    return std::regex_search(w, re.re());
+  }
 
   int search(std::string_view text, const Regex& re) {
-    std::cmatch m;
-    if (!std::regex_search(text.begin(), text.end(), m, re.re())) {
+    const std::wstring w = wide(text);
+    std::wsmatch m;
+    if (!std::regex_search(w, m, re.re())) {
       return -1;
     }
-    return length(text.substr(0, static_cast<std::size_t>(m.position(0))));
+    return utf16Index(w, static_cast<std::size_t>(m.position(0)));
+  }
+
+  std::optional<RegexMatch> exec(const Regex& re, std::string_view text, int& lastIndex) {
+    const std::wstring w = wide(text);
+    const int from = re.global() ? lastIndex : 0;
+    if (from > utf16Index(w, w.size())) {
+      lastIndex = 0;
+      return std::nullopt;
+    }
+    std::wsmatch m;
+    const std::size_t pos = fromUtf16Index(w, from);
+    if (!searchFrom(w, pos, m, re)) {
+      if (re.global()) {
+        lastIndex = 0;
+      }
+      return std::nullopt;
+    }
+    const std::size_t start = pos + static_cast<std::size_t>(m.position(0));
+    const std::size_t end = start + static_cast<std::size_t>(m.length(0));
+    if (re.global()) {
+      lastIndex = utf16Index(w, end);
+    }
+    return RegexMatch{utf16Index(w, start), groups(m)};
   }
 
   std::optional<std::vector<std::string>> match(std::string_view text, const Regex& re) {
+    const std::wstring w = wide(text);
     std::vector<std::string> out;
     bool found = false;
-    forEachMatch(text, re, re.global(), [&](const std::cmatch& m, std::size_t, std::size_t) {
+    forEachMatch(w, re, re.global(), [&](const std::wsmatch& m, std::size_t, std::size_t) {
       found = true;
       if (re.global()) {
-        out.push_back(m[0].str());
+        out.push_back(narrow(m[0].str()));
       } else {
         out = groups(m);
       }
@@ -812,27 +952,29 @@ namespace ii::js {
   }
 
   std::string replace(std::string_view text, const Regex& re, std::string_view replacement) {
+    const std::wstring w = wide(text);
     std::string out;
     std::size_t last = 0;
-    forEachMatch(text, re, re.global(), [&](const std::cmatch& m, std::size_t start, std::size_t end) {
-      out += text.substr(last, start - last);
-      out += substitute(replacement, m, text, start, end);
+    forEachMatch(w, re, re.global(), [&](const std::wsmatch& m, std::size_t start, std::size_t end) {
+      out += narrow(std::wstring_view(w).substr(last, start - last));
+      out += substitute(replacement, m, w, start, end);
       last = end;
     });
-    out += text.substr(std::min(last, text.size()));
+    out += narrow(std::wstring_view(w).substr(std::min(last, w.size())));
     return out;
   }
 
   std::string replace(std::string_view text, const Regex& re,
                       const std::function<std::string(const std::vector<std::string>&)>& fn) {
+    const std::wstring w = wide(text);
     std::string out;
     std::size_t last = 0;
-    forEachMatch(text, re, re.global(), [&](const std::cmatch& m, std::size_t start, std::size_t end) {
-      out += text.substr(last, start - last);
+    forEachMatch(w, re, re.global(), [&](const std::wsmatch& m, std::size_t start, std::size_t end) {
+      out += narrow(std::wstring_view(w).substr(last, start - last));
       out += fn(groups(m));
       last = end;
     });
-    out += text.substr(std::min(last, text.size()));
+    out += narrow(std::wstring_view(w).substr(std::min(last, w.size())));
     return out;
   }
 
@@ -844,26 +986,27 @@ namespace ii::js {
     if (separator.empty()) {
       return split(text, std::string_view(), limit);
     }
+    const std::wstring w = wide(text);
+    const std::wstring_view view(w);
     std::size_t offset = 0;
-    std::cmatch m;
-    while (offset <= text.size() &&
-           std::regex_search(text.data() + offset, text.data() + text.size(), m, separator.re())) {
+    std::wsmatch m;
+    while (offset <= w.size() && searchFrom(w, offset, m, separator)) {
       const std::size_t start = offset + static_cast<std::size_t>(m.position(0));
       const std::size_t end = start + static_cast<std::size_t>(m.length(0));
-      out.emplace_back(text.substr(offset, start - offset));
-      offset = std::max(offset + (offset < text.size() ? codePointLength(text, offset) : 1), end);
+      out.push_back(narrow(view.substr(offset, start - offset)));
+      offset = std::max(offset + 1, end);
       if (out.size() >= limit) {
         break;
       }
       for (std::size_t i = 1; i < m.size(); ++i) {
-        out.push_back(m[i].matched ? m[i].str() : std::string());
+        out.push_back(m[i].matched ? narrow(m[i].str()) : std::string());
         if (out.size() >= limit) {
           break;
         }
       }
     }
     if (out.size() < limit) {
-      out.emplace_back(offset <= text.size() ? text.substr(offset) : std::string_view());
+      out.push_back(offset <= w.size() ? narrow(view.substr(offset)) : std::string());
     }
     return out;
   }

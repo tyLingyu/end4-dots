@@ -84,6 +84,20 @@ class Registry:
                 return BuiltinRef(imp.uri, name, info.cpp_name)
         return None
 
+    def component_named(self, name: str) -> ComponentRef | None:
+        """A component anywhere in the shell by bare name (file or inline component), when the name
+        is unique. var-types.json names components this way, also across files (BrightnessMonitor)."""
+        if not hasattr(self, "_by_name"):
+            import re
+
+            found: dict[str, list[ComponentRef]] = {}
+            for path in sorted(self.root.rglob("*.qml")):
+                found.setdefault(path.stem, []).append(ComponentRef(path.resolve()))
+                for inline in re.findall(r"^\s*component\s+(\w+)\s*:", path.read_text(), re.M):
+                    found.setdefault(inline, []).append(ComponentRef(path.resolve(), inline))
+            self._by_name = {k: v[0] for k, v in found.items() if len(v) == 1}
+        return self._by_name.get(name)
+
     def builtin_info(self, ref: BuiltinRef) -> TypeInfo:
         return self.builtins.by_cpp[ref.cpp_name]
 

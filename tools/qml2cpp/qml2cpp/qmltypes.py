@@ -80,6 +80,7 @@ class TypeProperty:
     is_pointer: bool
     is_list: bool
     is_readonly: bool
+    notify: str | None = None  # the change signal; not always `<name>Changed` (PwNodeAudio.volume: volumesChanged)
 
 
 @dataclass
@@ -167,12 +168,16 @@ class BuiltinTypes:
                         is_pointer=bool(f.get("isPointer", False)),
                         is_list=bool(f.get("isList", False)),
                         is_readonly=bool(f.get("isReadonly", False)),
+                        notify=f.get("notify"),
                     )
                 elif member.kind in ("Signal", "Method"):
-                    params = [(p.fields.get("name", ""), p.fields.get("type", "")) for p in member.children]
+                    # Pointer types are marked isPointer, not spelled with `*`: keep it in the type name.
+                    params = [(p.fields.get("name", ""), p.fields.get("type", "") + ("*" if p.fields.get("isPointer") else ""))
+                              for p in member.children]
                     (info.signals if member.kind == "Signal" else info.methods)[f["name"]] = params
                     if member.kind == "Method":
-                        info.overloads.setdefault(f["name"], []).append((params, f.get("type", "void")))
+                        returns = f.get("type", "void") + ("*" if f.get("isPointer") else "")
+                        info.overloads.setdefault(f["name"], []).append((params, returns))
                 elif member.kind == "Enum":
                     info.enums[f["name"]] = list(f.get("values", []))
             self.by_cpp[info.cpp_name] = info

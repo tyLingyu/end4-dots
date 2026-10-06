@@ -11,7 +11,7 @@
   "cpp": "if (error == qs::FileViewError::FileNotFound) {\n  configFileView->writeAdapter();\n}",
   "kind": "statements (FunctionExpression)",
   "context": "root/configFileView.onLoadFailed",
-  "expected": "handler body, parameters (const qs::FileViewError::Enum& error)",
+  "expected": "handler body, parameters (qs::FileViewError::Enum const& error)",
   "code": "error => {\n            if (error == FileViewError.FileNotFound) {\n                writeAdapter();\n            }\n        }",
   "form": "body"
  },
@@ -41,10 +41,10 @@
   "form": "body"
  },
  "e77f4badf1fe": {
-  "cpp": "return std::vector<js::Json>{\n  js::Json{{\"size\", 2}, {\"type\", \"network\"}},\n  js::Json{{\"size\", 2}, {\"type\", \"bluetooth\"}},\n  js::Json{{\"size\", 1}, {\"type\", \"idleInhibitor\"}},\n  js::Json{{\"size\", 1}, {\"type\", \"mic\"}},\n  js::Json{{\"size\", 2}, {\"type\", \"audio\"}},\n  js::Json{{\"size\", 2}, {\"type\", \"nightLight\"}},\n  js::Json{{\"size\", 1}, {\"type\", \"powerProfile\"}},\n  js::Json{{\"size\", 1}, {\"type\", \"cloudflareWarp\"}},\n  js::Json{{\"size\", 1}, {\"type\", \"screenSnip\"}},\n  js::Json{{\"size\", 1}, {\"type\", \"colorPicker\"}},\n  js::Json{{\"size\", 1}, {\"type\", \"musicRecognition\"}}\n};",
+  "cpp": "std::vector<QuickToggleEntry>{\n  QuickToggleEntry{.type = \"network\", .size = 2},\n  QuickToggleEntry{.type = \"bluetooth\", .size = 2},\n  QuickToggleEntry{.type = \"idleInhibitor\", .size = 1},\n  QuickToggleEntry{.type = \"mic\", .size = 1},\n  QuickToggleEntry{.type = \"audio\", .size = 2},\n  QuickToggleEntry{.type = \"nightLight\", .size = 2},\n  QuickToggleEntry{.type = \"powerProfile\", .size = 1},\n  QuickToggleEntry{.type = \"cloudflareWarp\", .size = 1},\n  QuickToggleEntry{.type = \"screenSnip\", .size = 1},\n  QuickToggleEntry{.type = \"colorPicker\", .size = 1},\n  QuickToggleEntry{.type = \"musicRecognition\", .size = 1}\n}",
   "kind": "binding (ObjectPattern)",
   "context": "root/configFileView/configOptionsJsonAdapter/sidebar/quickToggles/android.toggles",
-  "expected": "std::vector<js::Json>",
+  "expected": "std::vector<QuickToggleEntry>",
   "code": "[\n                            { \"size\": 2, \"type\": \"network\" },\n                            { \"size\": 2, \"type\": \"bluetooth\" },\n                            { \"size\": 1, \"type\": \"idleInhibitor\" },\n                            { \"size\": 1, \"type\": \"mic\" },\n                            { \"size\": 2, \"type\": \"audio\" },\n                            { \"size\": 2, \"type\": \"nightLight\" },\n                            { \"size\": 1, \"type\": \"powerProfile\" },\n                            { \"size\": 1, \"type\": \"cloudflareWarp\" },\n                            { \"size\": 1, \"type\": \"screenSnip\" },\n                            { \"size\": 1, \"type\": \"colorPicker\" },\n                            { \"size\": 1, \"type\": \"musicRecognition\" }\n                        ]",
   "form": "expression"
  },

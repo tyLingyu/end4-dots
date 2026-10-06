@@ -39,6 +39,11 @@ class JsStore:
         rel = self._rel(qml)
         key = self.key(context, code)
         entry = self._data(rel).setdefault(key, {"cpp": None})
+        if entry.get("cpp") and entry.get("form", form) != form:
+            # The generator now wants another form (an unknown signal became known: whole statements
+            # -> handler body). The old translation doesn't fit; keep it for reference and refill.
+            entry["previous"] = {"form": entry["form"], "cpp": entry["cpp"]}
+            entry["cpp"] = None
         entry.update({"kind": kind, "form": form, "context": context, "expected": expected, "code": code})
         self._used.setdefault(rel, set()).add(key)
         return key, entry.get("cpp")

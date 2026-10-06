@@ -86,9 +86,13 @@ def render(var_types: VarTypes) -> tuple[str, list[str]]:
     for name in sorted(structs):
         visit(name)
 
-    def jsonable(t: str) -> bool:
-        t = t.replace("nlohmann::json", "js::Json")
-        words = set(re.findall(r"[A-Za-z_][\w:]*", t)) - {"std::vector", "std::optional", "std::map"}
+    def jsonable(t: str, top: bool = True) -> bool:
+        t = t.replace("nlohmann::json", "js::Json").strip()
+        if top and t.startswith("std::optional<") and t.endswith(">"):
+            return jsonable(t[len("std::optional<"):-1], False)  # only a field itself may be optional
+        if "std::optional" in t:
+            return False
+        words = set(re.findall(r"[A-Za-z_][\w:]*", t)) - {"std::vector", "std::map"}
         return all(w in _SCALARS or w in structs and all(jsonable(f) for f in structs[w].values()) for w in words)
 
     body: list[str] = []
@@ -102,11 +106,22 @@ def render(var_types: VarTypes) -> tuple[str, list[str]]:
         body.append(f"  friend bool operator==(const {name}&, const {name}&) = default;")
         body.append("};")
         if all(jsonable(t) for t in fields.values()):
-            pairs = ", ".join(f'{{"{key}", v.{members[key]}}}' for key in fields)
-            body.append(f"inline void to_json(js::Json& j, const {name}& v) {{ j = js::Json{{{pairs}}}; }}")
+            body.append(f"inline void to_json(js::Json& j, const {name}& v) {{")
+            body.append("  j = js::Json::object();")
+            for key, t in fields.items():
+                if t.strip().startswith("std::optional<"):
+                    body.append(f'  if (v.{members[key]}) j["{key}"] = *v.{members[key]};  // nullopt: no key, like undefined')
+                else:
+                    body.append(f'  j["{key}"] = v.{members[key]};')
+            body.append("}")
             body.append(f"inline void from_json(const js::Json& j, {name}& v) {{")
-            for key in fields:
-                body.append(f'  if (j.contains("{key}")) j.at("{key}").get_to(v.{members[key]});')
+            for key, t in fields.items():
+                t = t.strip().replace("nlohmann::json", "js::Json")
+                if t.startswith("std::optional<"):
+                    inner = cpp_type(t[len("std::optional<"):-1])
+                    body.append(f'  if (j.contains("{key}") && !j.at("{key}").is_null()) v.{members[key]} = j.at("{key}").get<{inner}>();')
+                else:
+                    body.append(f'  if (j.contains("{key}")) j.at("{key}").get_to(v.{members[key]});')
             body.append("}")
         body.append("")
 

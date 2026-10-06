@@ -74,13 +74,19 @@ OnScreenDisplay::OnScreenDisplay() {
 - 单例是 `X::instance()`。`Component`、`sourceComponent` 和隐式组件都生成为工厂 lambda，工厂里的 id 是局部变量。
 - 处理器连接在构造函数里，`Connections` 随 target 变化重连。
 
-## 已知限制（留桩或待阶段 3）
+## 现状
 
-- `Variants`、`Repeater` 等以 Component 为默认属性的委托：需要阶段 3 设计带 `required property modelData` 的委托运行时，目前生成桩。
+OSD（`modules/ii/onScreenDisplay`）连同依赖共 24 个 QML 文件：1105 处翻译完成，其中 204 条 JS 由 AI 按 `FILL.md` 填写，其余为机械翻译；剩余 6 个桩。
+生成代码还不能编译，因为它用到的 Quickshell 兼容层和部分运行时类型还不存在。阶段 3 要实现的内容，以及剩下 6 个桩各需要什么，都列在 [`shell/COMPAT.md`](../../shell/COMPAT.md)。
+
+已知限制：
+
+- `Variants`、`Repeater` 等以 Component 为默认属性的委托：需要带 `required property modelData` 的委托运行时，目前生成桩。
 - `Loader { source: "x.qml" }`：URL 到生成类工厂的注册表还没有。
+- Behavior 里是动画组，或 Behavior 带 id、带自有属性：生成桩。
 - 内联组件引用外层文件的 id 时，只处理了外层是单例的情况（Qt 里 id 按创建时的上下文查找，ii 的内联组件都在本文件内创建）。
 - 匿名子对象（带自有属性的子对象）上的函数和信号。
-- 正则与 `Date` 依赖 `ii::js` 和阶段 3 的 `ii::qt`，见 `FILL.md`。
+- 带剩余参数（`...args`）的函数，调用处不做机械翻译。
 
 ## 为什么用 qmldom
 

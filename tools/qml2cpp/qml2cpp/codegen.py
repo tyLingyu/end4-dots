@@ -17,6 +17,11 @@ from .tsys import ATTACHED, AnonRef, AnyType, TypeSystem
 from .structs import HEADER as STRUCTS_HEADER
 from .typemap import JSON, RUNTIME, component_for_class, generated_header, namespace_parts, qualified_class, runtime_for
 
+# Value types of the runtime and their headers (generated member types may use them).
+RUNTIME_VALUE_HEADERS = {"Color": "runtime/color.h", "Point": "runtime/geometry.h", "Size": "runtime/geometry.h",
+                         "Rect": "runtime/geometry.h", "DateTime": "runtime/datetime.h", "Easing": "runtime/easing.h",
+                         "AnchorLine": "runtime/anchors.h"}
+
 # Properties ii sets that have no effect in ii-shell's renderer.
 IGNORED = {"renderType", "antialiasing", "smooth", "font.hintingPreference", "layer.smooth", "linkColor"}
 
@@ -36,6 +41,31 @@ def _flatten_groups(obj: dom.QmlObject) -> None:
     for b in obj.bindings:
         if b.value.obj is not None:
             _flatten_groups(b.value.obj)
+
+
+def has_toplevel_return(code: str) -> bool:
+    """Whether C++ code is a function body: a `return` outside any nested braces (a lambda's own
+    `return` inside an expression doesn't count). String and char literals are skipped."""
+    depth = 0
+    i = 0
+    while i < len(code):
+        c = code[i]
+        if c in "\"'":
+            i += 1
+            while i < len(code) and code[i] != c:
+                i += 2 if code[i] == "\\" else 1
+        elif code.startswith("//", i):
+            i = code.find("\n", i)
+            if i < 0:
+                break
+        elif c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+        elif depth == 0 and re.match(r"\breturn\b", code[i:]) and (i == 0 or not (code[i - 1].isalnum() or code[i - 1] == "_")):
+            return True
+        i += 1
+    return False
 
 
 @dataclass
@@ -63,6 +93,7 @@ class ComponentGen:
     methods: list[str] = field(default_factory=list)
     definitions: list[str] = field(default_factory=list)
     objects: list[Emitted] = field(default_factory=list)
+    std_includes: set[str] = field(default_factory=set)
     anon_emitted: list[Emitted] = field(default_factory=list)  # objects with their own class, factories included
     pending_components: list[tuple[dom.QmlObject, Value, str]] = field(default_factory=list)
 
@@ -95,11 +126,21 @@ class ComponentGen:
 
     def uses_type(self, cpp: str | None) -> None:
         """Declarations a member type needs: var-types structs, Quickshell classes inside containers."""
+        for header, needle in (("<map>", "std::map<"), ("<optional>", "std::optional<"), ("<functional>", "std::function<"),
+                               ("runtime/component.h", "Component<")):
+            if needle in (cpp or ""):
+                (self.std_includes if header.startswith("<") else self.header_includes).add(header)
         for word in re.findall(r"[A-Za-z_][\w:]*", cpp or ""):
-            if word in self.ts.var_types.structs:
+            if word.removeprefix("ii::") in RUNTIME_VALUE_HEADERS:
+                self.header_includes.add(RUNTIME_VALUE_HEADERS[word.removeprefix("ii::")])
+            elif word in self.ts.var_types.structs:
                 self.header_includes.add(STRUCTS_HEADER)
             elif word == JSON:
                 self.header_includes.add("runtime/js.h")
+            elif word.startswith("::ii::") and (ref := component_for_class(word)) is not None and ref.path != self.ref.path:
+                ns, _, name = qualified_class(ref).rpartition("::")
+                self.forwards.add(f"namespace {ns} {{ class {name}; }}")
+                self.includes.add(generated_header(ref))
             elif word.startswith("qs::"):
                 runtime = next((r for r in RUNTIME.values() if r.cpp == word), None)
                 if runtime is not None:
@@ -117,6 +158,10 @@ class ComponentGen:
                 self.includes.add(runtime.header)
         if re.search(r"\bqt::", code):
             self.includes.add("runtime/qt.h")
+        for m in re.finditer(r"\bii::(\w+)\b(?!::)", code):
+            runtime = next((r for r in RUNTIME.values() if r.cpp == m.group(1)), None)
+            if runtime is not None:
+                self.includes.add(runtime.header)  # ii::Rectangle in a dynamic_cast, say
 
     def is_visual(self, t: AnyType | None) -> bool:
         return t is not None and self.ts.view(t).is_visual
@@ -408,6 +453,12 @@ class ComponentGen:
         create = "create" if e.var.cpp == "this" else f"{e.var.cpp}->create"
         obj_type = self.ts.object_type(self.ref, obj)
         self.counter += 1
+        if obj.type_name == "Behavior" and (obj.properties or obj.id or any(c.children for c in obj.children)):
+            # A group (SequentialAnimation { ... PropertyAction {} }) needs a Behavior that drives
+            # animation groups; a Behavior with an id or its own properties needs a class of its own.
+            self.stub_line(context, f"Behavior on {b.name} {{ {' '.join(c.type_name for c in obj.children)} {{ ... }} }}",
+                           "behavior (animation group, id or own properties)", "")
+            return
         if obj.type_name == "Behavior":
             self.class_of(obj_type)
             var = Value(f"b{self.counter}", f"Behavior<{cpp_type}>*", obj_type)
@@ -477,10 +528,14 @@ class ComponentGen:
             expr = self.tr.coerce(value, cpp_type)
         except Untranslatable as err:
             filled = self.stub_line(context, b.value.script.code, f"binding ({err})", cpp_type or "", "expression")
-            if filled and "return " in filled:  # a lambda body (a JS block binding)
+            if filled and has_toplevel_return(filled):  # a lambda body (a JS block binding)
                 self.body.append(f"{setter}bind([=, this]() -> {cpp_type} {{")
                 self.body += [f"  {line}" for line in filled.splitlines()]
                 self.body.append(f'}}, "{label}");')
+            elif filled and ("//" in filled or "\n" in filled):  # keep a trailing comment off the `;`
+                self.body.append(f"{setter}bind([=, this] {{")
+                self.body += [f"  return {line}" if i == 0 else f"    {line}" for i, line in enumerate(filled.splitlines())]
+                self.body += ["  ;", f'}}, "{label}");']
             elif filled:
                 self.body.append(f'{setter}bind([=, this] {{ return {filled}; }}, "{label}");')
             return
@@ -523,11 +578,11 @@ class ComponentGen:
             return self.member_of(e.var, self.ts.signal_member(e.type, name)), params
         if name.endswith("Changed") and (prop := self.ts.prop(e.type, name[: -len("Changed")])) is not None:
             if prop.kind == "property":
-                return f"{self.member_of(e.var, prop.access)}.changed()", []
+                return self.member_of(e.var, self.ts.change_signal(e.type, prop)), []
         return None
 
     def connect_lines(self, signal: str, params: list[tuple[str, str | None]], body: list[str], connect: str) -> list[str]:
-        decls = ", ".join(f"[[maybe_unused]] const {t}& {n}" for n, t in params)
+        decls = ", ".join(f"[[maybe_unused]] {t} const& {n}" for n, t in params)
         return [f"{signal}.{connect}([=, this]({decls}) {{", *(f"  {line}" for line in body), "});"]
 
     def handler(self, e: Emitted, b: dom.Binding) -> None:
@@ -539,7 +594,7 @@ class ComponentGen:
         signal, params = target
         scope = self.scope_for(e)
         scope.locals.update({n: Value(n, t) for n, t in params})
-        body = self.handler_body(context, b.value.script, scope, ", ".join(f"const {t}& {n}" for n, t in params))
+        body = self.handler_body(context, b.value.script, scope, ", ".join(f"{t} const& {n}" for n, t in params))
         if body is not None:
             self.body += self.connect_lines(signal, params, body, "connectForever")
 
@@ -576,7 +631,7 @@ class ComponentGen:
             scope.locals.update({n: Value(n, t) for (n, t) in params})
             scope.locals["target"] = Value("target", f"{cls}*", target.obj)
             body = self.handler_body(f"{context}.{m.name}", m.body, scope,
-                                     ", ".join(f"const {t}& {n}" for n, t in params) + f"; `target` is the {cls}*")
+                                     ", ".join(f"{t} const& {n}" for n, t in params) + f"; `target` is the {cls}*")
             if body is not None:
                 lines += [f"  {line}" for line in self.connect_lines(f"out.push_back({signal}", params, body, "connect")]
                 lines[-1] = "  }));"
@@ -625,6 +680,7 @@ class ComponentGen:
                 return
             signature = parse(entry["signature"])
         self.translated += 1
+        self.uses_type(signature.text)
         self.methods.append(f"{signature.text};")
         self.definitions.append(f"  {signature.definition(f'{self.cls}::{m.name}')} {{")
         self.definitions += [f"    {line}" for line in body.splitlines()]
@@ -702,6 +758,8 @@ class ComponentGen:
         self.scan_includes("\n".join(self.body + self.definitions))
 
         base = self.class_of(self.view.base) or "Object"
+        if isinstance(self.view.base, ComponentRef) and self.view.base.path != self.ref.path:
+            self.header_includes.add(generated_header(self.view.base))  # a base class must be complete
         singleton = self.view.is_singleton
         nested_decls = self.anon_classes()
         declared = self.declared_members()  # before the includes are read: registers the types used
@@ -766,6 +824,8 @@ def generate_file(ts: TypeSystem, tr: Translator, store: JsStore, path) -> tuple
     ns = "::".join(["ii", *namespace_parts(main.ref)])
     own = {f"namespace {ns} {{ class {g.cls}; }}" for g in gens}
     header_includes = set().union(*(g.header_includes for g in gens)) | {"runtime/property.h"}
+    header_includes -= {generated_header(main.ref)}
+    std_includes = set().union(*(g.std_includes for g in gens)) | {"<string>", "<vector>"}
     includes = set().union(*(g.includes for g in gens)) - {generated_header(main.ref)}
     forwards = set().union(*(g.forwards for g in gens)) - own
     indent = lambda lines: [f"  {line}" if line else "" for line in lines]
@@ -775,8 +835,7 @@ def generate_file(ts: TypeSystem, tr: Translator, store: JsStore, path) -> tuple
         "",
         *sorted(f'#include "{h}"' for h in header_includes),
         "",
-        "#include <string>",
-        "#include <vector>",
+        *sorted(f"#include {h}" for h in std_includes),
         "",
         *sorted(forwards),
         "",

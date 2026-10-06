@@ -1,6 +1,6 @@
 {
  "61eb7e8ab9bb": {
-  "cpp": null,
+  "cpp": "// brightnessMonitor?.brightness ?? 50: 50 without a monitor; brightness is a number, never null (NaN stays NaN)\n// ii: the fallback 50 is on a 0..1 scale (brightness and OsdValueIndicator.value are fractions)\nauto* monitor = this->brightnessMonitor.get();\nreturn monitor != nullptr ? monitor->brightness.get() : 50.0;",
   "kind": "binding (optional chaining)",
   "context": "root.value",
   "expected": "double",
@@ -8,7 +8,7 @@
   "form": "expression"
  },
  "aa7aef141245": {
-  "cpp": null,
+  "cpp": "// find() gives undefined when no screen matches -> nullptr\nconst std::optional<qs::ShellScreen*> found = js::find(qs::Quickshell::instance().screens.get(), [](qs::ShellScreen* s) {\n  // Hyprland.focusedMonitor?.name is undefined without a focused monitor, and no screen name (a string) === undefined\n  qs::HyprlandMonitor* focused = qs::Hyprland::instance().focusedMonitor.get();\n  return focused != nullptr && s->name.get() == focused->name.get();\n});\nreturn found.value_or(nullptr);",
   "kind": "binding (FunctionExpression)",
   "context": "root.focusedScreen",
   "expected": "qs::ShellScreen*",

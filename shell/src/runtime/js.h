@@ -100,25 +100,35 @@ namespace ii::js {
 
   // ── Regular expressions: /pattern/flags -> Regex("pattern", "flags") ──────────
 
-  // ECMAScript syntax through std::regex, matching UTF-8 bytes (ii's patterns are ASCII).
-  // Flags: g (global), i (ignore case), m (multiline).
+  // JS regular expressions through std::wregex over UTF-32 text, with the pattern rewritten where
+  // std's ECMAScript differs from V4 (\s and . as JS defines them, literal `{`). Flags: g (global),
+  // i (ignore case), m (multiline). Not supported: the u and y flags, lookbehind, named groups.
   class Regex {
   public:
     Regex(std::string_view pattern, std::string_view flags = {});
 
-    [[nodiscard]] const std::regex& re() const noexcept { return m_re; }
+    [[nodiscard]] const std::wregex& re() const noexcept { return m_re; }  // over UTF-32 text
     [[nodiscard]] bool global() const noexcept { return m_global; }
     [[nodiscard]] bool empty() const noexcept { return m_empty; }
 
   private:
-    std::regex m_re;
+    std::wregex m_re;
     bool m_global = false;
     bool m_empty = false;
   };
 
-  // re.test(text) / text.search(re)
+  // A match: its UTF-16 index and [match, groups...] (unmatched groups "").
+  struct RegexMatch {
+    int index = 0;
+    std::vector<std::string> groups;
+  };
+
+  // re.test(text) / text.search(re) (UTF-16 index, -1 when none)
   [[nodiscard]] bool test(const Regex& re, std::string_view text);
   [[nodiscard]] int search(std::string_view text, const Regex& re);
+  // re.exec(text), with the regex's lastIndex kept by the caller (UTF-16 units): a global regex
+  // searches from lastIndex and moves it past the match, or back to 0 when there is none.
+  [[nodiscard]] std::optional<RegexMatch> exec(const Regex& re, std::string_view text, int& lastIndex);
   // text.match(re): without g, [match, groups...] (unmatched groups ""); with g, every match.
   // nullopt where JS returns null.
   [[nodiscard]] std::optional<std::vector<std::string>> match(std::string_view text, const Regex& re);

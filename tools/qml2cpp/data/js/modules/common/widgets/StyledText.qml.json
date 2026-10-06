@@ -8,8 +8,8 @@
   "form": "body"
  },
  "5e341eead4b5": {
-  "cpp": null,
-  "kind": "binding (optional chaining)",
+  "cpp": "// Appearance 是单例，Appearance?. 不会短路；font.pixelSize.small 恒有定义，?? 的默认值不会用到\nreturn ::ii::common::Appearance::instance().font.get()->pixelSize.get()->small.get();",
+  "kind": "binding (operator ??)",
   "context": "root.font.pixelSize",
   "expected": "double",
   "code": "Appearance?.font.pixelSize.small ?? 15",
@@ -24,7 +24,7 @@
   "form": "expression"
  },
  "87865d43110b": {
-  "cpp": null,
+  "cpp": "static const js::Regex digits(R\"(^\\d+$)\");\nreturn js::test(digits, this->text.get());",
   "kind": "binding (RegExpLiteral)",
   "context": "root.shouldUseNumberFont",
   "expected": "bool",
@@ -32,15 +32,23 @@
   "form": "expression"
  },
  "f3ae49038e9f": {
-  "cpp": null,
-  "kind": "binding (optional chaining)",
+  "cpp": "// Appearance 是单例，Appearance?. 不会短路；m3colors.m3onBackground 恒有定义，?? 的默认值不会用到\nreturn ::ii::common::Appearance::instance().m3colors.get()->m3onBackground.get();",
+  "kind": "binding (operator ??)",
   "context": "root.color",
   "expected": "Color",
   "code": "Appearance?.m3colors.m3onBackground ?? \"black\"",
   "form": "expression"
  },
- "f6ae251a47da": {
+ "f589d27d7701": {
   "cpp": null,
+  "kind": "behavior (animation group, id or own properties)",
+  "form": "statements",
+  "context": "root.text",
+  "expected": "",
+  "code": "Behavior on text { SequentialAnimation { ... } }"
+ },
+ "f6ae251a47da": {
+  "cpp": "// ({}) 是空对象：一个轴也不设\nreturn this->shouldUseNumberFont.get() ? std::map<std::string, double>{} : ::ii::common::Appearance::instance().font.get()->variableAxes.get()->main.get();",
   "kind": "binding (ObjectPattern)",
   "context": "root.font.variableAxes",
   "expected": "std::map<std::string, double>",

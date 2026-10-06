@@ -7,14 +7,6 @@
   "code": "[sink, source]",
   "form": "expression"
  },
- "16e937926a90": {
-  "cpp": null,
-  "kind": "binding (cannot assign std::vector<qs::PwNode*> to std::vector<js::Json>)",
-  "context": "root.inputDevices",
-  "expected": "std::vector<js::Json>",
-  "code": "root.devices(false)",
-  "form": "expression"
- },
  "246f81dfa5d9": {
   "cpp": "const std::string ogaPath = \"/usr/share/sounds/\" + audioTheme.get() + \"/stereo/\" + soundName + \".oga\";\nconst std::string oggPath = \"/usr/share/sounds/\" + audioTheme.get() + \"/stereo/\" + soundName + \".ogg\";\n\n// Try playing .oga first\nstd::vector<std::string> command = {\"ffplay\", \"-nodisp\", \"-autoexit\", ogaPath};\nqs::Quickshell::instance().execDetached(command);\n\n// Also try playing .ogg (ffplay will just fail silently if file doesn't exist)\ncommand = {\"ffplay\", \"-nodisp\", \"-autoexit\", oggPath};\nqs::Quickshell::instance().execDetached(command);",
   "kind": "function",
@@ -34,7 +26,7 @@
   "signature": "std::string friendlyDeviceName(qs::PwNode* node)"
  },
  "31b00562a49f": {
-  "cpp": "// Protection against sudden volume changes: Connections { target: sink?.audio ?? null; function onVolumeChanged() }\no2->setConnector([=, this](Object* object, std::vector<Connection>& out) {\n  if (object == nullptr) {\n    return;\n  }\n  auto* target = static_cast<qs::PwNodeAudio*>(object);\n  out.push_back(target->volume.changed().connect([=, this]() {\n    auto* protection = ::ii::common::Config::instance().options->audio.get()->protection.get();\n    if (!protection->enable.get()) {\n      return;\n    }\n    const double newVolume = sink.get()->audio.get()->volume.get();\n    // when resuming from suspend, we should not write volume to avoid pipewire volume reset issues\n    // (a number is never undefined or null: of the three tests only isNaN can hold)\n    if (std::isnan(newVolume)) {\n      o2->lastReady.set(false);\n      o2->lastVolume.set(0);\n      return;\n    }\n    if (!o2->lastReady.get()) {\n      o2->lastVolume.set(newVolume);\n      o2->lastReady.set(true);\n      return;\n    }\n    const double maxAllowedIncrease = protection->maxAllowedIncrease.get() / 100;\n    const double maxAllowed = protection->maxAllowed.get() / 100;\n\n    if (newVolume - o2->lastVolume.get() > maxAllowedIncrease) {\n      sink.get()->audio.get()->volume.set(o2->lastVolume.get());\n      sinkProtectionTriggered.emit(::ii::services::Translation::instance().tr(\"Illegal increment\"));\n    } else if (newVolume > maxAllowed || newVolume > hardMaxValue.get()) {\n      sinkProtectionTriggered.emit(::ii::services::Translation::instance().tr(\"Exceeded max allowed\"));\n      // std::min(a, b) returns a when either is NaN; only lastVolume can be NaN here, as with Math.min\n      sink.get()->audio.get()->volume.set(std::min(o2->lastVolume.get(), maxAllowed));\n    }\n    o2->lastVolume.set(sink.get()->audio.get()->volume.get());\n  }));\n});",
+  "cpp": "// Protection against sudden volume changes: Connections { target: sink?.audio ?? null; function onVolumeChanged() }\no2->setConnector([=, this](Object* object, std::vector<Connection>& out) {\n  if (object == nullptr) {\n    return;\n  }\n  auto* target = static_cast<qs::PwNodeAudio*>(object);\n  // onVolumeChanged is volume's NOTIFY signal, volumesChanged: it fires on any channel change.\n  out.push_back(target->volumes.changed().connect([=, this]() {\n    auto* protection = ::ii::common::Config::instance().options->audio.get()->protection.get();\n    if (!protection->enable.get()) {\n      return;\n    }\n    const double newVolume = sink.get()->audio.get()->volume.get();\n    // when resuming from suspend, we should not write volume to avoid pipewire volume reset issues\n    // (a number is never undefined or null: of the three tests only isNaN can hold)\n    if (std::isnan(newVolume)) {\n      o2->lastReady.set(false);\n      o2->lastVolume.set(0);\n      return;\n    }\n    if (!o2->lastReady.get()) {\n      o2->lastVolume.set(newVolume);\n      o2->lastReady.set(true);\n      return;\n    }\n    const double maxAllowedIncrease = protection->maxAllowedIncrease.get() / 100;\n    const double maxAllowed = protection->maxAllowed.get() / 100;\n\n    if (newVolume - o2->lastVolume.get() > maxAllowedIncrease) {\n      sink.get()->audio.get()->volume.set(o2->lastVolume.get());\n      sinkProtectionTriggered.emit(::ii::services::Translation::instance().tr(\"Illegal increment\"));\n    } else if (newVolume > maxAllowed || newVolume > hardMaxValue.get()) {\n      sinkProtectionTriggered.emit(::ii::services::Translation::instance().tr(\"Exceeded max allowed\"));\n      // std::min(a, b) returns a when either is NaN; only lastVolume can be NaN here, as with Math.min\n      sink.get()->audio.get()->volume.set(std::min(o2->lastVolume.get(), maxAllowed));\n    }\n    o2->lastVolume.set(sink.get()->audio.get()->volume.get());\n  }));\n});",
   "kind": "function of a child object",
   "context": "root/Connections.0.onVolumeChanged",
   "expected": "",
@@ -67,14 +59,6 @@
   "form": "function",
   "signature": "void setDefaultSource(qs::PwNode* node)"
  },
- "8afd27fde103": {
-  "cpp": null,
-  "kind": "binding (cannot assign std::vector<qs::PwNode*> to std::vector<js::Json>)",
-  "context": "root.inputAppNodes",
-  "expected": "std::vector<js::Json>",
-  "code": "root.appNodes(false)",
-  "form": "expression"
- },
  "9930085c3075": {
   "cpp": "qs::Pipewire::instance().preferredDefaultAudioSink.set(node);",
   "kind": "function",
@@ -101,28 +85,12 @@
   "form": "function",
   "signature": "bool correctType(qs::PwNode* node, bool isSink)"
  },
- "afeda1a03fd6": {
-  "cpp": null,
-  "kind": "binding (cannot assign std::vector<qs::PwNode*> to std::vector<js::Json>)",
-  "context": "root.outputDevices",
-  "expected": "std::vector<js::Json>",
-  "code": "root.devices(true)",
-  "form": "expression"
- },
  "b047529a251a": {
   "cpp": "// sink?.audio.volume ?? 0: undefined (so 0) without a sink; a volume is a number, never null\nqs::PwNode* node = sink.get();\nreturn node != nullptr ? static_cast<double>(node->audio.get()->volume.get()) : 0.0;",
   "kind": "binding (optional chaining)",
   "context": "root.value",
   "expected": "double",
   "code": "sink?.audio.volume ?? 0",
-  "form": "expression"
- },
- "b284ce2426a3": {
-  "cpp": null,
-  "kind": "binding (cannot assign std::vector<qs::PwNode*> to std::vector<js::Json>)",
-  "context": "root.outputAppNodes",
-  "expected": "std::vector<js::Json>",
-  "code": "root.appNodes(true)",
   "form": "expression"
  },
  "b8721d6d8a69": {

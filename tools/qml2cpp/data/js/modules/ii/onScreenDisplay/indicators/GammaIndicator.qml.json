@@ -1,6 +1,6 @@
 {
  "aebc704dddce": {
-  "cpp": null,
+  "cpp": "// ii: `Hyprsunset.gamma / 100 ?? 0.5` parses as `(gamma / 100) ?? 0.5`; a quotient is a number,\n// never null or undefined, so the 0.5 fallback never applies\nreturn static_cast<double>(::ii::services::Hyprsunset::instance().gamma.get()) / 100;",
   "kind": "binding (operator ??)",
   "context": "rotateIcon.value",
   "expected": "double",

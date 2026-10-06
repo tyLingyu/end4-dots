@@ -5,6 +5,7 @@ nested in a binding such as `sizes: QtObject { ... }`), or a built-in type from 
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from . import dom
@@ -189,6 +190,8 @@ class TypeSystem:
             root = self.registry.component(ref).root
             method = next((m for m in root.methods if m.name == name and m.kind == "function"), None)
             if method is not None:
+                if method.rest:
+                    return None  # `...args`: positional C++ arguments can't express it; calls stay JS
                 entry = self.store.find(ref.path, f"{root.id or 'root'}.{name}")
                 if entry and entry.get("signature"):
                     return parse(entry["signature"])
@@ -273,6 +276,25 @@ class TypeSystem:
             return f"qs::{short}::Enum"
         return f"qs::{short}"
 
+    def change_signal(self, ref: AnyType, prop: Prop) -> str:
+        """What `on<Prop>Changed` connects to: the property's NOTIFY signal. Usually its own
+        changed(); when Qt notifies through another property's signal (PwNodeAudio.volume ->
+        volumesChanged), that property's changed(), or a plain signal of that name."""
+        notify = None
+        while ref is not None and not isinstance(ref, BuiltinRef):
+            ref = self.view(ref).base
+        if isinstance(ref, BuiltinRef):
+            for info in self.registry.builtins.chain(self.registry.builtin_info(ref)):
+                if prop.name in info.properties:
+                    notify = info.properties[prop.name].notify
+                    break
+        if notify is None or notify == f"{prop.name}Changed":
+            return f"{prop.access}.changed()"
+        other = self.prop(ref, notify.removesuffix("Changed")) if notify.endswith("Changed") else None
+        if other is not None and other.kind == "property":
+            return f"{other.access}.changed()"
+        return self.signal_member(ref, notify)
+
     def signal_member(self, ref: AnyType | None, name: str) -> str:
         """C++ member of a signal: its name, unless reserved or a property has it too (MouseArea's
         `pressed` is both; the property keeps the name and the signal is `pressedSignal`)."""
@@ -310,6 +332,18 @@ class TypeSystem:
             view.props[group] = Prop(group, None, group, kind="group", owner=ref)
         return view
 
+    def _qualify(self, owner: ComponentRef, cpp: str) -> str:
+        """var-types writes components by bare name (`Notif*`, `std::vector<TaskbarAppEntry*>`):
+        qualify every one that resolves from `owner` to its generated class."""
+        def word(m: re.Match) -> str:
+            name = m.group(0)
+            if "::" in name or name in self.var_types.structs:
+                return name
+            ref = self.resolve(owner, name) or self.registry.component_named(name)
+            return f"::{qualified_class(ref)}" if isinstance(ref, ComponentRef) else name
+
+        return re.sub(r"(?<![\w:])[A-Za-z_][\w:]*", word, cpp)
+
     def _type_of_cpp(self, owner: ComponentRef, cpp: str) -> AnyType | None:
         """The QML type behind an object pointer type of var-types.json: qs::ShellScreen*, ii::Item*, Notif*."""
         if not cpp.endswith("*"):
@@ -324,7 +358,7 @@ class TypeSystem:
                     if info is not None:
                         return BuiltinRef(module, qml, info.cpp_name)
             return None
-        return self.resolve(owner, name)
+        return self.resolve(owner, name) or self.registry.component_named(name)
 
     # ── Components ───────────────────────────────────────────────────────────
 
@@ -334,13 +368,10 @@ class TypeSystem:
             return QML_BASIC[name], None
         if name == "var":
             cpp = self.var_types.lookup(owner, p.name) or JSON
-            ref = self._type_of_cpp(owner, cpp)
-            if isinstance(ref, ComponentRef):
-                cpp = f"::{qualified_class(ref)}*"  # var-types writes components by their bare name
-            return cpp, ref
+            return self._qualify(owner, cpp), self._type_of_cpp(owner, cpp)
         if name == "list<var>" and (listed := self.var_types.lookup(owner, p.name)) is not None:
             inner = listed.removeprefix("std::vector<").removesuffix(">").strip()
-            return listed, self._type_of_cpp(owner, inner)
+            return self._qualify(owner, listed), self._type_of_cpp(owner, inner)
         if name.startswith("list<") and name.endswith(">"):
             inner, ref = self._declared_type(owner, dom.PropertyDef(p.name, name[5:-1]))
             return (f"std::vector<{inner}>" if inner else None), ref

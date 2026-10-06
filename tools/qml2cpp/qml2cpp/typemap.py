@@ -59,6 +59,8 @@ QT_CPP = {
     "QVariant": JSON,
     "QJSValue": JSON,
     "QStringList": "std::vector<std::string>",
+    "QVariantMap": JSON,
+    "QVariantList": f"std::vector<{JSON}>",
     "QPointF": "Point",
     "QSizeF": "Size",
     "QRectF": "Rect",
@@ -142,6 +144,9 @@ RUNTIME: dict[str, Runtime] = {
     "Quickshell.Io/IpcHandler": Runtime("qs::IpcHandler", "compat/ipc.h", False),
     "Quickshell.Hyprland/GlobalShortcut": Runtime("qs::GlobalShortcut", "compat/hyprland.h", False),
     "Quickshell.Services.Pipewire/PwObjectTracker": Runtime("qs::PwObjectTracker", "compat/pipewire.h", False),
+    "Quickshell/ObjectModel": Runtime("qs::UntypedObjectModel", "compat/object_model.h", False),
+    "Quickshell.Services.Notifications/Notification": Runtime("qs::Notification", "compat/notifications.h", False),
+    "Quickshell.Services.Notifications/NotificationAction": Runtime("qs::NotificationAction", "compat/notifications.h", False),
     "Quickshell.Services.Notifications/NotificationServer": Runtime(
         "qs::NotificationServer", "compat/notifications.h", False
     ),

@@ -1,6 +1,6 @@
 {
  "652d127b832b": {
-  "cpp": null,
+  "cpp": "// Listen to volume changes: Connections { target: Audio.sink?.audio ?? null }\no3->target.bind([=, this]() -> Object* {\n  // Audio.sink?.audio ?? null: null without a sink (or for a sink without audio)\n  qs::PwNode* node = ::ii::services::Audio::instance().sink.get();\n  return node != nullptr ? static_cast<Object*>(node->audio.get()) : nullptr;\n}, \"OnScreenDisplay/Connections.target\");\no3->setConnector([=, this](Object* object, std::vector<Connection>& out) {\n  if (object == nullptr) {\n    return;\n  }\n  auto* target = static_cast<qs::PwNodeAudio*>(object);\n  // onVolumeChanged: PwNodeAudio has no volumeChanged signal; QML resolves the handler to the NOTIFY\n  // signal of `volume`, volumesChanged, which fires whenever any channel volume changes (also when the\n  // average stays the same), i.e. when `volumes` changes\n  out.push_back(target->volumes.changed().connect([=, this]() {\n    if (!::ii::services::Audio::instance().ready.get()) {\n      return;\n    }\n    currentIndicator.set(std::string(\"volume\"));\n    this->triggerOsd();\n  }));\n  out.push_back(target->muted.changed().connect([=, this]() {\n    if (!::ii::services::Audio::instance().ready.get()) {\n      return;\n    }\n    currentIndicator.set(std::string(\"volume\"));\n    this->triggerOsd();\n  }));\n});",
   "kind": "connections (optional chaining)",
   "context": "root/Connections.2.Connections",
   "expected": "",
@@ -8,7 +8,7 @@
   "form": "statements"
  },
  "aa7aef141245": {
-  "cpp": null,
+  "cpp": "// find() gives undefined when no screen matches -> nullptr\nconst std::optional<qs::ShellScreen*> found = js::find(qs::Quickshell::instance().screens.get(), [](qs::ShellScreen* s) {\n  // Hyprland.focusedMonitor?.name is undefined without a focused monitor, and no screen name (a string) === undefined\n  qs::HyprlandMonitor* focused = qs::Hyprland::instance().focusedMonitor.get();\n  return focused != nullptr && s->name.get() == focused->name.get();\n});\nreturn found.value_or(nullptr);",
   "kind": "binding (FunctionExpression)",
   "context": "root.focusedScreen",
   "expected": "qs::ShellScreen*",
@@ -16,7 +16,7 @@
   "form": "expression"
  },
  "b783b06c40de": {
-  "cpp": null,
+  "cpp": "return std::vector<OsdIndicator>{\n    OsdIndicator{\"volume\", \"indicators/VolumeIndicator.qml\"},\n    OsdIndicator{\"brightness\", \"indicators/BrightnessIndicator.qml\"},\n    OsdIndicator{\"gamma\", \"indicators/GammaIndicator.qml\"},\n};",
   "kind": "binding (ObjectPattern)",
   "context": "root.indicators",
   "expected": "std::vector<OsdIndicator>",
@@ -24,8 +24,8 @@
   "form": "expression"
  },
  "c450e6597f67": {
-  "cpp": null,
-  "kind": "binding (optional chaining)",
+  "cpp": "const std::optional<OsdIndicator> found =\n    js::find(this->indicators.get(), [&](const OsdIndicator& i) { return i.id == this->currentIndicator.get(); });\nif (!found) {\n  // ii: find() gives undefined and ?.sourceUrl stays undefined; a binding that yields undefined for a\n  // url property (no RESET) is an error and the Loader keeps its source. Unreachable in practice:\n  // currentIndicator only ever holds one of the three ids\n  throw std::runtime_error(\"Unable to assign [undefined] to QUrl\");\n}\nreturn found->sourceUrl;",
+  "kind": "binding (FunctionExpression)",
   "context": "root/osdLoader.sourceComponent/columnLayout/osdValuesWrapper/contentColumnLayout/osdIndicatorLoader.source",
   "expected": "std::string",
   "code": "root.indicators.find(i => i.id === root.currentIndicator)?.sourceUrl",

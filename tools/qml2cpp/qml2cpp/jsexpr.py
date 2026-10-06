@@ -8,6 +8,7 @@ conditionals and a few Math functions, with JS semantics kept where they differ 
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 
 from .jsast import Node
@@ -63,9 +64,15 @@ class Translator:
             raise Untranslatable(node.kind)
         return method(node, scope)
 
+    @staticmethod
+    def same_type(a: str | None, b: str | None) -> bool:
+        """Type spellings compared as C++ sees them: `::ii::X*` and `ii::X*` are the same type."""
+        norm = lambda t: re.sub(r"(?<![\w:])::ii::", "ii::", t or "").replace(" ", "")
+        return a is not None and b is not None and norm(a) == norm(b)
+
     def coerce(self, value: Value, target: str) -> str:
         """`value` as a C++ expression of type `target` (QML's assignment conversions)."""
-        if value.type == target:
+        if value.type == target or self.same_type(value.type, target):
             return value.cpp
         if target == "double" and value.type == "int":
             return value.cpp
@@ -164,14 +171,14 @@ class Translator:
         raise Untranslatable(f"name {name}")
 
     def _FieldMemberExpression(self, node: Node, scope: Scope) -> Value:
-        if node.attrs.get("dotToken") == "?.":
-            raise Untranslatable("optional chaining")
         name = node.attrs["name"]
         base_node = node.children[0]
         enum = self._enum(base_node, name, scope)
         if enum is not None:
             return enum
         base = self.expression(base_node, scope)
+        if node.attrs.get("dotToken") == "?." and not base.is_ref:
+            raise Untranslatable("optional chaining")  # (a singleton is never null: `?.` is `.`)
         if base.group is not None:
             member = self.ts.view(base.obj).groups.get(base.group, {}).get(name)
             if member is None:

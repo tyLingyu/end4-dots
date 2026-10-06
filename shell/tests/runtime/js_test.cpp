@@ -80,6 +80,26 @@ namespace {
          [](const Json& a) -> Json {
            return strings(js::split(str(a[0]), js::Regex(str(a[1]), str(a[2])), a[3].get<std::uint32_t>()));
          }},
+        {"reExecAll",
+         [](const Json& a) -> Json {
+           const js::Regex re(str(a[1]), str(a[2]));
+           Json found = Json::array();
+           int lastIndex = 0;
+           for (int guard = 0; guard < 50; ++guard) {
+             const auto m = js::exec(re, str(a[0]), lastIndex);
+             if (!m) {
+               break;
+             }
+             found.push_back(Json{std::to_string(m->index), std::to_string(lastIndex), strings(m->groups)});
+             if (!re.global()) {
+               break;
+             }
+             if (js::length(m->groups[0]) == 0) {
+               ++lastIndex;
+             }
+           }
+           return found;
+         }},
         {"stringify", [](const Json& a) -> Json { return js::stringify(js::parse(str(a[0])), integer(a[1])); }},
         {"stableSort",
          [](const Json& a) -> Json {

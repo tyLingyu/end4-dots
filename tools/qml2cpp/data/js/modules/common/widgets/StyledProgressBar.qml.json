@@ -1,6 +1,6 @@
 {
  "0a652afb4676": {
-  "cpp": null,
+  "cpp": "::ii::common::Appearance::instance().animation.get()->elementMoveFast.get()->numberAnimation.get().createObject(*b11)",
   "kind": "behavior animation (optional chaining)",
   "context": "root.waveAmplitudeMultiplier.Behavior.animation",
   "expected": "Animation* (created by this code, owned by the Behavior)",
@@ -8,7 +8,7 @@
   "form": "expression"
  },
  "115e9be3eb17": {
-  "cpp": null,
+  "cpp": "::ii::common::Appearance::instance().animation.get()->elementMoveEnter.get()->numberAnimation.get().createObject(*b10)",
   "kind": "behavior animation (optional chaining)",
   "context": "root.value.Behavior.animation",
   "expected": "Animation* (created by this code, owned by the Behavior)",
@@ -16,16 +16,16 @@
   "form": "expression"
  },
  "5221471a421e": {
-  "cpp": null,
-  "kind": "binding (optional chaining)",
+  "cpp": "// Appearance 是单例，Appearance?. 不会短路；colors.colPrimary 恒有定义，?? 的默认值不会用到\nreturn ::ii::common::Appearance::instance().colors.get()->colPrimary.get();",
+  "kind": "binding (operator ??)",
   "context": "root.highlightColor",
   "expected": "Color",
   "code": "Appearance?.colors.colPrimary ?? \"#685496\"",
   "form": "expression"
  },
  "d3c7df42476e": {
-  "cpp": null,
-  "kind": "binding (optional chaining)",
+  "cpp": "// Appearance 是单例，Appearance?. 不会短路；m3colors.m3secondaryContainer 恒有定义，?? 的默认值不会用到\nreturn ::ii::common::Appearance::instance().m3colors.get()->m3secondaryContainer.get();",
+  "kind": "binding (operator ??)",
   "context": "root.trackColor",
   "expected": "Color",
   "code": "Appearance?.m3colors.m3secondaryContainer ?? \"#F1D3F9\"",

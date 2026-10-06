@@ -9,7 +9,7 @@
  },
  "5b0333653881": {
   "cpp": "const std::vector<Color>& colors = wallColorQuant->colors.get();\n// ii: 取色完成前 colors 为空，colors[0]?.x 是 undefined，undefined + undefined 得 NaN\nif (colors.empty()) {\n  return js::NaN;\n}\nreturn (qt::hslSaturation(colors[0]) + qt::hslLightness(colors[0])) / 2;",
-  "kind": "binding (optional chaining)",
+  "kind": "binding (ArrayMemberExpression)",
   "context": "root.wallpaperVibrancy",
   "expected": "double",
   "code": "(wallColorQuant.colors[0]?.hslSaturation + wallColorQuant.colors[0]?.hslLightness) / 2",

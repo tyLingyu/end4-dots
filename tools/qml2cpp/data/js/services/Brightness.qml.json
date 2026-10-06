@@ -3,7 +3,7 @@
   "cpp": "// const [, , , current, max] = data.split(\" \")：越界的元素是 undefined，parseInt(undefined) 是 NaN\nconst std::vector<std::string> parts = js::split(data, \" \");\nconst double current = parts.size() > 3 ? js::parseInt(parts[3]) : js::NaN;\nconst double max = parts.size() > 4 ? js::parseInt(parts[4]) : js::NaN;\n// int 属性按 ToInt32 存：NaN、±Infinity 存成 0（例如 ddcutil 报错，输出不是五段）\nthis->rawMaxBrightness.set(std::isfinite(max) ? static_cast<int>(max) : 0);\nthis->brightness.set(current / this->rawMaxBrightness.get());\nthis->ready.set(true);",
   "kind": "statements (FunctionExpression)",
   "context": "monitor/initProc/stdout.onRead",
-  "expected": "handler body, parameters (const std::string& data)",
+  "expected": "handler body, parameters (std::string const& data)",
   "code": "data => {\n                    const [, , , current, max] = data.split(\" \");\n                    monitor.rawMaxBrightness = parseInt(max);\n                    monitor.brightness = parseInt(current) / monitor.rawMaxBrightness;\n                    monitor.ready = true;\n                }",
   "form": "body"
  },
@@ -46,7 +46,7 @@
   "cpp": "if (js::startsWith(data, \"Display \")) {\n  const std::vector<std::string> lines = js::map(js::split(data, \"\\n\"), [](const std::string& l) { return js::trim(l); });\n  // ii: 找不到这两行时 JS 在 .split 处抛 TypeError，这一项不会 push\n  const std::optional<std::string> connector =\n      js::find(lines, [](const std::string& l) { return js::startsWith(l, \"DRM connector:\"); });\n  if (!connector) {\n    return;\n  }\n  DdcMonitor entry;\n  entry.name = js::join(js::slice(js::split(*connector, \"-\"), 1), \"-\");\n  const std::optional<std::string> bus = js::find(lines, [](const std::string& l) { return js::startsWith(l, \"I2C bus:\"); });\n  if (!bus) {\n    return;\n  }\n  const std::vector<std::string> busParts = js::split(*bus, \"/dev/i2c-\");\n  // ii: 行里没有 \"/dev/i2c-\" 时 busNum 是 undefined，结构体里只能存成 \"\"（ddcutil 总会输出这一段）\n  entry.busNum = busParts.size() > 1 ? busParts[1] : std::string();\n  // var 数组的 push 是原地修改、不发 ddcMonitorsChanged；这里只能整体写回，没有绑定或处理函数依赖它的变化\n  std::vector<DdcMonitor> list = ddcMonitors.get();\n  list.push_back(std::move(entry));\n  ddcMonitors.set(std::move(list));\n}",
   "kind": "statements (FunctionExpression)",
   "context": "root/ddcProc/stdout.onRead",
-  "expected": "handler body, parameters (const std::string& data)",
+  "expected": "handler body, parameters (std::string const& data)",
   "code": "data => {\n                if (data.startsWith(\"Display \")) {\n                    const lines = data.split(\"\\n\").map(l => l.trim());\n                    root.ddcMonitors.push({\n                        name: lines.find(l => l.startsWith(\"DRM connector:\")).split(\"-\").slice(1).join('-'),\n                        busNum: lines.find(l => l.startsWith(\"I2C bus:\")).split(\"/dev/i2c-\")[1]\n                    });\n                }\n            }",
   "form": "body"
  },
@@ -105,7 +105,7 @@
   "cpp": "auto& root = ::ii::services::Brightness::instance();\nroot.initializeMonitor(js::indexOf(root.monitors.get(), this) + 1);",
   "kind": "statements (FunctionExpression)",
   "context": "monitor/initProc.onExited",
-  "expected": "handler body, parameters (const int& exitCode, const int& exitStatus)",
+  "expected": "handler body, parameters (int const& exitCode, int const& exitStatus)",
   "code": "(exitCode, exitStatus) => {\n                initializeMonitor(root.monitors.indexOf(monitor) + 1);\n            }",
   "form": "body"
  },
