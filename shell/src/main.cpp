@@ -4,6 +4,9 @@
 
 #include "app/main_loop.h"
 #include "core/log.h"
+#include "compat/global_shortcuts.h"
+#include "compat/ipc.h"
+#include "runtime/fd_watch.h"
 #include "render/gl_shared_context.h"
 #include "render/render_context.h"
 #include "runtime/animation.h"
@@ -155,6 +158,10 @@ namespace {
 } // namespace
 
 int main(int argc, char** argv) {
+  if (argc > 1 && (std::strcmp(argv[1], "ipc") == 0 || std::strcmp(argv[1], "msg") == 0)) {
+    return ii::qs::handleIpcCli(argc, argv);
+  }
+
   const bool animate = argc > 1 && std::strcmp(argv[1], "--animate") == 0;
   std::signal(SIGINT, onSignal);
   std::signal(SIGTERM, onSignal);
@@ -167,6 +174,7 @@ int main(int argc, char** argv) {
     kLog.error("failed to connect to the Wayland display");
     return 1;
   }
+  ii::qs::setWaylandConnection(wayland);
 
   GlSharedContext gl;
   gl.initialize(wayland.display());
@@ -194,11 +202,15 @@ int main(int argc, char** argv) {
     }
   }
   kLog.info("created {} window(s)", windows.size());
+  ii::qs::IpcServer::start();
 
-  MainLoop loop(wayland, [] { return std::vector<PollSource*>{}; }, [&windows] {
+
+  MainLoop loop(wayland, [] { return std::vector<PollSource*>{&ii::FdWatch::pollSource()}; }, [&windows] {
+    ii::qs::IpcServer::stop();
     ii::setPolishRequestHandler({});
     ii::AnimationDriver::instance().setFrameRequestHandler({});
     windows.clear();
+    ii::qs::setWaylandConnection(nullptr);
   });
   loop.run();
   return 0;

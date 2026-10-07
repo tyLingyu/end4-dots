@@ -4,14 +4,21 @@
 
 #include "core/deferred_call.h"
 #include "core/log.h"
+#include "runtime/fd_watch.h"
 
+#include <algorithm>
 #include <cerrno>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <poll.h>
 #include <sstream>
+#include <sys/inotify.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <utility>
+#include <vector>
 
 namespace ii::qs {
 
@@ -89,6 +96,7 @@ namespace ii::qs {
       if (isCompleted()) {
         load();
       }
+      updateWatch();
     });
     adapter.changed().connectForever([this] {
       if (FileViewAdapter* a = adapter.peek()) {
@@ -101,7 +109,7 @@ namespace ii::qs {
     watchChanges.changed().connectForever([this] { updateWatch(); });
   }
 
-  FileView::~FileView() = default;
+  FileView::~FileView() { stopWatch(); }
 
   void FileView::componentComplete() {
     if (!path.peek().empty() && preload.peek()) {
@@ -184,7 +192,11 @@ namespace ii::qs {
   void FileView::setText(const std::string& text) { write(text); }
   void FileView::setData(const std::string& data) { write(data); }
 
-  void FileView::reload() { load(); }
+  // Quickshell's reload() is updatePath(): a new load and a new watcher.
+  void FileView::reload() {
+    load();
+    updateWatch();
+  }
 
   void FileView::writeAdapter() {
     if (FileViewAdapter* a = adapter.peek()) {
@@ -192,9 +204,109 @@ namespace ii::qs {
     }
   }
 
+  // Masks and event coalescing are Qt's inotify engine (qfilesystemwatcher_inotify.cpp); the
+  // file/directory handling is Quickshell's (io/fileview.cpp, updateWatchedFiles and the two
+  // onWatched*Changed slots).
+  namespace {
+    constexpr std::uint32_t kFileMask = IN_ATTRIB | IN_MODIFY | IN_MOVE | IN_MOVE_SELF | IN_DELETE_SELF;
+    constexpr std::uint32_t kDirMask = IN_ATTRIB | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF;
+    constexpr std::uint32_t kRemoved = IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT;
+  } // namespace
+
+  void FileView::stopWatch() {
+    if (m_inotifyFd < 0) {
+      return;
+    }
+    FdWatch::unwatch(m_watchId);
+    ::close(m_inotifyFd);  // drops its watches and any unread events, as deleting the watcher does
+    m_inotifyFd = -1;
+    m_watchId = 0;
+    m_fileWd = -1;
+    m_dirWd = -1;
+    ++m_watchGeneration;
+  }
+
   void FileView::updateWatch() {
-    if (watchChanges.peek()) {
-      kLog.debug("watchChanges is not implemented yet (stage 3b)");
+    stopWatch();
+    m_watchedPath = stripFileUrl(path.peek());
+    if (m_watchedPath.empty() || !watchChanges.peek()) {
+      return;
+    }
+    m_inotifyFd = ::inotify_init1(IN_NONBLOCK | IN_CLOEXEC);
+    if (m_inotifyFd < 0) {
+      kLog.warn("inotify_init1 failed for {}", m_watchedPath);
+      return;
+    }
+    // QFileSystemWatcher::addPath fails quietly for a path that doesn't exist.
+    watchFile();
+    std::string dir = m_watchedPath.contains('/') ? m_watchedPath : "./" + m_watchedPath;
+    dir.resize(dir.rfind('/'));
+    const int wd = dir.empty() ? -1 : ::inotify_add_watch(m_inotifyFd, dir.c_str(), kDirMask);
+    m_dirWd = wd >= 0 && wd != m_fileWd ? wd : -1;
+    m_watchId = FdWatch::watch(m_inotifyFd, POLLIN, [this](short) { onWatchEvents(); });
+  }
+
+  void FileView::watchFile() {
+    struct stat st{};
+    if (::stat(m_watchedPath.c_str(), &st) != 0) {
+      return;
+    }
+    // QFileSystemWatcher keeps a directory path in directories(), never in files().
+    const int wd = ::inotify_add_watch(m_inotifyFd, m_watchedPath.c_str(), S_ISDIR(st.st_mode) ? kDirMask : kFileMask);
+    m_fileWd = wd >= 0 && !S_ISDIR(st.st_mode) ? wd : -1;
+  }
+
+  void FileView::onWatchEvents() {
+    // Qt reads everything available and merges the masks of events for the same watch.
+    alignas(inotify_event) char buffer[4096];
+    std::vector<std::pair<int, std::uint32_t>> merged;  // in first-seen order
+    while (true) {
+      const ssize_t n = ::read(m_inotifyFd, buffer, sizeof(buffer));
+      if (n <= 0) {
+        break;
+      }
+      for (ssize_t at = 0; at < n;) {
+        const auto* event = reinterpret_cast<const inotify_event*>(buffer + at);
+        auto it = std::ranges::find(merged, event->wd, &std::pair<int, std::uint32_t>::first);
+        if (it != merged.end()) {
+          it->second |= event->mask;
+        } else {
+          merged.emplace_back(event->wd, event->mask);
+        }
+        at += static_cast<ssize_t>(sizeof(inotify_event) + event->len);
+      }
+    }
+    const std::uint64_t generation = m_watchGeneration;
+    const std::weak_ptr<bool> alive = m_alive;
+    for (const auto& [wd, mask] : merged) {
+      // A fileChanged handler may reload (a new watcher) or destroy this view.
+      if (alive.expired() || generation != m_watchGeneration) {
+        return;
+      }
+      const bool removed = (mask & kRemoved) != 0;
+      if (wd >= 0 && wd == m_fileWd) {
+        if (removed) {
+          ::inotify_rm_watch(m_inotifyFd, wd);
+          m_fileWd = -1;
+        }
+        // onWatchedFileChanged: watch the path again (a replaced file), then report.
+        if (m_fileWd < 0) {
+          watchFile();
+        }
+        fileChanged.emit();
+      } else if (wd >= 0 && wd == m_dirWd) {
+        if (removed) {
+          ::inotify_rm_watch(m_inotifyFd, wd);
+          m_dirWd = -1;
+        }
+        // onWatchedDirectoryChanged: the file was just created.
+        if (m_fileWd < 0) {
+          watchFile();
+          if (m_fileWd >= 0) {
+            fileChanged.emit();
+          }
+        }
+      }
     }
   }
 

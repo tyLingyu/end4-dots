@@ -7,7 +7,10 @@
 
 namespace ii {
 
-  Object::~Object() { destroyOwned(); }
+  Object::~Object() {
+    destroyed.emit();
+    destroyOwned();
+  }
 
   void Object::adopt(std::unique_ptr<Object> object) {
     object->m_owner = this;

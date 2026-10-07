@@ -11,6 +11,7 @@
 #include "runtime/loader.h"
 
 #include "../check.h"
+#include "../pump.h"
 
 #include <cstdlib>
 #include <filesystem>
@@ -21,25 +22,16 @@
 
 using namespace ii;
 
-namespace {
+using ii_test::drainDeferred;
 
-  // Runs what the main loop would run between frames.
-  void drainDeferred() {
-    for (int round = 0; round < 10; ++round) {
-      auto pending = DeferredCall::takePending();
-      if (pending.empty()) {
-        return;
-      }
-      for (auto& fn : pending) {
-        fn();
-      }
-    }
-  }
+namespace {
 
   const std::filesystem::path& scratch() {
     static const std::filesystem::path dir = [] {
       auto path = std::filesystem::temp_directory_path() / ("ii-osd-test-" + std::to_string(::getpid()));
-      std::filesystem::create_directories(path);
+      // The config directory exists, as on every start but the first: Config only becomes ready
+      // if its watcher finds the directory (see "Config" in COMPAT.md's upstream bugs).
+      std::filesystem::create_directories(path / "config" / "illogical-impulse");
       ::setenv("XDG_CONFIG_HOME", (path / "config").c_str(), 1);
       ::setenv("XDG_STATE_HOME", (path / "state").c_str(), 1);
       ::setenv("XDG_CACHE_HOME", (path / "cache").c_str(), 1);
@@ -106,6 +98,12 @@ TEST("osd: Config writes exactly the config.json Quickshell writes for the defau
   expected << expectedIn.rdbuf();
   CHECK(!expected.str().empty());
   CHECK(json == expected.str());
+}
+
+TEST("osd: Config becomes ready once the watcher sees the file it wrote") {
+  auto& config = common::Config::instance();
+  // Quickshell: watchChanges -> fileChanged -> fileReloadTimer -> reload() -> onLoaded -> ready.
+  CHECK(ii_test::pumpUntil([&] { return config.ready.peek(); }));
 }
 
 TEST_MAIN()
