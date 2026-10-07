@@ -25,7 +25,6 @@ gui-libs/xdg-desktop-portal-hyprland
 gui-apps/hyprshot
 gui-libs/hyprcursor
 gui-apps/wf-recorder
-gui-apps/wtype
 gui-apps/fuzzel
 gui-apps/wlogout
 dev-cpp/sdbus-c++

@@ -18,7 +18,6 @@ TabButton {
 
     property real baseSize: 56
     property real baseHighlightHeight: 32
-    property real highlightCollapsedTopMargin: 8
     padding: 0
 
     // The navigation item’s target area always spans the full width of the

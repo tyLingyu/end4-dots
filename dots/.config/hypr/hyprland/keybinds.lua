@@ -22,7 +22,6 @@ hl.bind("SUPER_R", hl.dsp.global("quickshell:workspaceNumber"),
     { ignore_mods = true, transparent = true, release = true })
 hl.bind("SUPER + Tab", hl.dsp.global("quickshell:overviewWorkspacesToggle"), { description = "Shell: Toggle overview" })
 hl.bind("SUPER + V", hl.dsp.global("quickshell:overviewClipboardToggle"))
-hl.bind("SUPER + Period", hl.dsp.global("quickshell:overviewEmojiToggle"))
 hl.bind("SUPER + N", hl.dsp.global("quickshell:sidebarRightToggle"), { description = "Shell: Toggle right sidebar" })
 hl.bind("SUPER + Slash", hl.dsp.global("quickshell:cheatsheetToggle"), { description = "Shell: Toggle cheatsheet" })
 hl.bind("SUPER + K", hl.dsp.global("quickshell:oskToggle"), { description = "Shell: Toggle on-screen keyboard" })
@@ -57,9 +56,6 @@ hl.bind("CTRL + SUPER + R", hl.dsp.exec_cmd("killall ydotool qs quickshell; qs -
 hl.bind("SUPER + V", hl.dsp.exec_cmd(
         qsIsAlive .. " || pkill fuzzel || cliphist list | fuzzel --match-mode fzf --dmenu | cliphist decode | wl-copy"),
     { description = "Utilities: Clipboard history >> clipboard" })
-hl.bind("SUPER + Period", hl.dsp.exec_cmd(
-        qsIsAlive .. " || pkill fuzzel || " .. hyprScripts .. "/fuzzel-emoji.sh copy"),
-    { description = "Utilities: Emoji >> clipboard" })
 hl.bind("SUPER + SHIFT + S", hl.dsp.global("quickshell:regionScreenshot"), { description = "Utilities: Screen snip" })
 hl.bind("SUPER + SHIFT + S",
     hl.dsp.exec_cmd(qsIsAlive .. " || pidof slurp || hyprshot --freeze --clipboard-only --mode region --silent"))

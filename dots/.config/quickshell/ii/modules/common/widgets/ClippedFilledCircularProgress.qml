@@ -14,7 +14,6 @@ Item {
     property color colSecondary: ColorUtils.transparentize(colPrimary, 0.5) ?? "#F1D3F9"
     property real gapAngle: 360 / 18
     property bool fill: true
-    property int fillOverflow: 2
     property bool enableAnimation: true
     property int animationDuration: 800
     property var easingType: Easing.OutCubic

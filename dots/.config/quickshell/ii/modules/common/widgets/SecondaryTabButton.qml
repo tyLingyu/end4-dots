@@ -11,7 +11,6 @@ TabButton {
     property string buttonText
     property string buttonIcon
     property int rippleDuration: 1200
-    property int tabContentWidth: buttonBackground.width - buttonBackground.radius*2
 
     property color colBackground: ColorUtils.transparentize(Appearance.colors.colSurfaceContainer)
     property color colBackgroundHover: ColorUtils.transparentize(Appearance.colors.colOnSurface, root.checked ? 1 : 0.95)

@@ -184,7 +184,6 @@ packages = [
 [groups.toolkit]
 packages = [
   "upower",
-  "wtype",
   "ydotool"
 ]
 

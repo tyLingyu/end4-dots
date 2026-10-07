@@ -411,7 +411,7 @@ ButtonMouseArea {
         property alias indicatorRectangle: indicatorRect
         property alias color: indicatorRect.color
 
-        property var indexPair: AnimatedTabIndexPair {
+        AnimatedTabIndexPair {
             id: idxPair
             index: trailingIndicator.index
         }

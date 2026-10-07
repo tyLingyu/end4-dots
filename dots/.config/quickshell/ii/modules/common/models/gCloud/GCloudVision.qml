@@ -12,7 +12,6 @@ GCloudApi {
 
     readonly property string imageBase64FilePath: `${Directories.screenshotTemp}/vision_base64.txt`
     readonly property string payloadFilePath: `${Directories.screenshotTemp}/vision_payload.json`
-    property string uploadEndpoint: "https://uguu.se/upload"
 
     property bool tokenReady: GoogleCloud.tokenReady
     property bool onlineImageReady: false

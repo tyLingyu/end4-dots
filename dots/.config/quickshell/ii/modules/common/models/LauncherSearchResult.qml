@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 
 QtObject {
-    enum IconType { Material, Text, System, None }
+    enum IconType { Material, System, None }
     enum FontType { Normal, Monospace }
 
     // General stuff

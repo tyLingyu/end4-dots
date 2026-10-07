@@ -14,25 +14,6 @@ Singleton {
 
     property string query: ""
 
-    function ensurePrefix(prefix) {
-        if ([Config.options.search.prefix.action, Config.options.search.prefix.app, Config.options.search.prefix.clipboard, Config.options.search.prefix.emojis, Config.options.search.prefix.math, Config.options.search.prefix.shellCommand, Config.options.search.prefix.webSearch,].some(i => root.query.startsWith(i))) {
-            root.query = prefix + root.query.slice(1);
-        } else {
-            root.query = prefix + root.query;
-        }
-    }
-
-    // https://specifications.freedesktop.org/menu/latest/category-registry.html
-    property list<string> mainRegisteredCategories: ["AudioVideo", "Development", "Education", "Game", "Graphics", "Network", "Office", "Science", "Settings", "System", "Utility"]
-    property list<string> appCategories: DesktopEntries.applications.values.reduce((acc, entry) => {
-        for (const category of entry.categories) {
-            if (!acc.includes(category) && mainRegisteredCategories.includes(category)) {
-                acc.push(category);
-            }
-        }
-        return acc;
-    }, []).sort()
-
     // Load user action scripts from ~/.config/illogical-impulse/actions/
     // Uses FolderListModel to auto-reload when scripts are added/removed
     property var userActionScripts: {
@@ -205,23 +186,6 @@ Singleton {
                             }
                         })],
                     blurImage: shouldBlurImage
-                });
-            }).filter(Boolean);
-        } else if (root.query.startsWith(Config.options.search.prefix.emojis)) {
-            // Clipboard
-            const searchString = StringUtils.cleanPrefix(root.query, Config.options.search.prefix.emojis);
-            return Emojis.fuzzyQuery(searchString).map(entry => {
-                const emoji = entry.match(/^\s*(\S+)/)?.[1] || "";
-                return resultComp.createObject(null, {
-                    rawValue: entry,
-                    name: entry.replace(/^\s*\S+\s+/, ""),
-                    iconName: emoji,
-                    iconType: LauncherSearchResult.IconType.Text,
-                    verb: Translation.tr("Copy"),
-                    type: Translation.tr("Emoji"),
-                    execute: () => {
-                        Quickshell.clipboardText = entry.match(/^\s*(\S+)/)?.[1];
-                    }
                 });
             }).filter(Boolean);
         }

@@ -12,6 +12,5 @@ KEYWORDS="~amd64"
 
 RDEPEND="
 	sys-power/upower
-	gui-apps/wtype
 	x11-misc/ydotool
 "

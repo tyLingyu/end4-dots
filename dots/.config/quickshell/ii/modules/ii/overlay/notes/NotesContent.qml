@@ -194,7 +194,6 @@ OverlayBackground {
                         required property var modelData
                         readonly property real lineHeight: Math.min(Math.max(modelData.height, Appearance.font.pixelSize.normal + 6), root.maxCopyButtonSize)
                         readonly property real iconSizeLocal: Appearance.font.pixelSize.normal
-                        readonly property real hitPadding: 6
                         property bool justCopied: false
 
                         implicitHeight: lineHeight

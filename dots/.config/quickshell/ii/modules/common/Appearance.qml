@@ -114,8 +114,6 @@ Singleton {
         property color colLayer0Base: ColorUtils.mix(m3colors.m3background, m3colors.m3primary, Config.options.appearance.extraBackgroundTint ? 0.99 : 1)
         property color colLayer0: ColorUtils.transparentize(colLayer0Base, root.backgroundTransparency)
         property color colOnLayer0: m3colors.m3onBackground
-        property color colLayer0Hover: ColorUtils.transparentize(ColorUtils.mix(colLayer0, colOnLayer0, 0.9, root.contentTransparency))
-        property color colLayer0Active: ColorUtils.transparentize(ColorUtils.mix(colLayer0, colOnLayer0, 0.8, root.contentTransparency))
         property color colLayer0Border: ColorUtils.mix(root.m3colors.m3outlineVariant, colLayer0, 0.4)
         // Layer 1
         property color colLayer1Base: m3colors.m3surfaceContainerLow
@@ -129,9 +127,7 @@ Singleton {
         property color colLayer2: ColorUtils.solveOverlayColor(colLayer1Base, colLayer2Base, 1 - root.contentTransparency)
         property color colLayer2Hover: ColorUtils.solveOverlayColor(colLayer1Base, ColorUtils.mix(colLayer2Base, colOnLayer2, 0.90), 1 - root.contentTransparency)
         property color colLayer2Active: ColorUtils.solveOverlayColor(colLayer1Base, ColorUtils.mix(colLayer2Base, colOnLayer2, 0.80), 1 - root.contentTransparency);
-        property color colLayer2Disabled: ColorUtils.solveOverlayColor(colLayer1Base, ColorUtils.mix(colLayer2Base, m3colors.m3background, 0.8), 1 - root.contentTransparency);
         property color colOnLayer2: m3colors.m3onSurface;
-        property color colOnLayer2Disabled: ColorUtils.mix(colOnLayer2, m3colors.m3background, 0.4);
         // Layer 3
         property color colLayer3Base: m3colors.m3surfaceContainerHigh
         property color colLayer3: ColorUtils.solveOverlayColor(colLayer2Base, colLayer3Base, 1 - root.contentTransparency)
@@ -156,7 +152,6 @@ Singleton {
         // Secondary
         property color colSecondary: m3colors.m3secondary
         property color colSecondaryHover: ColorUtils.mix(m3colors.m3secondary, colLayer1Hover, 0.85)
-        property color colSecondaryActive: ColorUtils.mix(m3colors.m3secondary, colLayer1Active, 0.4)
         property color colOnSecondary: m3colors.m3onSecondary
         property color colSecondaryContainer: m3colors.m3secondaryContainer
         property color colSecondaryContainerHover: ColorUtils.mix(m3colors.m3secondaryContainer, m3colors.m3onSecondaryContainer, 0.90)
@@ -164,21 +159,15 @@ Singleton {
         property color colOnSecondaryContainer: m3colors.m3onSecondaryContainer
         // Tertiary
         property color colTertiary: m3colors.m3tertiary
-        property color colTertiaryHover: ColorUtils.mix(m3colors.m3tertiary, colLayer1Hover, 0.85)
-        property color colTertiaryActive: ColorUtils.mix(m3colors.m3tertiary, colLayer1Active, 0.4)
         property color colTertiaryContainer: m3colors.m3tertiaryContainer
         property color colTertiaryContainerHover: ColorUtils.mix(m3colors.m3tertiaryContainer, m3colors.m3onTertiaryContainer, 0.90)
         property color colTertiaryContainerActive: ColorUtils.mix(m3colors.m3tertiaryContainer, colLayer1Active, 0.54)
-        property color colOnTertiary: m3colors.m3onTertiary
         property color colOnTertiaryContainer: m3colors.m3onTertiaryContainer
         // Surface
         property color colBackgroundSurfaceContainer: ColorUtils.transparentize(m3colors.m3surfaceContainer, root.backgroundTransparency)
-        property color colSurfaceContainerLow: ColorUtils.solveOverlayColor(m3colors.m3background, m3colors.m3surfaceContainerLow, 1 - root.contentTransparency)
         property color colSurfaceContainer: ColorUtils.solveOverlayColor(m3colors.m3surfaceContainerLow, m3colors.m3surfaceContainer, 1 - root.contentTransparency)
         property color colSurfaceContainerHigh: ColorUtils.solveOverlayColor(m3colors.m3surfaceContainer, m3colors.m3surfaceContainerHigh, 1 - root.contentTransparency)
         property color colSurfaceContainerHighest: ColorUtils.solveOverlayColor(m3colors.m3surfaceContainerHigh, m3colors.m3surfaceContainerHighest, 1 - root.contentTransparency)
-        property color colSurfaceContainerHighestHover: ColorUtils.mix(m3colors.m3surfaceContainerHighest, m3colors.m3onSurface, 0.95)
-        property color colSurfaceContainerHighestActive: ColorUtils.mix(m3colors.m3surfaceContainerHighest, m3colors.m3onSurface, 0.85)
         property color colOnSurface: m3colors.m3onSurface
         property color colOnSurfaceVariant: m3colors.m3onSurfaceVariant
         // Misc
@@ -259,11 +248,9 @@ Singleton {
         readonly property list<real> emphasizedAccel: [0.3, 0, 0.8, 0.15, 1, 1]
         readonly property list<real> emphasizedDecel: [0.05, 0.7, 0.1, 1, 1, 1]
         readonly property list<real> standard: [0.2, 0, 0, 1, 1, 1]
-        readonly property list<real> standardAccel: [0.3, 0, 1, 1, 1, 1]
         readonly property list<real> standardDecel: [0, 0, 0, 1, 1, 1]
         readonly property real expressiveFastSpatialDuration: 350
         readonly property real expressiveDefaultSpatialDuration: 500
-        readonly property real expressiveSlowSpatialDuration: 650
         readonly property real expressiveEffectsDuration: 200
     }
 
@@ -378,10 +365,6 @@ Singleton {
             property list<real> bezierCurve: root.animationCurves.standardDecel
         }
 
-        property QtObject menuDecel: QtObject {
-            property int duration: 350
-            property int type: Easing.OutExpo
-        }
     }
 
     sizes: QtObject {
@@ -391,8 +374,6 @@ Singleton {
         property real barShortenScreenWidthThreshold: 1200 // Shorten if screen width is at most this value
         property real barHellaShortenScreenWidthThreshold: 1000 // Shorten even more...
         property real elevationMargin: 10
-        property real fabShadowRadius: 5
-        property real fabHoveredShadowRadius: 7
         property real hyprlandGapsOut: 5
         property real mediaControlsWidth: 440
         property real mediaControlsHeight: 160
@@ -401,7 +382,6 @@ Singleton {
         property real searchWidthCollapsed: 210
         property real searchWidth: 360
         property real sidebarWidth: 460
-        property real sidebarWidthExtended: 750
         property real baseVerticalBarWidth: 46
         property real verticalBarWidth: Config.options.bar.cornerStyle === 1 ? 
             (baseVerticalBarWidth + root.sizes.hyprlandGapsOut * 2) : baseVerticalBarWidth

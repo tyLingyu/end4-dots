@@ -2,10 +2,10 @@
 
 ## `var-types.json`
 
-ii 中全部 292 个 `property var`（`extract_vars.py` 抽取，源码基于 `e595b6ae`）对应的 C++ 类型，供 qml2cpp 生成属性声明时使用。
+ii 中全部 276 个 `property var`（`extract_vars.py` 抽取，源码基于 `e595b6ae`；之后删除死代码时去掉了已不存在的条目）对应的 C++ 类型，供 qml2cpp 生成属性声明时使用。
 
-- `structs`：推断出的 56 个结构体（字段名 → 类型）。
-- `properties`：每个属性的 `file` / `line` / `name` / `cpp_type`，以及 `kind`、`confidence`（high 274 / medium 15 / low 3）、`evidence`、`notes`。
+- `structs`：推断出的 54 个结构体（字段名 → 类型）。
+- `properties`：每个属性的 `file` / `line` / `name` / `cpp_type`，以及 `kind`、`confidence`（high 261 / medium 15）、`evidence`、`notes`。查找按 `file` + `name`，`line` 只供参考。
 
 类型由子代理逐个阅读源码与引用推断，再统一合并：同形结构合并为一个名字，同名不同形的取字段并集。
 `confidence` 不是 `high` 的条目在翻译到对应文件时需人工确认。
@@ -39,6 +39,5 @@ ii 中全部 292 个 `property var`（`extract_vars.py` 抽取，源码基于 `e
 
 ### 推断中发现的问题
 
-- `SelectionDialog`、`WeekRow` 在整个仓库中没有被使用（对应 3 条 low 置信度）。
 - `Weather.location` 初始化声明了 `lon`，但读写都用 `.long`，结构体按 `lon` 统一。
 - `Images.thumbnailSizes` 依赖对象键的插入顺序，换成 `std::map` 后需按尺寸遍历。

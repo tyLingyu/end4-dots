@@ -92,16 +92,6 @@ Singleton {
         root.ensureState();
     }
 
-    Timer {
-        id: updateHyprsunset
-        interval: 100
-        repeat: false
-        onTriggered: {
-            root.ensureState();
-            root.setGamma(root.gamma);
-        }
-    }
-
     function enableTemperature() {
         root.temperatureActive = true;
 

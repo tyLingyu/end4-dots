@@ -7,7 +7,7 @@ from materialyoucolor.quantize import QuantizeCelebi
 from materialyoucolor.score.score import Score
 from materialyoucolor.hct import Hct
 from materialyoucolor.dynamiccolor.material_dynamic_colors import MaterialDynamicColors
-from materialyoucolor.utils.color_utils import (rgba_from_argb, argb_from_rgb, argb_from_rgba)
+from materialyoucolor.utils.color_utils import (rgba_from_argb, argb_from_rgb)
 from materialyoucolor.utils.math_utils import (sanitize_degrees_double, difference_degrees, rotation_direction)
 
 parser = argparse.ArgumentParser(description='Color generation script')

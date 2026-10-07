@@ -16,7 +16,6 @@ Singleton {
         const combined = new Set([...root.availableLanguages, ...root.availableGeneratedLanguages]);
         return Array.from(combined).sort();
     }
-    property bool isScanning: scanLanguagesProcess.running
     property bool isLoading: false
     property string translationKeepSuffix: "/*keep*/"
     property string translationsDir: Quickshell.shellPath("translations")

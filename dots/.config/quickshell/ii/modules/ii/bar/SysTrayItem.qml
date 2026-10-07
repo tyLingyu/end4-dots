@@ -12,7 +12,6 @@ import qs.modules.common.functions
 MouseArea {
     id: root
     required property SystemTrayItem item
-    property bool targetMenuOpen: false
 
     signal menuOpened(qsWindow: var)
     signal menuClosed()

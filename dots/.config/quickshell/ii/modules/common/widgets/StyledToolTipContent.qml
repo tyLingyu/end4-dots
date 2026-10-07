@@ -14,8 +14,6 @@ Item {
     implicitWidth: tooltipTextObject.implicitWidth + 2 * root.horizontalPadding
     implicitHeight: tooltipTextObject.implicitHeight + 2 * root.verticalPadding
 
-    property bool isVisible: backgroundRectangle.implicitHeight > 0
-
     Rectangle {
         id: backgroundRectangle
         anchors {
