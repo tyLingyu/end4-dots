@@ -56,6 +56,8 @@ public:
   // Texture/text-generation access for ScaledRenderer views and graphics-lifecycle owners.
   [[nodiscard]] TextureManager& textureManager();
   [[nodiscard]] std::uint64_t textMetricsGeneration() const noexcept { return m_textMetricsGeneration; }
+  // ii-shell: public, so textures can be uploaded outside a surface's render (canvas pixels).
+  bool makeCurrentNoSurface();
 
 private:
   friend class ScaledRenderer;
@@ -77,7 +79,6 @@ private:
   );
   [[nodiscard]] TextMetrics measureGlyphScaled(float scale, char32_t codepoint, float fontSize);
 
-  bool makeCurrentNoSurface();
   void handleGraphicsReset(RenderGraphicsResetStatus status);
   void renderNode(
       float renderScale, const Node* node, const Mat3& parentTransform, float parentOpacity, float sw, float sh,

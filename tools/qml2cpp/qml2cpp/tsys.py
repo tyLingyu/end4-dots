@@ -293,7 +293,9 @@ class TypeSystem:
     def change_signal(self, ref: AnyType, prop: Prop) -> str:
         """What `on<Prop>Changed` connects to: the property's NOTIFY signal. Usually its own
         changed(); when Qt notifies through another property's signal (PwNodeAudio.volume ->
-        volumesChanged), that property's changed(), or a plain signal of that name."""
+        volumesChanged), that property's changed(). A NOTIFY named after no property
+        (FileView.loaded -> loadedOrAsyncChanged) is the property's own change: compat keeps
+        the value in a Property, whose changed() is that signal."""
         notify = None
         while ref is not None and not isinstance(ref, BuiltinRef):
             ref = self.view(ref).base
@@ -307,7 +309,7 @@ class TypeSystem:
         other = self.prop(ref, notify.removesuffix("Changed")) if notify.endswith("Changed") else None
         if other is not None and other.kind == "property":
             return f"{other.access}.changed()"
-        return self.signal_member(ref, notify)
+        return f"{prop.access}.changed()"
 
     def signal_member(self, ref: AnyType | None, name: str) -> str:
         """C++ member of a signal: its name, unless reserved or a property has it too (MouseArea's

@@ -15,13 +15,6 @@ namespace ii::qs {
 
   class GlobalShortcut;
 
-  // Global connection hook called by main.cpp to provide the active Wayland connection.
-  // Shortcuts created before this hook is set will register when it is set.
-  // As Quickshell revision 7511545.
-  void setWaylandConnection(WaylandConnection* connection);
-  inline void setWaylandConnection(WaylandConnection& connection) { setWaylandConnection(&connection); }
-  [[nodiscard]] WaylandConnection* waylandConnection();
-
   // Multiplexed representation of a hyprland_global_shortcut_v1 proxy.
   // Multiple GlobalShortcut instances with identical appid + name share one ManagedShortcut.
   // As Quickshell's src/wayland/hyprland/global_shortcuts/{manager,shortcut}.cpp.

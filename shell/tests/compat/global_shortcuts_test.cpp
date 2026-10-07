@@ -1,5 +1,6 @@
 #include "compat/global_shortcuts.h"
 #include "compat/hyprland.h"
+#include "compat/platform.h"
 #include "wayland/wayland_connection.h"
 
 #include "../check.h"
@@ -11,7 +12,7 @@
 using namespace ii;
 
 TEST("global_shortcuts: inert without connection and empty name handling") {
-  qs::setWaylandConnection(nullptr);
+  qs::setPlatform(nullptr, nullptr);
   auto& mgr = qs::GlobalShortcutManager::instance();
 
   // Empty name shortcut should not register or be pending
@@ -58,7 +59,7 @@ TEST("global_shortcuts: pressed and released signals and property update") {
 }
 
 TEST("global_shortcuts: dynamic name and appid change updates registration") {
-  qs::setWaylandConnection(nullptr);
+  qs::setPlatform(nullptr, nullptr);
   auto& mgr = qs::GlobalShortcutManager::instance();
 
   auto s = std::make_unique<qs::GlobalShortcut>();
@@ -82,7 +83,7 @@ TEST("global_shortcuts: dynamic name and appid change updates registration") {
 }
 
 TEST("global_shortcuts: registration, refcounting, and duplicate handling") {
-  qs::setWaylandConnection(nullptr);
+  qs::setPlatform(nullptr, nullptr);
   auto& mgr = qs::GlobalShortcutManager::instance();
 
   bool canConnect = false;
@@ -108,7 +109,7 @@ TEST("global_shortcuts: registration, refcounting, and duplicate handling") {
   CHECK(mgr.pendingCount() == 1);
 
   // Set Wayland connection hook; s1 should be registered now
-  qs::setWaylandConnection(*wayland);
+  qs::setPlatform(wayland.get(), nullptr);
   CHECK(s1->isRegistered());
   CHECK(mgr.isRegistered("iishell", "unit_test_shortcut"));
   CHECK(mgr.refcount("iishell", "unit_test_shortcut") == 1);
@@ -137,7 +138,7 @@ TEST("global_shortcuts: registration, refcounting, and duplicate handling") {
   CHECK(!mgr.isRegistered("iishell", "unit_test_renamed"));
   CHECK(mgr.activeCount() == 0);
 
-  qs::setWaylandConnection(nullptr);
+  qs::setPlatform(nullptr, nullptr);
 }
 
 TEST_MAIN()

@@ -349,10 +349,12 @@ class ComponentGen:
             self.bind_object(e)
 
     def bind_object(self, e: Emitted, skip: set[str] | None = None) -> None:
-        if e.type is None or (isinstance(e.type, BuiltinRef) and e.type.name == "Connections"):
+        if e.type is None:
             return
         aliases = {p.name for p in self.component.root.properties if p.is_alias} if e is self.objects[0] else set()
         aliases |= skip or set()
+        if isinstance(e.type, BuiltinRef) and e.type.name == "Connections":
+            aliases.add("target")  # connections() binds the target, typed for its handlers
         easing: dict[str, dom.Binding] = {}
         for b in e.obj.bindings:
             if b.name in IGNORED or b.is_signal_handler or b.is_on or b.name in aliases:
@@ -407,6 +409,8 @@ class ComponentGen:
                 self.body.append("});")
 
     def component_members(self) -> None:
+        """`Component { id: x }` objects. QML creates them with the tree, so they exist before any
+        binding is first evaluated (Brightness.monitors calls monitorComp.createObject)."""
         for child, member, path in self.pending_components:
             lines = self.factory(child.children[0], path)
             if lines is not None:
@@ -949,8 +953,8 @@ class ComponentGen:
         self.tr.used.clear()
         self.create_objects()
         self.alias_wiring()
-        self.bind_properties()
         self.component_members()
+        self.bind_properties()
         self.delegates()
         self.handlers(self.objects)
         for r in self.tr.used:
@@ -992,7 +996,9 @@ class ComponentGen:
                f"  static {self.cls}* self = nullptr;",
                "  if (self == nullptr) {",
                f"    self = static_cast<{self.cls}*>(::operator new(sizeof({self.cls})));",
+               "    CreationScope creation;  // its bindings evaluate once the tree exists",
                f"    new (self) {self.cls}();",
+               "    creation.finish();",
                "    self->complete();",
                "  }",
                "  return *self;",

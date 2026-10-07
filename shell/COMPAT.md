@@ -1,6 +1,6 @@
 # 阶段 3：运行时与 Quickshell 兼容层
 
-OSD（`modules/ii/onScreenDisplay`）及其依赖共 24 个 QML 文件，由 [`tools/qml2cpp`](../tools/qml2cpp) 生成到 `src/ii/`。这些代码现在能编译，也能无头运行（`tests/generated/osd_test.cpp`）：
+OSD（`modules/ii/onScreenDisplay`）及其依赖共 24 个 QML 文件，由 [`tools/qml2cpp`](../tools/qml2cpp) 生成到 `src/ii/`。`ii-shell` 运行的就是这份生成代码，OSD 已上屏，可与 `qs -c ii` 同时运行。无头测试（`tests/generated/osd_test.cpp`）覆盖：
 
 - 面板随 `GlobalStates.osdVolumeOpen` 加载、卸载；
 - 指示器按 URL 加载；
@@ -37,13 +37,23 @@ API 命名约定见 [`tools/qml2cpp/FILL.md`](../tools/qml2cpp/FILL.md)。行为
 | `compat/notifications` | org.freedesktop.Notifications 服务端（OSD 用不到，通知界面移植时做） |
 | IPC 的信号与属性 | `qs ipc` 的 `listen`/`prop`（ii 没用到） |
 
-## 3c：上屏
+## 已完成（3c）：上屏
 
-- **PanelWindow**：用 Noctalia 的 LayerSurface 实现，含 anchors/margins/exclusiveZone/layer/namespace/mask，`contentItem` 渲染进窗口。
-- **Quickshell.screens**：由 Wayland 输出填充。
-- **Canvas**：像素上传为纹理。
-- **main.cpp**：FdWatch 已交给主循环，`qs::setWaylandConnection()` 与 IPC 服务端已接上；还要设置 `Loader::setResolver(generatedComponent)`、创建 OnScreenDisplay，并去掉阶段 1 的演示。
-- **验收**：与 qs 的 OSD 做视觉对比，并测量内存（目标 ≤150 MB PSS）。
+| 部分 | 内容 |
+|---|---|
+| `PanelWindow`（`compat/panel_window`） | Noctalia 的 LayerSurface；anchors/margins/exclusiveZone/exclusionMode/layer/namespace/keyboardFocus/mask，下一帧前一并提交（同 Quickshell 的 polish）；可见、已 complete 且平台已设置时映射到 `screen` 的输出，否则取消映射（Quickshell 也不复用不可见的层窗口）；`contentItem` 渲染进窗口，指针事件走窗口自己的 InputDispatcher |
+| `compat/platform` | Wayland 连接与渲染器（`setPlatform`，测试里不设，窗口不映射、快捷键挂起）；`Quickshell.screens` 随 Wayland 输出增删；各窗口共用的帧请求、动画 tick 与指针路由 |
+| Canvas（`compat/canvas_textures`） | 画过的 Canvas 在下一帧前上传为纹理，销毁时释放；测试里像素留在 CPU |
+| main.cpp | `Loader::setResolver(generatedComponent)`，创建 OnScreenDisplay，去掉阶段 1 的演示 |
+| 运行时：`CreationScope` | 组件创建期间安装的绑定推迟到整棵树建好后求值，后装先求值，同 QQmlObjectCreator 的 finalize：初值能触发 `onFooChanged`（字面量不触发）。之前生成代码边建边求值，`Translation.onLanguageCodeChanged` 收不到初值，界面不翻译 |
+| 生成器 | `Component { id: x }` 随树创建，早于任何绑定（`Brightness.monitors` 求值时要调 `monitorComp.createObject`）；NOTIFY 名与属性不同名时（`FileView.loaded` → `loadedOrAsyncChanged`）用属性的 `changed()` |
+| Wayland | 不再绑定 wlr-foreign-toplevel、ext-foreign-toplevel-list、hyprland-toplevel-mapping：ii 走 Hyprland IPC，这些只带来窗口标题更新的唤醒；ext-workspace 只在有使用者时绑定（它没有 destroy 请求，绑定后丢掉的管理器会让后续服务端创建的对象 id 错位，连接以 “not a valid new object id” 断开） |
+
+**验收**（Hyprland 0.56.2，eDP-1 1.25 倍缩放，发布构建）：
+
+- 视觉：`tests/visual/compare.sh` 对比 qs 与 ii-shell 的音量 OSD，平均差 1.2/255，差值超过 32 的像素 605/36250，集中在文字边缘：Qt 的文字是子像素（LCD）抗锯齿，ii-shell 是灰度抗锯齿。
+- 内存：PSS 启动后 51 MB，OSD 打开过一次后 69 MB（目标 ≤150 MB）；同时运行的完整 `qs -c ii` 为 495 MB。
+- 空闲 CPU：30 秒 3 个 tick（约 0.1%），期间终端标题每 80 ms 变化一次（Hyprland 的 `windowtitlev2` 事件）。
 
 ## 生成器以后要补的
 
@@ -65,7 +75,7 @@ API 命名约定见 [`tools/qml2cpp/FILL.md`](../tools/qml2cpp/FILL.md)。行为
   - `urgency` 的字符串是数字而不是名字。
   - `triggerListChange` 不起作用。
   - 被丢弃的 Notif 对象从不销毁。
-- `Translation`：`isLoading` 从不为 true；翻译只在 `languageCode` 变化时加载。
+- `Translation`：`isLoading` 从不为 true。
 - `Directories`：`.face` 头像路径少了一个斜杠（`/home/u.face`）。
 - `SystemInfo`：输出里没有逗号时，解构会抛错，`windowingSystem` 保持不变。
 - `WavyLine`：`x === 0` 的分支永远不会执行。

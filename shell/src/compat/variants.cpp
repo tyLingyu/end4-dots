@@ -33,9 +33,17 @@ namespace ii::qs {
     std::vector<Object*> list;
     for (Object* item : items) {
       auto it = std::ranges::find(kept, item, &std::pair<Object*, Object*>::first);
-      Object* instance = it != kept.end() ? it->second : m_delegate(*this, item);
-      if (it == kept.end() && instance != nullptr) {
-        instance->complete();  // the delegate builds the tree; completing is the runtime's
+      Object* instance = nullptr;
+      if (it != kept.end()) {
+        instance = it->second;
+      } else {
+        // The delegate builds the tree; evaluating its bindings and completing it is the runtime's.
+        CreationScope creation;
+        instance = m_delegate(*this, item);
+        creation.finish();
+        if (instance != nullptr) {
+          instance->complete();
+        }
       }
       if (instance != nullptr) {
         next.emplace_back(item, instance);

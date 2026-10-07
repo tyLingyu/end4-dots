@@ -6,7 +6,9 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
+using ii::CreationScope;
 using ii::Property;
 using ii::Signal;
 
@@ -258,6 +260,60 @@ TEST("lifetime: assignment from a handler replaces the binding mid-evaluation") 
   CHECK(!out.hasBinding());
   source.set(3);
   CHECK_EQ(out.peek(), 42);
+}
+
+// QML: `property string a: src + "_CN"; onAChanged: ...` runs the handler for the initial value
+// (bindings are evaluated after creation, with handlers connected); a literal value does not.
+TEST("creation: a binding's initial value reaches handlers connected later in the scope") {
+  Property<std::string> src{"zh"};
+  Property<std::string> a;
+  Property<std::string> literal;
+  std::vector<std::string> seen;
+  {
+    CreationScope creation;
+    literal.set("lit");
+    a.bind([&] { return src.get() + "_CN"; });
+    CHECK(a.peek().empty());  // not evaluated while the tree is being built
+    a.onChanged([&] { seen.push_back("a=" + a.peek()); });
+    literal.onChanged([&] { seen.push_back("literal"); });
+    creation.finish();
+  }
+  CHECK(seen == std::vector<std::string>{"a=zh_CN"});
+  src.set("ja");
+  CHECK_EQ(a.peek(), "ja_CN");
+}
+
+TEST("creation: last installed is evaluated first; replaced or destroyed bindings are skipped") {
+  std::vector<int> order;
+  Property<int> first;
+  Property<int> second;
+  auto gone = std::make_unique<Property<int>>();
+  {
+    CreationScope creation;
+    first.bind([&] { order.push_back(1); return 1; });
+    gone->bind([&] { order.push_back(9); return 9; });
+    second.bind([&] { order.push_back(2); return 2; });
+    first.set(10);  // an initial property replaces the component's binding
+    gone.reset();
+  }
+  CHECK(order == std::vector<int>{2});
+  CHECK_EQ(first.peek(), 10);
+  CHECK_EQ(second.peek(), 2);
+}
+
+TEST("creation: nested scopes evaluate their own bindings when they finish") {
+  Property<int> outer;
+  Property<int> inner;
+  CreationScope outerScope;
+  outer.bind([&] { return inner.get() + 1; });
+  {
+    CreationScope innerScope;
+    inner.bind([] { return 5; });
+  }
+  CHECK_EQ(inner.peek(), 5);
+  CHECK_EQ(outer.peek(), 0);
+  outerScope.finish();
+  CHECK_EQ(outer.peek(), 6);
 }
 
 TEST_MAIN()

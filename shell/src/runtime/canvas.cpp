@@ -17,7 +17,11 @@ namespace ii {
       }
       return true;
     }
+
+    CanvasTextureSink* g_textureSink = nullptr;
   } // namespace
+
+  void setCanvasTextureSink(CanvasTextureSink* sink) { g_textureSink = sink; }
 
   // ── Context2D ──────────────────────────────────────────────────────────────
 
@@ -202,6 +206,9 @@ namespace ii {
   Canvas::Canvas() : Item(std::make_unique<ImageNode>()) {}
 
   Canvas::~Canvas() {
+    if (g_textureSink != nullptr) {
+      g_textureSink->canvasDestroyed(*this);
+    }
     if (m_surface != nullptr) {
       cairo_surface_destroy(m_surface);
     }
@@ -259,6 +266,9 @@ namespace ii {
     paint.emit(Rect{0.0, 0.0, width.peek(), height.peek()});
     cairo_surface_flush(m_surface);
     m_pixelsDirty = true;
+    if (g_textureSink != nullptr) {
+      g_textureSink->canvasPainted(*this);
+    }
     painted.emit();
   }
 
