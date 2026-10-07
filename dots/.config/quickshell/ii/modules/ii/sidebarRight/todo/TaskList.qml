@@ -27,8 +27,6 @@ Item {
         delegate: Item {
             id: todoItem
             required property var modelData
-            property bool pendingDoneToggle: false
-            property bool pendingDelete: false
             property bool enableHeightAnimation: false
 
             implicitHeight: todoItemRectangle.implicitHeight

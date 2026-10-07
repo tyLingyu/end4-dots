@@ -155,7 +155,6 @@ quickshell, home_attrs, ... }:
 
       ### illogical-impulse-toolkit
       upower #upower
-      wtype #wtype
       ydotool #ydotool
 
 

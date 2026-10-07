@@ -15,10 +15,6 @@ Singleton {
     property bool available: false
     property bool active: false
 
-    function fetchAvailability() {
-        fetchAvailabilityProc.running = true
-    }
-
     function fetchActiveState() {
         fetchActiveStateProc.running = true
     }

@@ -13,14 +13,8 @@ ContentPage {
 
     Process {
         id: randomWallProc
-        property string status: ""
         property string scriptPath: `${Directories.scriptPath}/colors/random/random_konachan_wall.sh`
         command: ["bash", "-c", FileUtils.trimFileProtocol(randomWallProc.scriptPath)]
-        stdout: SplitParser {
-            onRead: data => {
-                randomWallProc.status = data.trim();
-            }
-        }
     }
 
     component SmallLightDarkPreferenceButton: RippleButton {

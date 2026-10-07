@@ -6,8 +6,6 @@ Item {
 
     enum CornerEnum { TopLeft, TopRight, BottomLeft, BottomRight }
     property var corner: RoundCorner.CornerEnum.TopLeft
-    property alias leftVisualMargin: shape.anchors.leftMargin
-    property alias topVisualMargin: shape.anchors.topMargin
     property alias rightVisualMargin: shape.anchors.rightMargin
     property alias bottomVisualMargin: shape.anchors.bottomMargin
 

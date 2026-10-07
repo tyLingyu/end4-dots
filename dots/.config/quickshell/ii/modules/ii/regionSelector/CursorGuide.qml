@@ -6,7 +6,6 @@ import QtQuick
 Item {
     id: root
     property var action
-    property var selectionMode
 
     property string description: switch (root.action) {
     case RegionSelection.SnipAction.Copy:

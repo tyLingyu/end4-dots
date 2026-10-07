@@ -19,7 +19,6 @@ Singleton {
 
     property bool wifiEnabled: false
     property bool wifiScanning: false
-    property bool wifiConnecting: connectProc.running
     property WifiAccessPoint wifiConnectTarget
     readonly property list<WifiAccessPoint> wifiNetworks: []
     readonly property WifiAccessPoint active: wifiNetworks.find(n => n.active) ?? null
@@ -76,10 +75,6 @@ Singleton {
 
     }
 
-    function disconnectWifiNetwork(): void {
-        if (active) disconnectProc.exec(["nmcli", "connection", "down", active.ssid]);
-    }
-
     function openPublicWifiPortal() {
         Quickshell.execDetached(["xdg-open", "https://nmcheck.gnome.org/"]) // From some StackExchange thread, seems to work
     }
@@ -123,13 +118,6 @@ Singleton {
         onExited: (exitCode, exitStatus) => {
             root.wifiConnectTarget.askingPassword = (exitCode !== 0)
             root.wifiConnectTarget = null
-        }
-    }
-
-    Process {
-        id: disconnectProc
-        stdout: SplitParser {
-            onRead: getNetworks.running = true
         }
     }
 

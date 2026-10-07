@@ -55,9 +55,6 @@ Singleton {
             "urgency": notif.urgency,
         }
     }
-    function notifToString(notif) {
-        return JSON.stringify(notifToJSON(notif), null, 2);
-    }
 
     component NotifTimer: Timer {
         required property int notificationId
@@ -180,7 +177,6 @@ Singleton {
                 root.unread++;
             }
             root.notify(newNotifObject);
-            // console.log(notifToString(newNotifObject));
             notifFileView.setText(stringifyList(root.list));
         }
     }

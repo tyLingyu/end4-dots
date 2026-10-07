@@ -121,9 +121,6 @@
    "size": "ii::Size",
    "namespace_": "std::string"
   },
-  "LocaleInfo": {
-   "firstDayOfWeek": "int"
-  },
   "MprisTrack": {
    "uniqueId": "int",
    "artUrl": "std::string",
@@ -274,13 +271,6 @@
    "lat": "double",
    "lon": "double"
   },
-  "WeekDay": {
-   "date": "ii::DateTime",
-   "day": "int",
-   "month": "int",
-   "year": "int",
-   "today": "bool"
-  },
   "WifiAccessPointInfo": {
    "active": "bool",
    "strength": "int",
@@ -375,8 +365,8 @@
    "cpp_type": "LauncherSearchResult::IconType",
    "kind": "value",
    "confidence": "high",
-   "evidence": "LauncherSearchResult.qml:14 initialized from enum IconType {Material, Text, System, None}; set to IconType.* values in LauncherSearchResult constructors (services/LauncherSearch.qml) and switched on in SearchItem.qml:141",
-   "notes": "Nested enum (enum class IconType { Material, Text, System, None }); outside the spec's vocabulary list. Also read from action results in SearchItem.qml:265."
+   "evidence": "LauncherSearchResult.qml:14 initialized from enum IconType {Material, System, None}; set to IconType.* values in LauncherSearchResult constructors (services/LauncherSearch.qml) and switched on in SearchItem.qml:141",
+   "notes": "Nested enum (enum class IconType { Material, System, None }); outside the spec's vocabulary list. Also read from action results in SearchItem.qml:265."
   },
   {
    "file": "modules/common/models/LauncherSearchResult.qml",
@@ -1032,30 +1022,6 @@
    "notes": "Enum declared in RoundCorner.qml:7 -> nested enum of RoundCorner. ScreenCorners.qml:17 also uses the values as map keys."
   },
   {
-   "file": "modules/common/widgets/SelectionDialog.qml",
-   "line": 15,
-   "name": "defaultChoice",
-   "modifiers": [],
-   "cpp_type": "std::optional<std::string>",
-   "kind": "value",
-   "confidence": "low",
-   "evidence": "SelectionDialog.qml:15 declared without initialiser, `!== undefined` check and items.indexOf(defaultChoice) at line 70; no external instantiation of SelectionDialog exists",
-   "notes": "SelectionDialog is unused anywhere in the tree. items are rendered with modelData.toString() (line 88), so strings are assumed; if items were ever non-strings this would change."
-  },
-  {
-   "file": "modules/common/widgets/SelectionDialog.qml",
-   "line": 79,
-   "name": "modelData",
-   "modifiers": [
-    "required"
-   ],
-   "cpp_type": "std::string",
-   "kind": "value",
-   "confidence": "low",
-   "evidence": "SelectionDialog.qml:79 delegate of ScriptModel items, rendered with modelData.toString() and compared via indexOf with defaultChoice",
-   "notes": "SelectionDialog is unused anywhere in the tree, so item type is a guess: strings (selected(var result) also yields an item or null)."
-  },
-  {
    "file": "modules/common/widgets/SineCookie.qml",
    "line": 48,
    "name": "pointsList",
@@ -1242,30 +1208,6 @@
    "notes": "Element of ToolbarTabBar.tabButtonList; shares the TabButtonEntry struct."
   },
   {
-   "file": "modules/common/widgets/WeekRow.qml",
-   "line": 12,
-   "name": "locale",
-   "modifiers": [],
-   "cpp_type": "LocaleInfo",
-   "kind": "value",
-   "confidence": "low",
-   "evidence": "WeekRow.qml:12 declared without initialiser; only `root.locale.firstDayOfWeek` is read (line 18); WeekRow is not instantiated anywhere in the tree",
-   "notes": "Intended to be Qt.locale() (a QML Locale value type). Only firstDayOfWeek (0=Sunday .. 6=Saturday, matches DateUtils.getFirstDayOfWeek's getDay() convention, default 1) is used; replace with a real ii::Locale if the port provides one. WeekRow is unused."
-  },
-  {
-   "file": "modules/common/widgets/WeekRow.qml",
-   "line": 34,
-   "name": "model",
-   "modifiers": [
-    "required"
-   ],
-   "cpp_type": "WeekDay",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "WeekRow.qml:34 is the default delegate's `model` row; the rows are built at WeekRow.qml:23-29 as {date, day, month, year, today}",
-   "notes": "Per-row delegate model object (same shape as the Qt MonthGrid delegate props). date is a JS Date; month is 1-based. WeekRow.qml itself is unused elsewhere."
-  },
-  {
    "file": "modules/ii/background/Background.qml",
    "line": 28,
    "name": "modelData",
@@ -1428,17 +1370,6 @@
    "confidence": "high",
    "evidence": "Workspaces.qml:220 = Quickshell.iconPath(...) which returns a path/url string; used as AppIcon.source at line 235.",
    "notes": ""
-  },
-  {
-   "file": "modules/ii/bar/Workspaces.qml",
-   "line": 414,
-   "name": "indexPair",
-   "modifiers": [],
-   "cpp_type": "AnimatedTabIndexPair*",
-   "kind": "object_ref",
-   "confidence": "high",
-   "evidence": "Workspaces.qml:414-417 instantiates AnimatedTabIndexPair { index: ... } inline; idx1/idx2 read at lines 427-428; component at modules/common/models/AnimatedTabIndexPair.qml.",
-   "notes": "Owned child object (created by the property initializer, parented to the TrailingIndicator)."
   },
   {
    "file": "modules/ii/cheatsheet/Cheatsheet.qml",
@@ -2086,7 +2017,7 @@
    "cpp_type": "SearchBar::SearchPrefixType",
    "kind": "value",
    "confidence": "high",
-   "evidence": "SearchBar.qml:22-33 returns members of the enum SearchBar.SearchPrefixType (Action, App, Clipboard, Emojis, Math, ShellCommand, WebSearch, DefaultSearch)",
+   "evidence": "SearchBar.qml:22-33 returns members of the enum SearchBar.SearchPrefixType (Action, App, Clipboard, Math, ShellCommand, WebSearch, DefaultSearch)",
    "notes": "QML enum declared on SearchBar (enum SearchPrefixType); property is derived from searchingText and compared in switch statements."
   },
   {
@@ -2097,7 +2028,7 @@
    "cpp_type": "LauncherSearchResult::IconType",
    "kind": "value",
    "confidence": "high",
-   "evidence": "SearchItem.qml:21 entry?.iconType; LauncherSearchResult.qml defines `enum IconType { Material, Text, System, None }` and its iconType default is IconType.None",
+   "evidence": "SearchItem.qml:21 entry?.iconType; LauncherSearchResult.qml defines `enum IconType { Material, System, None }` and its iconType default is IconType.None",
    "notes": "If entry is null this is undefined in QML; treat as IconType::None. Compared against LauncherSearchResult.IconType.* in switch (l.141)."
   },
   {
@@ -2182,17 +2113,6 @@
    "confidence": "high",
    "evidence": "CursorGuide.qml:12-28 switches on it with RegionSelection.SnipAction.*; RegionSelection.qml:404 binds root.action.",
    "notes": "QML enum declared in RegionSelection.qml; maps to a C++ enum class nested in RegionSelection (not in the type vocabulary table)."
-  },
-  {
-   "file": "modules/ii/regionSelector/CursorGuide.qml",
-   "line": 9,
-   "name": "selectionMode",
-   "modifiers": [],
-   "cpp_type": "RegionSelection::SelectionMode",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "RegionSelection.qml:405 binds selectionMode: root.selectionMode (enum SelectionMode, RegionSelection.qml:33).",
-   "notes": "QML enum declared in RegionSelection.qml; maps to a C++ enum class nested in RegionSelection (not in the type vocabulary table). Declared in CursorGuide but never read there."
   },
   {
    "file": "modules/ii/regionSelector/OptionsToolbar.qml",
@@ -3073,7 +2993,7 @@
    "kind": "value",
    "confidence": "high",
    "evidence": "AppSearch.qml:51-54 list.map(a => ({name: Fuzzy.prepare(...), entry: a})) where list is list<DesktopEntry> (l.44); fed to Fuzzy.go(..., {key: 'name'}) and r.obj.entry read back.",
-   "notes": "FuzzyPrepared is the opaque result of Fuzzy.prepare() (fuzzysort.js:220 prepare -> new_result(target, ...)); only the original target string is meaningful to the port, rest is fuzzy-matcher internal state. Re-used by preppedIcons, Cliphist.preparedEntries (via FuzzyStringEntry) and Emojis.preparedEntries."
+   "notes": "FuzzyPrepared is the opaque result of Fuzzy.prepare() (fuzzysort.js:220 prepare -> new_result(target, ...)); only the original target string is meaningful to the port, rest is fuzzy-matcher internal state. Re-used by preppedIcons, Cliphist.preparedEntries (via FuzzyStringEntry)."
   },
   {
    "file": "services/AppSearch.qml",
@@ -3145,7 +3065,7 @@
    "kind": "value",
    "confidence": "high",
    "evidence": "Cliphist.qml:19-22 entries.map(a => ({name: Fuzzy.prepare(...), entry: a})) with entries a list<string> (l.18); fed to Fuzzy.go(..., {key:'name'}) and r.obj.entry returned (l.37-42).",
-   "notes": "FuzzyPrepared is introduced by AppSearch.preppedNames (id 235). FuzzyStringEntry is shared with Emojis.preparedEntries (id 243)."
+   "notes": "FuzzyPrepared is introduced by AppSearch.preppedNames (id 235)."
   },
   {
    "file": "services/DateTime.qml",
@@ -3157,19 +3077,6 @@
    "confidence": "high",
    "evidence": "DateTime.qml:13-20 `property var clock: SystemClock { id: clock ... }`; externally read as DateTime.clock.date/.hours/.minutes/.seconds (WeekRow.qml:28, CookieClock.qml:31-32, Hyprsunset.qml:35-36).",
    "notes": "SystemClock is a Quickshell type (import Quickshell), hence qs::SystemClock. Property owns the instance it is declared with."
-  },
-  {
-   "file": "services/Emojis.qml",
-   "line": 18,
-   "name": "preparedEntries",
-   "modifiers": [
-    "readonly"
-   ],
-   "cpp_type": "std::vector<FuzzyStringEntry>",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "Emojis.qml:18-21 list.map(a => ({name: Fuzzy.prepare(`${a}`), entry: a})); list is filled with trimmed text lines (updateEmojis l.45-54), returned entries are strings (LauncherSearch.qml:213-217 does entry.match/replace).",
-   "notes": "Re-uses FuzzyStringEntry/FuzzyPrepared introduced by Cliphist.preparedEntries (id 241) and AppSearch.preppedNames (id 235). Emojis.list itself is declared `list<var>` but only ever holds strings."
   },
   {
    "file": "services/GoogleCloud.qml",
@@ -3192,61 +3099,6 @@
    "confidence": "high",
    "evidence": "HyprlandData.qml:102 JSON.parse of `hyprctl clients -j`; fields read: address, workspace.id (l.31,36,74), monitor (Background.qml:37), at/size (RegionSelection.qml:88-89, HyprlandData.qml:76), class/title (ActiveWindow.qml:20,74), floating (RegionSelection.qml:57-61), pid (Session.qml:10). Shape confirmed against live `hyprctl clients -j` output.",
    "notes": "Only the fields the shell reads are listed (hyprctl emits more, e.g. mapped, hidden, initialClass, xwayland, fullscreen). `class` is a C++ keyword, hence class_ (JSON key stays 'class'). at/size are 2-element JSON arrays [x,y]/[w,h] mapped to ii::Point/ii::Size; monitor is the Hyprland monitor id (compared with HyprlandMonitor.id). HyprlandWorkspaceRef is shared with HyprlandMonitorInfo."
-  },
-  {
-   "file": "services/HyprlandData.qml",
-   "line": 16,
-   "name": "addresses",
-   "modifiers": [],
-   "cpp_type": "std::vector<std::string>",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "HyprlandData.qml:109 root.windowList.map(win => win.address); addresses are '0x...' hex strings; no external readers.",
-   "notes": ""
-  },
-  {
-   "file": "services/HyprlandData.qml",
-   "line": 17,
-   "name": "windowByAddress",
-   "modifiers": [],
-   "cpp_type": "std::map<std::string, HyprlandClient>",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "HyprlandData.qml:103-108 tempWinByAddress[win.address] = win; looked up with `0x${toplevel.HyprlandToplevel.address}` keys (l.29-30, 43-44).",
-   "notes": "Re-uses HyprlandClient introduced by windowList (id 245). Lookup returns undefined for unknown addresses so callers must handle a miss (e.g. via find())."
-  },
-  {
-   "file": "services/HyprlandData.qml",
-   "line": 18,
-   "name": "workspaces",
-   "modifiers": [],
-   "cpp_type": "std::vector<HyprlandWorkspaceInfo>",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "HyprlandData.qml:142-144 JSON.parse of `hyprctl workspaces -j` filtered to ids 1..100; only ws.id is read in this file; the same shape is reused for activeWorkspace (l.162, read as .monitor in ActiveWindow.qml:16). Shape confirmed against live hyprctl output.",
-   "notes": "monitor is the monitor NAME string (e.g. 'eDP-1'), monitorID the numeric id; hyprctl emits more (lastwindow, hasfullscreen, ...) which are not read by the shell."
-  },
-  {
-   "file": "services/HyprlandData.qml",
-   "line": 19,
-   "name": "workspaceIds",
-   "modifiers": [],
-   "cpp_type": "std::vector<int>",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "HyprlandData.qml:151 root.workspaces.map(ws => ws.id); no external readers.",
-   "notes": ""
-  },
-  {
-   "file": "services/HyprlandData.qml",
-   "line": 20,
-   "name": "workspaceById",
-   "modifiers": [],
-   "cpp_type": "std::map<int, HyprlandWorkspaceInfo>",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "HyprlandData.qml:145-150 tempWorkspaceById[ws.id] = ws; no external readers.",
-   "notes": "Deviation from the string-keyed map rule: keys are integer workspace ids (JS coerces them to strings), so int keys are the natural C++ choice; use std::map<std::string, ...> if strict spec compliance is wanted. Re-uses HyprlandWorkspaceInfo from id 248."
   },
   {
    "file": "services/HyprlandData.qml",
@@ -3370,41 +3222,6 @@
    "notes": ""
   },
   {
-   "file": "services/LatexRenderer.qml",
-   "line": 19,
-   "name": "renderPadding",
-   "modifiers": [
-    "readonly"
-   ],
-   "cpp_type": "int",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "LatexRenderer.qml:19 literal 4, interpolated into the MicroTeX '-padding=' argument (l.63); no external readers.",
-   "notes": ""
-  },
-  {
-   "file": "services/LatexRenderer.qml",
-   "line": 22,
-   "name": "processedExpressions",
-   "modifiers": [],
-   "cpp_type": "std::map<std::string, std::string>",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "LatexRenderer.qml:46 processedExpressions[hash] = expression (hash is Qt.md5 hex string); no readers.",
-   "notes": ""
-  },
-  {
-   "file": "services/LatexRenderer.qml",
-   "line": 23,
-   "name": "renderedImagePaths",
-   "modifiers": [],
-   "cpp_type": "std::map<std::string, std::string>",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "LatexRenderer.qml:73 renderedImagePaths[hash] = imagePath (generated QML string literals) on process exit; no readers.",
-   "notes": ""
-  },
-  {
    "file": "services/LauncherSearch.qml",
    "line": 38,
    "name": "userActionScripts",
@@ -3447,17 +3264,6 @@
    "confidence": "high",
    "evidence": "MprisController.qml:105-111 assigns {uniqueId, artUrl, title, artist, album}; read as activeTrack.uniqueId/.artUrl (l.90); no external readers.",
    "notes": "Declared without initializer (undefined until the first updateTrack() call from onActivePlayerChanged); modelled as a default-initialised struct since the only reader is guarded by an active player. uniqueId comes from MprisPlayer.uniqueId (`?? 0`); title/artist/album fall back to translated 'Unknown ...' strings."
-  },
-  {
-   "file": "services/MprisController.qml",
-   "line": 142,
-   "name": "loopState",
-   "modifiers": [],
-   "cpp_type": "qs::MprisLoopState",
-   "kind": "value",
-   "confidence": "high",
-   "evidence": "MprisController.qml:142 `this.activePlayer?.loopState ?? MprisLoopState.None` (Quickshell.Services.Mpris enum), written back via setLoopState (l.143-146).",
-   "notes": "Enum, not covered by the vocabulary table: written as qs::MprisLoopState (value, no pointer). Fall back to int if enums are not modelled. No external readers of MprisController.loopState."
   },
   {
    "file": "services/Notifications.qml",

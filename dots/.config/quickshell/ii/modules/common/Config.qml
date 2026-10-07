@@ -13,36 +13,6 @@ Singleton {
     property int readWriteDelay: 50 // milliseconds
     property bool blockWrites: false
 
-    function setNestedValue(nestedKey, value) {
-        let keys = nestedKey.split(".");
-        let obj = root.options;
-        let parents = [obj];
-
-        // Traverse and collect parent objects
-        for (let i = 0; i < keys.length - 1; ++i) {
-            if (!obj[keys[i]] || typeof obj[keys[i]] !== "object") {
-                obj[keys[i]] = {};
-            }
-            obj = obj[keys[i]];
-            parents.push(obj);
-        }
-
-        // Convert value to correct type using JSON.parse when safe
-        let convertedValue = value;
-        if (typeof value === "string") {
-            let trimmed = value.trim();
-            if (trimmed === "true" || trimmed === "false" || !isNaN(Number(trimmed))) {
-                try {
-                    convertedValue = JSON.parse(trimmed);
-                } catch (e) {
-                    convertedValue = value;
-                }
-            }
-        }
-
-        obj[keys[keys.length - 1]] = convertedValue;
-    }
-
     // Carry values of renamed options over from an existing config file.
     // The old keys aren't in the adapter anymore, so they get dropped on the next write.
     function migrateRenamedOptions(fileText) {
@@ -151,11 +121,9 @@ Singleton {
                 property string bluetooth: "kcmshell6 kcm_bluetooth"
                 property string changePassword: "kitty -1 --hold=yes fish -i -c 'passwd'"
                 property string network: "kcmshell6 kcm_networkmanagement"
-                property string manageUser: "kcmshell6 kcm_users"
                 property string networkEthernet: "kcmshell6 kcm_networkmanagement"
                 property string taskManager: "plasma-systemmonitor --page-name Processes"
                 property string terminal: "kitty -1" // This is only for shell actions
-                property string update: "kitty -1 --hold=yes fish -i -c 'pkexec pacman -Syu'"
                 property string volumeMixer: `~/.config/hypr/hyprland/scripts/launch_first_available.sh "pavucontrol-qt" "pavucontrol"`
             }
 
@@ -178,7 +146,6 @@ Singleton {
                             property string dateStyle: "rect"         // Options: "border", "rect", "bubble" , "hide"
                             property bool timeIndicators: false
                             property bool hourMarks: false
-                            property bool dateInClock: true
                             property bool constantlyRotate: true
                             property bool useSineCookie: true
                         }
@@ -288,10 +255,6 @@ Singleton {
                 property int suspend: 3
             }
 
-            property JsonObject calendar: JsonObject {
-                property string locale: "en-GB"
-            }
-
             property JsonObject cheatsheet: JsonObject {
                 // Use a nerdfont to see the icons
                 // 0: 󰖳  | 1: 󰌽 | 2: 󰘳 | 3:  | 4: 󰨡
@@ -344,10 +307,6 @@ Singleton {
 
             property JsonObject language: JsonObject {
                 property string ui: "zh_CN" // UI language. "auto" for system locale, or specific language code like "zh_CN", "en_US"
-            }
-
-            property JsonObject launcher: JsonObject {
-                property list<string> pinnedApps: [ "org.kde.dolphin", "kitty", "cmake-gui"]
             }
 
             property JsonObject light: JsonObject {
@@ -465,7 +424,6 @@ Singleton {
                     property string action: "/"
                     property string app: ">"
                     property string clipboard: ";"
-                    property string emojis: ":"
                     property string math: "="
                     property string shellCommand: "$"
                     property string webSearch: "?"
@@ -547,13 +505,6 @@ Singleton {
                 property bool secondPrecision: true
             }
 
-            property JsonObject updates: JsonObject {
-                property bool enableCheck: true
-                property int checkInterval: 120 // minutes
-                property int adviseUpdateThreshold: 75 // packages
-                property int stronglyAdviseUpdateThreshold: 200 // packages
-            }
-            
             property JsonObject wallpaperSelector: JsonObject {
                 property bool useSystemFileDialog: false
             }

@@ -165,8 +165,6 @@ Tips:
 ## illogical-impulse-toolkit
 - `upower`
   - Used in Quickshell config.
-- `wtype`
-  - Used in Hyprland `scripts/fuzzel-emoji.sh`
 - `ydotool`
   - Used in Quickshell config.
 

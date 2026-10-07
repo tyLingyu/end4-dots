@@ -15,7 +15,6 @@ Item {
     property color colSecondary: Appearance.colors.colSecondaryContainer
     property real gapAngle: 360 / 18
     property bool fill: false
-    property int fillOverflow: 2
     property bool enableAnimation: true
     property int animationDuration: 800
     property var easingType: Easing.OutCubic

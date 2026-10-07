@@ -9,7 +9,6 @@ NestableObject {
     id: root
 
     required property string key
-    property alias fetching: fetchProc.running
     property bool set
     property var value
 
@@ -25,10 +24,6 @@ NestableObject {
     function fetch() {
         fetchProc.command = fetchProc.baseCommand.concat([root.key]);
         fetchProc.running = true;
-    }
-
-    function setValue(newValue) {
-        HyprlandConfig.set(root.key, newValue)
     }
 
     function reset() {

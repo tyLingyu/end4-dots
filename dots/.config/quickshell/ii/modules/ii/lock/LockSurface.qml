@@ -15,8 +15,6 @@ import Quickshell.Services.SystemTray
 MouseArea {
     id: root
     required property LockContext context
-    property bool active: false
-    property bool showInputField: active || context.currentText.length > 0
     readonly property bool requirePasswordToPower: Config.options.lock.security.requirePasswordToPower
 
     // Force focus on entry

@@ -126,7 +126,6 @@ MouseArea {
         color: Appearance.colors.colLayer0
         radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
 
-        property int calculatedRows: Math.ceil(grid.count / grid.columns)
 
         implicitWidth: gridColumnLayout.implicitWidth
         implicitHeight: gridColumnLayout.implicitHeight

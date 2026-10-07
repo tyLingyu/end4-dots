@@ -3,17 +3,6 @@ import sys
 import cv2
 import numpy as np
 
-# Allowed scheme types
-SCHEMES = [
-    "scheme-content",
-    "scheme-expressive",
-    "scheme-fidelity",
-    "scheme-fruit-salad",
-    "scheme-monochrome",
-    "scheme-neutral",
-    "scheme-rainbow",
-    "scheme-tonal-spot"
-]
 
 def image_colorfulness(image):
     # Based on Hasler and Süsstrunk's colorfulness metric

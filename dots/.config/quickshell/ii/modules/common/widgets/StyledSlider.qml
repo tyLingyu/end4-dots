@@ -54,7 +54,6 @@ Slider {
     property bool animateWave: true
     property real waveAmplitudeMultiplier: wavy ? 0.5 : 0
     property real waveFrequency: 6
-    property real waveFps: 60
 
     leftPadding: handleMargins
     rightPadding: handleMargins

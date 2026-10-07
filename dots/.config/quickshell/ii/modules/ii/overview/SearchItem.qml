@@ -30,7 +30,6 @@ RippleButton {
             return "main"
     }
     property string itemClickActionName: entry?.verb ?? "Open"
-    property string bigText: entry?.iconType === LauncherSearchResult.IconType.Text ? entry?.iconName ?? "" : ""
     property string materialSymbol: entry.iconType === LauncherSearchResult.IconType.Material ? entry?.iconName ?? "" : ""
     property string cliphistRawString: entry?.rawValue ?? ""
     property bool blurImage: entry?.blurImage ?? false
@@ -141,8 +140,6 @@ RippleButton {
             sourceComponent: switch(root.iconType) {
                 case LauncherSearchResult.IconType.Material:
                     return materialSymbolComponent
-                case LauncherSearchResult.IconType.Text:
-                    return bigTextComponent
                 case LauncherSearchResult.IconType.System:
                     return iconImageComponent
                 case LauncherSearchResult.IconType.None:
@@ -166,15 +163,6 @@ RippleButton {
             MaterialSymbol {
                 text: root.materialSymbol
                 iconSize: 30
-                color: root.colForeground
-            }
-        }
-
-        Component {
-            id: bigTextComponent
-            StyledText {
-                text: root.bigText
-                font.pixelSize: Appearance.font.pixelSize.larger
                 color: root.colForeground
             }
         }

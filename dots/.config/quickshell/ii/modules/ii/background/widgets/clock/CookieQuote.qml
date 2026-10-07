@@ -7,7 +7,6 @@ import Qt5Compat.GraphicalEffects
 Item {
     id: root
 
-    readonly property string quoteText: Config.options.background.widgets.clock.quote.text
 
     implicitWidth: quoteBox.implicitWidth
     implicitHeight: quoteBox.implicitHeight

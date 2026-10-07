@@ -16,8 +16,6 @@ MouseArea {
     readonly property real dragDiffY: _dragDiffY
     property real startX: 0
     property real startY: 0
-    property real regionTopLeftX: Math.min(startX, startX + _dragDiffX)
-    property real regionTopLeftY: Math.min(startY, startY + _dragDiffY)
     property real regionWidth: Math.abs(_dragDiffX)
     property real regionHeight: Math.abs(_dragDiffY)
 
