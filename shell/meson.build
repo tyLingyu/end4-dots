@@ -39,6 +39,7 @@ libwebp_dep        = dependency('libwebp')
 libwebpdemux_dep   = dependency('libwebpdemux')
 libjxl_dep         = dependency('libjxl')
 libjxl_threads_dep = dependency('libjxl_threads')
+libpipewire_dep    = dependency('libpipewire-0.3')
 
 foreach h : ['stb/stb_image_resize2.h', 'stb/stb_image_write.h']
   if not cc.has_header(h)
@@ -68,6 +69,7 @@ foreach _p : [
   ['fractional-scale-v1', wayland_protos_dir / 'staging/fractional-scale/fractional-scale-v1.xml'],
   ['cursor-shape-v1', 'protocols/cursor-shape-v1.xml'],
   ['hyprland-focus-grab-v1', 'protocols/hyprland-focus-grab-v1.xml'],
+  ['hyprland-global-shortcuts-v1', 'protocols/hyprland-global-shortcuts-v1.xml'],
   ['hyprland-toplevel-mapping-v1', 'protocols/hyprland-toplevel-mapping-v1.xml'],
   ['text-input-unstable-v3', 'protocols/text-input-unstable-v3.xml'],
   ['virtual-keyboard-unstable-v1', 'protocols/virtual-keyboard-unstable-v1.xml'],
@@ -111,6 +113,7 @@ ii_sources = files(
   'src/app/main_loop.cpp',
   'src/compat/color_quantizer.cpp',
   'src/compat/file_view.cpp',
+  'src/compat/global_shortcuts.cpp',
   'src/compat/hyprland.cpp',
   'src/compat/ipc.cpp',
   'src/compat/json_value.cpp',
@@ -151,7 +154,6 @@ ii_sources = files(
   'src/render/core/image_orientation.cpp',
   'src/render/core/shader_program.cpp',
   'src/render/core/shared_texture_cache.cpp',
-  'src/render/core/stb_image_resize_impl.cpp',
   'src/render/core/thumbnail_service.cpp',
   'src/render/gl_shared_context.cpp',
   'src/render/programs/audio_spectrum_program.cpp',
@@ -233,6 +235,7 @@ ii_dependencies = [
   freetype2_dep, fontconfig_dep, cairo_dep, cairo_ft_dep,
   pango_dep, pangocairo_dep, pangoft2_dep, harfbuzz_dep, librsvg_dep,
   glib_dep, gobject_dep, libwebp_dep, libwebpdemux_dep, libjxl_dep, libjxl_threads_dep,
+  libpipewire_dep,
 ]
 ii_cpp_args = [
   '-Wall', '-Wextra', '-Wno-missing-field-initializers', '-Wpedantic', '-Wconversion', '-Wshadow',
@@ -241,12 +244,20 @@ ii_cpp_args = [
   '-DNOCTALIA_INSTALL_DATADIR="' + get_option('datadir') + '"',
 ]
 
+# stb_image_resize2 reads its coefficients through unaligned uint64_t pointers by design; UBSan's
+# alignment check would abort on it, so that one translation unit is built without it.
+ii_stb_resize = static_library('ii-stb-resize',
+  'src/render/core/stb_image_resize_impl.cpp',
+  cpp_args: ['-fno-sanitize=alignment'],
+)
+
 # Everything but main.cpp, so tests link the same code the shell runs.
 ii_core = static_library('ii-core',
   ii_sources + _protocol_sources + _protocol_headers,
   include_directories: ii_include,
   dependencies: ii_dependencies,
   cpp_args: ii_cpp_args,
+  link_with: ii_stb_resize,
 )
 ii_core_dep = declare_dependency(
   link_with: ii_core,
@@ -287,6 +298,12 @@ foreach _t : [
   ['js', 'tests/runtime/js_test.cpp'],
   ['animation', 'tests/runtime/animation_test.cpp'],
   ['diff', 'tests/diff/diff_test.cpp'],
+  ['file_view', 'tests/compat/file_view_test.cpp'],
+  ['color_quantizer', 'tests/compat/color_quantizer_test.cpp'],
+  ['global_shortcuts', 'tests/compat/global_shortcuts_test.cpp'],
+  ['ipc', 'tests/compat/ipc_test.cpp'],
+  ['hyprland', 'tests/compat/hyprland_test.cpp'],
+  ['pipewire', 'tests/compat/pipewire_test.cpp'],
 ]
   test(_t[0], executable(_t[0] + '_test', [_t[1]] + ii_exe_sources,
     dependencies: [ii_core_dep, nlohmann_dep],

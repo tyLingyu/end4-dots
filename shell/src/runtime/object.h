@@ -45,6 +45,9 @@ namespace ii {
     void complete();
     [[nodiscard]] bool isCompleted() const noexcept { return m_completed; }
     Signal<> completed;
+    // QObject::destroyed. Emitted from ~Object, when the derived parts are already gone: handlers
+    // may only compare or forget the pointer (how Quickshell's services null their references).
+    Signal<> destroyed;
 
   protected:
     virtual void componentComplete() {}

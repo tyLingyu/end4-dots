@@ -116,14 +116,22 @@ namespace ii::qs {
   private:
     void load();
     void write(const std::string& content);
+    // Quickshell's updateWatchedFiles: a QFileSystemWatcher on the file and its directory,
+    // recreated whenever the path is (re)loaded or watchChanges changes.
     void updateWatch();
+    void stopWatch();
+    void onWatchEvents();
+    void watchFile();
 
     std::string m_text;
     bool m_hasContent = false;
     std::shared_ptr<bool> m_alive = std::make_shared<bool>(true);  // expires deferred reports
-    int m_watchFd = -1;
+    int m_inotifyFd = -1;
     std::uint64_t m_watchId = 0;
-    int m_watchDescriptor = -1;
+    std::uint64_t m_watchGeneration = 0;  // bumped by stopWatch, so a handler can tell it was replaced
+    std::string m_watchedPath;
+    int m_fileWd = -1;
+    int m_dirWd = -1;
   };
 
 } // namespace ii::qs

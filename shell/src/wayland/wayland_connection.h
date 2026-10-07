@@ -43,6 +43,7 @@ struct ext_workspace_manager_v1;
 struct zwp_virtual_keyboard_manager_v1;
 struct zwp_text_input_manager_v3;
 struct hyprland_focus_grab_manager_v1;
+struct hyprland_global_shortcuts_manager_v1;
 struct hyprland_toplevel_mapping_manager_v1;
 struct zwlr_gamma_control_manager_v1;
 struct zwlr_screencopy_manager_v1;
@@ -194,6 +195,9 @@ public:
   [[nodiscard]] ext_background_effect_manager_v1* backgroundEffectManager() const noexcept;
   [[nodiscard]] wp_fractional_scale_manager_v1* fractionalScaleManager() const noexcept;
   [[nodiscard]] hyprland_focus_grab_manager_v1* hyprlandFocusGrabManager() const noexcept;
+  // ii-shell: hyprland-global-shortcuts-v1 (compat/global_shortcuts).
+  [[nodiscard]] hyprland_global_shortcuts_manager_v1* hyprlandGlobalShortcutsManager() const noexcept;
+  [[nodiscard]] bool hasHyprlandGlobalShortcuts() const noexcept;
   [[nodiscard]] FocusGrabService* focusGrabService() const noexcept;
   [[nodiscard]] TextInputService* textInputService() const noexcept { return m_textInputService; }
   [[nodiscard]] wp_viewporter* viewporter() const noexcept;
@@ -320,6 +324,7 @@ private:
   ext_background_effect_manager_v1* m_backgroundEffectManager = nullptr;
   wp_fractional_scale_manager_v1* m_fractionalScaleManager = nullptr;
   hyprland_focus_grab_manager_v1* m_hyprlandFocusGrabManager = nullptr;
+  hyprland_global_shortcuts_manager_v1* m_hyprlandGlobalShortcutsManager = nullptr;
   zwlr_gamma_control_manager_v1* m_gammaControlManager = nullptr;
   zwlr_screencopy_manager_v1* m_screencopyManager = nullptr;
   ext_image_copy_capture_manager_v1* m_imageCopyCaptureManager = nullptr;

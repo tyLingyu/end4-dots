@@ -12,6 +12,7 @@
 #include "ext-workspace-v1-client-protocol.h"
 #include "fractional-scale-v1-client-protocol.h"
 #include "hyprland-focus-grab-v1-client-protocol.h"
+#include "hyprland-global-shortcuts-v1-client-protocol.h"
 #include "hyprland-toplevel-mapping-v1-client-protocol.h"
 #include "idle-inhibit-unstable-v1-client-protocol.h"
 #include "text-input-unstable-v3-client-protocol.h"
@@ -68,6 +69,7 @@ namespace {
   constexpr std::uint32_t kExtBackgroundEffectBlurCapabilityMask = 1U;
   constexpr std::uint32_t kFractionalScaleManagerVersion = 1;
   constexpr std::uint32_t kHyprlandFocusGrabManagerVersion = 1;
+  constexpr std::uint32_t kHyprlandGlobalShortcutsManagerVersion = 1; // ii-shell: Quickshell's GlobalShortcut
   constexpr std::uint32_t kHyprlandToplevelMappingManagerVersion = 1;
   constexpr std::uint32_t kViewporterVersion = 1;
   constexpr std::uint32_t kOutputVersion = 4;
@@ -1174,6 +1176,12 @@ wp_fractional_scale_manager_v1* WaylandConnection::fractionalScaleManager() cons
 hyprland_focus_grab_manager_v1* WaylandConnection::hyprlandFocusGrabManager() const noexcept {
   return m_hyprlandFocusGrabManager;
 }
+hyprland_global_shortcuts_manager_v1* WaylandConnection::hyprlandGlobalShortcutsManager() const noexcept {
+  return m_hyprlandGlobalShortcutsManager;
+}
+bool WaylandConnection::hasHyprlandGlobalShortcuts() const noexcept {
+  return m_hyprlandGlobalShortcutsManager != nullptr;
+}
 FocusGrabService* WaylandConnection::focusGrabService() const noexcept { return m_focusGrabService.get(); }
 wp_viewporter* WaylandConnection::viewporter() const noexcept { return m_viewporter; }
 
@@ -1529,6 +1537,15 @@ void WaylandConnection::bindGlobal(
     );
     return;
   }
+  // ii-shell: hyprland-global-shortcuts-v1, for compat/global_shortcuts (Quickshell's GlobalShortcut).
+  if (interfaceName == hyprland_global_shortcuts_manager_v1_interface.name) {
+    const auto bindVersion = std::min(version, kHyprlandGlobalShortcutsManagerVersion);
+    m_hyprlandGlobalShortcutsManager = static_cast<hyprland_global_shortcuts_manager_v1*>(
+        wl_registry_bind(registry, name, &hyprland_global_shortcuts_manager_v1_interface, bindVersion)
+    );
+    return;
+  }
+
 
   if (interfaceName == hyprland_toplevel_mapping_manager_v1_interface.name) {
     const auto bindVersion = std::min(version, kHyprlandToplevelMappingManagerVersion);
@@ -1726,6 +1743,10 @@ void WaylandConnection::cleanup() {
   if (m_hyprlandFocusGrabManager != nullptr) {
     hyprland_focus_grab_manager_v1_destroy(m_hyprlandFocusGrabManager);
     m_hyprlandFocusGrabManager = nullptr;
+  }
+  if (m_hyprlandGlobalShortcutsManager != nullptr) {
+    hyprland_global_shortcuts_manager_v1_destroy(m_hyprlandGlobalShortcutsManager);
+    m_hyprlandGlobalShortcutsManager = nullptr;
   }
 
   if (m_gammaControlManager != nullptr) {
