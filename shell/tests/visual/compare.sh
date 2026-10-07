@@ -1,42 +1,57 @@
 #!/usr/bin/env bash
-# Visual check of ii-shell's demo against Qt rendering the same QML (tests/visual/osd_demo.qml).
-# Needs a running Hyprland session, grim and ImageMagick; uses a build in ../../build-release.
+# Visual check of ii-shell's volume OSD against Quickshell's (`qs -c ii`), both on screen.
+# Needs a running Hyprland session with `qs -c ii`, grim and ImageMagick. Starts
+# ../../build-release/ii-shell unless an ii-shell is already running.
 #
 #   tests/visual/compare.sh [out-dir]
 #
-# Qt renders through its default GL backend at the output's scale (QT_SCALE_FACTOR reproduces
-# 1.25x, since Qt on Hyprland otherwise renders at an integer 2x); ii-shell's window is captured
-# from screen. Only pixels opaque in Qt's image are compared (the rest shows the desktop).
+# Each shell's OSD is opened through its IPC (osdVolume trigger) and captured from screen, one
+# at a time; both use the same layer namespace and geometry. The OSD's rectangle is taken from
+# Hyprland's layer list, so the comparison includes the desktop behind its rounded corners.
 set -euo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)
 shell=$(cd "$here/../.." && pwd)
 out=${1:-$(mktemp -d)}
-scale=$(hyprctl monitors -j | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["scale"])')
-read -r ow oh < <(hyprctl monitors -j | python3 -c '
-import json,sys; m=json.load(sys.stdin)[0]; print(round(m["width"]/m["scale"]), round(m["height"]/m["scale"]))')
-w=300 h=72
-x=$(((ow - w) / 2)) y=$(((oh - h) / 2))
+mkdir -p "$out"
 
-QT_FORCE_STDERR_LOGGING=1 QT_SCALE_FACTOR=$(python3 -c "print($scale / 2)") \
-  qml6 "$here/render.qml" -- "$here/osd_demo.qml" "$out/qt.png" 2>/dev/null
+pgrep -x qs >/dev/null || { echo "qs -c ii is not running" >&2; exit 1; }
+started=
+if ! pgrep -f '/ii-shell$' >/dev/null; then
+  "$shell/build-release/ii-shell" >"$out/ii-shell.log" 2>&1 &
+  started=$!
+  sleep 2
+fi
 
-"$shell/build-release/ii-shell" >"$out/ii-shell.log" 2>&1 &
-pid=$!
-sleep 2
-grim -g "$x,$y ${w}x$h" "$out/ours.png"
-kill -INT "$pid"
-wait "$pid" || true
+# The OSD layer's logical rectangle on screen, once one is open.
+osd_geometry() {
+  hyprctl layers -j | python3 -c '
+import json, sys
+for mon in json.load(sys.stdin).values():
+    for layers in mon["levels"].values():
+        for l in layers:
+            if l["namespace"] == "quickshell:onScreenDisplay":
+                print("%d,%d %dx%d" % (l["x"], l["y"], l["w"], l["h"])); sys.exit()'
+}
+
+qs -c ii ipc call osdVolume trigger >/dev/null
+sleep 0.8
+geom=$(osd_geometry)
+grim -g "$geom" "$out/qs.png"
+sleep 2.5 # until qs's OSD has closed
+"$shell/build-release/ii-shell" ipc call osdVolume trigger >/dev/null
+sleep 0.8
+grim -g "$geom" "$out/ours.png"
+if [[ -n $started ]]; then
+  kill -INT "$started"
+  wait "$started" || true
+fi
 
 cd "$out"
-magick qt.png -alpha extract -threshold 99% mask.png
-magick qt.png -background black -alpha remove qt_rgb.png
-magick ours.png -alpha off ours_rgb.png
-magick ours_rgb.png qt_rgb.png -compose difference -composite \
-  mask.png -compose multiply -composite -colorspace gray diff.png
-n=$(magick mask.png -format '%[fx:mean*w*h]' info:)
-mean=$(magick diff.png -format '%[fx:mean*255*w*h]' info: | awk -v n="$n" '{printf "%.2f", $1/n}')
+magick qs.png ours.png -compose difference -composite -colorspace gray diff.png
+n=$(magick diff.png -format '%[fx:w*h]' info:)
+mean=$(magick diff.png -format '%[fx:mean*255]' info:)
 over=$(magick diff.png -threshold 12.5% -format '%[fx:mean*w*h]' info:)
-magick qt_rgb.png ours_rgb.png \( diff.png -auto-level \) -append compare.png
-echo "mean |diff| over the panel: $mean / 255; pixels off by more than 32: $over of $n"
-echo "side by side (Qt, ii-shell, diff): $out/compare.png"
+magick qs.png ours.png \( diff.png -auto-level \) -append compare.png
+echo "mean |diff|: $mean / 255; pixels off by more than 32: $over of $n"
+echo "side by side (qs, ii-shell, diff): $out/compare.png"

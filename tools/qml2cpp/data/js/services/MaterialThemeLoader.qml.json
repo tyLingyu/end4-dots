@@ -1,0 +1,51 @@
+{
+ "230717dbc98a": {
+  "cpp": "this->applyColors(themeFileView->text());",
+  "kind": "statements (call applyColors)",
+  "form": "body",
+  "context": "root/delayedFileRead.onTriggered",
+  "expected": "handler body, parameters ()",
+  "code": "{\n            root.applyColors(themeFileView.text())\n        }"
+ },
+ "4283cfb65822": {
+  "cpp": "[&]() -> int {\n  // Config.options?.hacks?.arbitraryRaceConditionDelay ?? 100\n  const auto* options = ::ii::common::Config::instance().options;\n  const auto* hacks = options != nullptr ? options->hacks.get() : nullptr;\n  return hacks != nullptr ? hacks->arbitraryRaceConditionDelay.get() : 100;\n}()",
+  "kind": "binding (optional chaining)",
+  "form": "expression",
+  "context": "root/delayedFileRead.interval",
+  "expected": "int",
+  "code": "Config.options?.hacks?.arbitraryRaceConditionDelay ?? 100"
+ },
+ "4a78186094a7": {
+  "cpp": "qt::resolvedUrl(filePath.get(), \"services/MaterialThemeLoader.qml\")",
+  "kind": "binding (name Qt)",
+  "form": "expression",
+  "context": "root/themeFileView.path",
+  "expected": "std::string",
+  "code": "Qt.resolvedUrl(root.filePath)"
+ },
+ "8d2a0052913d": {
+  "cpp": "const auto fileContent = themeFileView->text();\nthis->applyColors(fileContent);",
+  "kind": "statements (call applyColors)",
+  "form": "body",
+  "context": "root/themeFileView.onLoadedChanged",
+  "expected": "handler body, parameters ()",
+  "code": "{\n            const fileContent = themeFileView.text()\n            root.applyColors(fileContent)\n        }"
+ },
+ "ae157e3424dc": {
+  "cpp": "// JS 的 for-in + 动态属性赋值 Appearance.m3colors[m3Key]：按名字查 M3colors 的颜色属性。\n// colors.json 的键都有对应属性（V4 对不存在的属性赋值会抛 TypeError，这里不会发生）。\nusing M3colors = ::ii::common::Appearance::M3colors;\nstatic const std::pair<std::string_view, Property<Color> M3colors::*> kMembers[] = {\n      {\"m3background\", &::ii::common::Appearance::M3colors::m3background},\n      {\"m3error\", &::ii::common::Appearance::M3colors::m3error},\n      {\"m3errorContainer\", &::ii::common::Appearance::M3colors::m3errorContainer},\n      {\"m3inverseOnSurface\", &::ii::common::Appearance::M3colors::m3inverseOnSurface},\n      {\"m3inversePrimary\", &::ii::common::Appearance::M3colors::m3inversePrimary},\n      {\"m3inverseSurface\", &::ii::common::Appearance::M3colors::m3inverseSurface},\n      {\"m3onBackground\", &::ii::common::Appearance::M3colors::m3onBackground},\n      {\"m3onError\", &::ii::common::Appearance::M3colors::m3onError},\n      {\"m3onErrorContainer\", &::ii::common::Appearance::M3colors::m3onErrorContainer},\n      {\"m3onPrimary\", &::ii::common::Appearance::M3colors::m3onPrimary},\n      {\"m3onPrimaryContainer\", &::ii::common::Appearance::M3colors::m3onPrimaryContainer},\n      {\"m3onPrimaryFixed\", &::ii::common::Appearance::M3colors::m3onPrimaryFixed},\n      {\"m3onPrimaryFixedVariant\", &::ii::common::Appearance::M3colors::m3onPrimaryFixedVariant},\n      {\"m3onSecondary\", &::ii::common::Appearance::M3colors::m3onSecondary},\n      {\"m3onSecondaryContainer\", &::ii::common::Appearance::M3colors::m3onSecondaryContainer},\n      {\"m3onSecondaryFixed\", &::ii::common::Appearance::M3colors::m3onSecondaryFixed},\n      {\"m3onSecondaryFixedVariant\", &::ii::common::Appearance::M3colors::m3onSecondaryFixedVariant},\n      {\"m3onSuccess\", &::ii::common::Appearance::M3colors::m3onSuccess},\n      {\"m3onSuccessContainer\", &::ii::common::Appearance::M3colors::m3onSuccessContainer},\n      {\"m3onSurface\", &::ii::common::Appearance::M3colors::m3onSurface},\n      {\"m3onSurfaceVariant\", &::ii::common::Appearance::M3colors::m3onSurfaceVariant},\n      {\"m3onTertiary\", &::ii::common::Appearance::M3colors::m3onTertiary},\n      {\"m3onTertiaryContainer\", &::ii::common::Appearance::M3colors::m3onTertiaryContainer},\n      {\"m3onTertiaryFixed\", &::ii::common::Appearance::M3colors::m3onTertiaryFixed},\n      {\"m3onTertiaryFixedVariant\", &::ii::common::Appearance::M3colors::m3onTertiaryFixedVariant},\n      {\"m3outline\", &::ii::common::Appearance::M3colors::m3outline},\n      {\"m3outlineVariant\", &::ii::common::Appearance::M3colors::m3outlineVariant},\n      {\"m3primary\", &::ii::common::Appearance::M3colors::m3primary},\n      {\"m3primaryContainer\", &::ii::common::Appearance::M3colors::m3primaryContainer},\n      {\"m3primaryFixed\", &::ii::common::Appearance::M3colors::m3primaryFixed},\n      {\"m3primaryFixedDim\", &::ii::common::Appearance::M3colors::m3primaryFixedDim},\n      {\"m3scrim\", &::ii::common::Appearance::M3colors::m3scrim},\n      {\"m3secondary\", &::ii::common::Appearance::M3colors::m3secondary},\n      {\"m3secondaryContainer\", &::ii::common::Appearance::M3colors::m3secondaryContainer},\n      {\"m3secondaryFixed\", &::ii::common::Appearance::M3colors::m3secondaryFixed},\n      {\"m3secondaryFixedDim\", &::ii::common::Appearance::M3colors::m3secondaryFixedDim},\n      {\"m3shadow\", &::ii::common::Appearance::M3colors::m3shadow},\n      {\"m3success\", &::ii::common::Appearance::M3colors::m3success},\n      {\"m3successContainer\", &::ii::common::Appearance::M3colors::m3successContainer},\n      {\"m3surface\", &::ii::common::Appearance::M3colors::m3surface},\n      {\"m3surfaceBright\", &::ii::common::Appearance::M3colors::m3surfaceBright},\n      {\"m3surfaceContainer\", &::ii::common::Appearance::M3colors::m3surfaceContainer},\n      {\"m3surfaceContainerHigh\", &::ii::common::Appearance::M3colors::m3surfaceContainerHigh},\n      {\"m3surfaceContainerHighest\", &::ii::common::Appearance::M3colors::m3surfaceContainerHighest},\n      {\"m3surfaceContainerLow\", &::ii::common::Appearance::M3colors::m3surfaceContainerLow},\n      {\"m3surfaceContainerLowest\", &::ii::common::Appearance::M3colors::m3surfaceContainerLowest},\n      {\"m3surfaceDim\", &::ii::common::Appearance::M3colors::m3surfaceDim},\n      {\"m3surfaceTint\", &::ii::common::Appearance::M3colors::m3surfaceTint},\n      {\"m3surfaceVariant\", &::ii::common::Appearance::M3colors::m3surfaceVariant},\n      {\"m3tertiary\", &::ii::common::Appearance::M3colors::m3tertiary},\n      {\"m3tertiaryContainer\", &::ii::common::Appearance::M3colors::m3tertiaryContainer},\n      {\"m3tertiaryFixed\", &::ii::common::Appearance::M3colors::m3tertiaryFixed},\n      {\"m3tertiaryFixedDim\", &::ii::common::Appearance::M3colors::m3tertiaryFixedDim}\n};\nM3colors* colors = ::ii::common::Appearance::instance().m3colors.get();\nconst js::Json json = js::parse(fileContent);\nfor (const auto& [key, value] : json.items()) {\n  // key.replace(/_([a-z])/g, g => g[1].toUpperCase())\n  std::string camelCaseKey;\n  for (std::size_t i = 0; i < key.size(); ++i) {\n    if (key[i] == '_' && i + 1 < key.size() && key[i + 1] >= 'a' && key[i + 1] <= 'z') {\n      camelCaseKey += static_cast<char>(key[i + 1] - 'a' + 'A');\n      ++i;\n    } else {\n      camelCaseKey += key[i];\n    }\n  }\n  const std::string m3Key = \"m3\" + camelCaseKey;\n  for (const auto& [name, member] : kMembers) {\n    if (name == m3Key) {\n      (colors->*member).set(qmlColor(value.is_string() ? value.get<std::string>() : std::string()));\n    }\n  }\n}\ncolors->darkmode.set(qt::hslLightness(colors->m3background.get()) < 0.5);",
+  "kind": "function",
+  "form": "function",
+  "context": "root.applyColors",
+  "expected": "signature (C++ declaration) + cpp (function body statements)",
+  "code": "function applyColors(fileContent) { const json = JSON.parse(fileContent)\n        for (const key in json) {\n            if (json.hasOwnProperty(key)) {\n                // Convert snake_case to CamelCase\n                const camelCaseKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase())\n                const m3Key = `m3${camelCaseKey}`\n                Appearance.m3colors[m3Key] = json[key]\n            }\n        }\n        \n        Appearance.m3colors.darkmode = (Appearance.m3colors.m3background.hslLightness < 0.5) }",
+  "signature": "void applyColors(const std::string& fileContent)"
+ },
+ "cc2bd59a2f8e": {
+  "cpp": "// this 是 themeFileView（处理函数所在的对象）\nthemeFileView->reload();\ndelayedFileRead->start();",
+  "kind": "statements (ThisExpression)",
+  "form": "body",
+  "context": "root/themeFileView.onFileChanged",
+  "expected": "handler body, parameters ()",
+  "code": "{\n            this.reload()\n            delayedFileRead.start()\n        }"
+ }
+}

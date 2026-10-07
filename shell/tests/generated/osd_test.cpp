@@ -3,11 +3,13 @@
 // config written with Quickshell's JSON. XDG dirs point at a scratch directory, so the user's
 // config is never read or written.
 
+#include "compat/quickshell.h"
 #include "core/deferred_call.h"
 #include "ii/GlobalStates.h"
 #include "ii/components.h"
 #include "ii/modules/common/Config.h"
 #include "ii/modules/ii/onScreenDisplay/OnScreenDisplay.h"
+#include "ii/services/Brightness.h"
 #include "runtime/loader.h"
 
 #include "../check.h"
@@ -44,10 +46,19 @@ namespace {
 
 TEST("osd: the panel loads with osdVolumeOpen, the indicator by URL") {
   (void)scratch();
+  // A screen before the services exist, as when the shell starts on a session.
+  auto& quickshell = qs::Quickshell::instance();
+  auto* screen = quickshell.create<qs::ShellScreen>();
+  screen->name.set("TEST-1");
+  quickshell.screens.set({screen});
   Loader::setResolver(generatedComponent);
-  auto osd = std::make_unique<onScreenDisplay::OnScreenDisplay>();
-  osd->complete();
+  auto osd = createRoot<onScreenDisplay::OnScreenDisplay>();
   drainDeferred();
+
+  // Brightness.monitors is evaluated while Brightness is built: monitorComp must already exist.
+  auto& brightness = services::Brightness::instance();
+  CHECK(brightness.monitors.peek().size() == 1);
+  CHECK(brightness.getMonitorForScreen(screen) != nullptr);
 
   auto& states = GlobalStates::instance();
   CHECK(!states.osdVolumeOpen.peek());

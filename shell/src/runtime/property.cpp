@@ -9,11 +9,39 @@ namespace ii {
   namespace {
     constexpr Logger kLog("binding");
     thread_local Binding* t_currentBinding = nullptr;
+    thread_local CreationScope* t_creationScope = nullptr;
   } // namespace
+
+  // ── CreationScope ───────────────────────────────────────────────────────────
+
+  CreationScope::CreationScope() : m_outer(t_creationScope) { t_creationScope = this; }
+
+  CreationScope::~CreationScope() { finish(); }
+
+  void CreationScope::finish() {
+    if (!m_open) {
+      return;
+    }
+    m_open = false;
+    t_creationScope = m_outer;
+    // QQmlObjectCreator::finalize pops its binding stack: last installed, first evaluated.
+    // An evaluation may destroy pending bindings; their entries are nulled (~Binding).
+    while (!m_pending.empty()) {
+      Binding* binding = m_pending.back();
+      m_pending.pop_back();
+      if (binding != nullptr) {
+        binding->m_deferredIn = nullptr;
+        binding->evaluate();
+      }
+    }
+  }
 
   // ── Binding ─────────────────────────────────────────────────────────────────
 
   Binding::~Binding() {
+    if (m_deferredIn != nullptr) {
+      std::ranges::replace(m_deferredIn->m_pending, this, nullptr);
+    }
     clearDependencies();
     if (m_destroyed != nullptr) {
       *m_destroyed = true;
@@ -146,6 +174,11 @@ namespace ii {
 
   void PropertyBase::installBinding(std::unique_ptr<Binding> binding) {
     m_binding = std::move(binding);
+    if (CreationScope* scope = t_creationScope) {
+      m_binding->m_deferredIn = scope;
+      scope->m_pending.push_back(m_binding.get());
+      return;
+    }
     m_binding->evaluate();
   }
 

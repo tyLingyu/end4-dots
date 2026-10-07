@@ -4,16 +4,13 @@
 #include "core/process/process_fds.h"
 #include "cursor-shape-v1-client-protocol.h"
 #include "ext-background-effect-v1-client-protocol.h"
-#include "ext-foreign-toplevel-list-v1-client-protocol.h"
 #include "ext-idle-notify-v1-client-protocol.h"
 #include "ext-image-capture-source-v1-client-protocol.h"
 #include "ext-image-copy-capture-v1-client-protocol.h"
 #include "ext-session-lock-v1-client-protocol.h"
-#include "ext-workspace-v1-client-protocol.h"
 #include "fractional-scale-v1-client-protocol.h"
 #include "hyprland-focus-grab-v1-client-protocol.h"
 #include "hyprland-global-shortcuts-v1-client-protocol.h"
-#include "hyprland-toplevel-mapping-v1-client-protocol.h"
 #include "idle-inhibit-unstable-v1-client-protocol.h"
 #include "text-input-unstable-v3-client-protocol.h"
 #include "util/string_utils.h"
@@ -22,7 +19,6 @@
 #include "wayland/hyprland/focus_grab_service.h"
 #include "wayland/text_input_service.h"
 #include "wayland/virtual_keyboard_service.h"
-#include "wlr-foreign-toplevel-management-unstable-v1-client-protocol.h"
 #include "wlr-gamma-control-unstable-v1-client-protocol.h"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "wlr-output-management-unstable-v1-client-protocol.h"
@@ -55,9 +51,6 @@ namespace {
   constexpr std::uint32_t kLayerShellVersion = 4;
   constexpr std::uint32_t kXdgOutputManagerVersion = 3;
   constexpr std::uint32_t kXdgWmBaseVersion = 6;
-  constexpr std::uint32_t kExtWorkspaceManagerVersion = 1;
-  constexpr std::uint32_t kWlrForeignToplevelManagerVersion = 3;
-  constexpr std::uint32_t kExtForeignToplevelListVersion = 1;
   constexpr std::uint32_t kCursorShapeManagerVersion = 1;
   constexpr std::uint32_t kXdgActivationVersion = 1;
   constexpr std::uint32_t kExtSessionLockManagerVersion = 1;
@@ -70,7 +63,6 @@ namespace {
   constexpr std::uint32_t kFractionalScaleManagerVersion = 1;
   constexpr std::uint32_t kHyprlandFocusGrabManagerVersion = 1;
   constexpr std::uint32_t kHyprlandGlobalShortcutsManagerVersion = 1; // ii-shell: Quickshell's GlobalShortcut
-  constexpr std::uint32_t kHyprlandToplevelMappingManagerVersion = 1;
   constexpr std::uint32_t kViewporterVersion = 1;
   constexpr std::uint32_t kOutputVersion = 4;
   constexpr std::uint32_t kTextInputManagerVersion = 2;
@@ -79,7 +71,6 @@ namespace {
   constexpr std::uint32_t kScreencopyManagerVersion = 3;
   constexpr std::uint32_t kImageCopyCaptureManagerVersion = 1;
   constexpr std::uint32_t kOutputImageCaptureSourceManagerVersion = 1;
-  constexpr std::uint32_t kForeignToplevelImageCaptureSourceManagerVersion = 1;
   constexpr std::uint32_t kOutputManagerVersion = 4;
   constexpr std::uint32_t kOutputManagerMinVersion = 3;
 
@@ -776,21 +767,6 @@ void WaylandConnection::setOutputLifecycleCallbacks(
   m_outputRemovedCallback = std::move(removed);
 }
 
-void WaylandConnection::setWorkspaceManagerCallback(std::function<void(ext_workspace_manager_v1*)> extWorkspace) {
-  m_extWorkspaceManagerCallback = std::move(extWorkspace);
-}
-
-void WaylandConnection::setToplevelChangeCallback(ChangeCallback callback) {
-  m_toplevelsHandler.setChangeCallback(callback);
-  m_extForeignToplevels.setChangeCallback(std::move(callback));
-}
-
-void WaylandConnection::setHyprlandToplevelMappingManagerCallback(
-    std::function<void(hyprland_toplevel_mapping_manager_v1* manager)> callback
-) {
-  m_hyprlandToplevelMappingManagerCallback = std::move(callback);
-}
-
 void WaylandConnection::setIdleCapabilitiesReadyCallback(ChangeCallback callback) {
   m_idleCapabilitiesReadyCallback = std::move(callback);
   notifyIdleCapabilitiesReady();
@@ -963,54 +939,6 @@ void WaylandConnection::setCursorShape(std::uint32_t serial, std::uint32_t shape
   m_seatHandler.setCursorShape(serial, shape);
 }
 
-std::optional<ActiveToplevel> WaylandConnection::activeToplevel() const { return m_toplevelsHandler.current(); }
-
-std::optional<ActiveToplevel> WaylandConnection::matchToplevelByTitleAndAppId(
-    std::string_view title, std::string_view appId, wl_output* preferredOutput
-) const {
-  return m_toplevelsHandler.matchByTitleAndAppId(title, appId, preferredOutput);
-}
-
-wl_output* WaylandConnection::activeToplevelOutput() const { return m_toplevelsHandler.currentOutput(); }
-
-std::vector<std::string> WaylandConnection::runningAppIds(wl_output* outputFilter) const {
-  return m_toplevelsHandler.allAppIds(outputFilter);
-}
-
-std::vector<ToplevelInfo> WaylandConnection::windowsForApp(
-    const std::string& idLower, const std::string& wmClassLower, wl_output* outputFilter
-) const {
-  return m_toplevelsHandler.windowsForApp(idLower, wmClassLower, outputFilter);
-}
-
-std::vector<ToplevelInfo> WaylandConnection::windowsWithoutAppId(wl_output* outputFilter) const {
-  return m_toplevelsHandler.windowsWithoutAppId(outputFilter);
-}
-
-std::vector<ToplevelInfo>
-WaylandConnection::extWindowsForApp(const std::string& idLower, const std::string& wmClassLower) const {
-  if (!m_extForeignToplevels.isBound()) {
-    return {};
-  }
-  return m_extForeignToplevels.windowsForApp(idLower, wmClassLower);
-}
-
-std::vector<ToplevelInfo> WaylandConnection::extWindowsWithoutAppId() const {
-  return m_extForeignToplevels.isBound() ? m_extForeignToplevels.windowsWithoutAppId() : std::vector<ToplevelInfo>{};
-}
-
-bool WaylandConnection::containsWlrToplevelHandle(zwlr_foreign_toplevel_handle_v1* handle) const {
-  return m_toplevelsHandler.containsWlrHandle(handle);
-}
-
-void WaylandConnection::activateToplevel(zwlr_foreign_toplevel_handle_v1* handle) {
-  m_toplevelsHandler.activateHandle(handle, m_seat);
-}
-
-void WaylandConnection::closeToplevel(zwlr_foreign_toplevel_handle_v1* handle) {
-  m_toplevelsHandler.closeHandle(handle);
-}
-
 bool WaylandConnection::isConnected() const noexcept { return m_display != nullptr; }
 
 bool WaylandConnection::hasRequiredGlobals() const noexcept {
@@ -1023,10 +951,6 @@ bool WaylandConnection::hasSubcompositor() const noexcept { return m_subcomposit
 bool WaylandConnection::hasXdgOutputManager() const noexcept { return m_xdgOutputManager != nullptr; }
 bool WaylandConnection::hasXdgShell() const noexcept { return m_xdgWmBase != nullptr; }
 
-bool WaylandConnection::hasExtWorkspaceManager() const noexcept { return m_hasExtWorkspaceGlobal; }
-bool WaylandConnection::hasForeignToplevelManager() const noexcept { return m_hasForeignToplevelManagerGlobal; }
-
-bool WaylandConnection::hasExtForeignToplevelList() const noexcept { return m_hasExtForeignToplevelListGlobal; }
 bool WaylandConnection::hasSessionLockManager() const noexcept { return m_sessionLockManager != nullptr; }
 bool WaylandConnection::hasIdleNotifier() const noexcept { return m_idleNotifier != nullptr; }
 bool WaylandConnection::hasIdleInhibitManager() const noexcept { return m_idleInhibitManager != nullptr; }
@@ -1049,11 +973,6 @@ ext_image_copy_capture_manager_v1* WaylandConnection::imageCopyCaptureManager() 
 
 ext_output_image_capture_source_manager_v1* WaylandConnection::outputImageCaptureSourceManager() const noexcept {
   return m_outputImageCaptureSourceManager;
-}
-
-ext_foreign_toplevel_image_capture_source_manager_v1*
-WaylandConnection::foreignToplevelImageCaptureSourceManager() const noexcept {
-  return m_foreignToplevelImageCaptureSourceManager;
 }
 
 std::string WaylandConnection::requestActivationToken(wl_surface* surface) const {
@@ -1094,18 +1013,6 @@ void WaylandConnection::activateSurface(wl_surface* surface) {
   if (!token.empty()) {
     xdg_activation_v1_activate(m_xdgActivation, token.c_str(), surface);
   }
-}
-
-void WaylandConnection::activateToplevelForAppId(std::string_view appId) {
-  if (!hasForeignToplevelManager() || appId.empty()) {
-    return;
-  }
-  const std::string idLower = StringUtils::toLower(std::string(appId));
-  const auto windows = windowsForApp(idLower, idLower);
-  if (windows.empty()) {
-    return;
-  }
-  activateToplevel(windows.back().handle);
 }
 
 wl_display* WaylandConnection::display() const noexcept { return m_display; }
@@ -1432,40 +1339,6 @@ void WaylandConnection::bindGlobal(
     return;
   }
 
-  if (interfaceName == ext_workspace_manager_v1_interface.name) {
-    m_hasExtWorkspaceGlobal = true;
-    const auto bindVersion = std::min(version, kExtWorkspaceManagerVersion);
-    auto* manager = static_cast<ext_workspace_manager_v1*>(
-        wl_registry_bind(registry, name, &ext_workspace_manager_v1_interface, bindVersion)
-    );
-    if (m_extWorkspaceManagerCallback) {
-      m_extWorkspaceManagerCallback(manager);
-    } else {
-      ext_workspace_manager_v1_destroy(manager);
-    }
-    return;
-  }
-
-  if (interfaceName == zwlr_foreign_toplevel_manager_v1_interface.name) {
-    m_hasForeignToplevelManagerGlobal = true;
-    const auto bindVersion = std::min(version, kWlrForeignToplevelManagerVersion);
-    auto* manager = static_cast<zwlr_foreign_toplevel_manager_v1*>(
-        wl_registry_bind(registry, name, &zwlr_foreign_toplevel_manager_v1_interface, bindVersion)
-    );
-    m_toplevelsHandler.bind(manager);
-    return;
-  }
-
-  if (interfaceName == ext_foreign_toplevel_list_v1_interface.name) {
-    m_hasExtForeignToplevelListGlobal = true;
-    const auto bindVersion = std::min(version, kExtForeignToplevelListVersion);
-    auto* list = static_cast<ext_foreign_toplevel_list_v1*>(
-        wl_registry_bind(registry, name, &ext_foreign_toplevel_list_v1_interface, bindVersion)
-    );
-    m_extForeignToplevels.bind(list, m_display);
-    return;
-  }
-
   if (interfaceName == wp_cursor_shape_manager_v1_interface.name) {
     const auto bindVersion = std::min(version, kCursorShapeManagerVersion);
     m_cursorShapeManager = static_cast<wp_cursor_shape_manager_v1*>(
@@ -1547,19 +1420,6 @@ void WaylandConnection::bindGlobal(
   }
 
 
-  if (interfaceName == hyprland_toplevel_mapping_manager_v1_interface.name) {
-    const auto bindVersion = std::min(version, kHyprlandToplevelMappingManagerVersion);
-    auto* manager = static_cast<hyprland_toplevel_mapping_manager_v1*>(
-        wl_registry_bind(registry, name, &hyprland_toplevel_mapping_manager_v1_interface, bindVersion)
-    );
-    if (m_hyprlandToplevelMappingManagerCallback) {
-      m_hyprlandToplevelMappingManagerCallback(manager);
-    } else {
-      hyprland_toplevel_mapping_manager_v1_destroy(manager);
-    }
-    return;
-  }
-
   if (interfaceName == zwp_text_input_manager_v3_interface.name) {
     const auto bindVersion = std::min(version, kTextInputManagerVersion);
     m_textInputManager = static_cast<zwp_text_input_manager_v3*>(
@@ -1606,14 +1466,6 @@ void WaylandConnection::bindGlobal(
     const auto bindVersion = std::min(version, kOutputImageCaptureSourceManagerVersion);
     m_outputImageCaptureSourceManager = static_cast<ext_output_image_capture_source_manager_v1*>(
         wl_registry_bind(registry, name, &ext_output_image_capture_source_manager_v1_interface, bindVersion)
-    );
-    return;
-  }
-
-  if (interfaceName == ext_foreign_toplevel_image_capture_source_manager_v1_interface.name) {
-    const auto bindVersion = std::min(version, kForeignToplevelImageCaptureSourceManagerVersion);
-    m_foreignToplevelImageCaptureSourceManager = static_cast<ext_foreign_toplevel_image_capture_source_manager_v1*>(
-        wl_registry_bind(registry, name, &ext_foreign_toplevel_image_capture_source_manager_v1_interface, bindVersion)
     );
     return;
   }
@@ -1685,8 +1537,6 @@ void WaylandConnection::cleanup() {
   if (m_virtualKeyboardService != nullptr) {
     m_virtualKeyboardService->cleanup();
   }
-  m_toplevelsHandler.cleanup();
-  m_extForeignToplevels.cleanup();
 
   for (auto& out : m_outputs) {
     if (out.xdgOutput != nullptr) {
@@ -1764,10 +1614,6 @@ void WaylandConnection::cleanup() {
   if (m_outputImageCaptureSourceManager != nullptr) {
     ext_output_image_capture_source_manager_v1_destroy(m_outputImageCaptureSourceManager);
     m_outputImageCaptureSourceManager = nullptr;
-  }
-  if (m_foreignToplevelImageCaptureSourceManager != nullptr) {
-    ext_foreign_toplevel_image_capture_source_manager_v1_destroy(m_foreignToplevelImageCaptureSourceManager);
-    m_foreignToplevelImageCaptureSourceManager = nullptr;
   }
 
   for (auto* mode : m_outputModes) {
@@ -1849,19 +1695,16 @@ void WaylandConnection::cleanup() {
   m_surfaceOutputs.clear();
   m_layerSurfaceMap.clear();
   m_hasLayerShellGlobal = false;
-  m_hasExtWorkspaceGlobal = false;
-  m_hasForeignToplevelManagerGlobal = false;
   m_outputAddedCallback = nullptr;
   m_outputRemovedCallback = nullptr;
-  m_extWorkspaceManagerCallback = nullptr;
 }
 
 void WaylandConnection::logStartupSummary() const {
   kLog.info(
-      "connected compositor={} shm={} layer-shell={} xdg-shell={} xdg-output={} ext-workspace={} "
+      "connected compositor={} shm={} layer-shell={} xdg-shell={} xdg-output={} "
       "session-lock={} fractional-scale={} gamma-control={} output-management={} outputs={}",
       m_compositor != nullptr ? "yes" : "no", m_shm != nullptr ? "yes" : "no", hasLayerShell() ? "yes" : "no",
-      hasXdgShell() ? "yes" : "no", hasXdgOutputManager() ? "yes" : "no", hasExtWorkspaceManager() ? "yes" : "no",
+      hasXdgShell() ? "yes" : "no", hasXdgOutputManager() ? "yes" : "no",
       hasSessionLockManager() ? "yes" : "no", hasFractionalScale() ? "yes" : "no", hasGammaControl() ? "yes" : "no",
       hasOutputManagement() ? "yes" : "no", m_outputs.size()
   );

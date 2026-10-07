@@ -1,6 +1,7 @@
 #include "compat/global_shortcuts.h"
 
 #include "compat/hyprland.h"
+#include "compat/platform.h"
 #include "core/log.h"
 #include "hyprland-global-shortcuts-v1-client-protocol.h"
 #include "wayland/wayland_connection.h"
@@ -31,24 +32,20 @@ namespace ii::qs {
           }
         },
     };
-
-    WaylandConnection* g_waylandConnection = nullptr;
   } // namespace
-
-  void setWaylandConnection(WaylandConnection* connection) {
-    g_waylandConnection = connection;
-    GlobalShortcutManager::instance().updateConnection(connection);
-  }
-
-  WaylandConnection* waylandConnection() {
-    return g_waylandConnection;
-  }
 
   // ── GlobalShortcutManager ──────────────────────────────────────────────────
   // as Quickshell's src/wayland/hyprland/global_shortcuts/manager.cpp
 
+  // Follows the platform's connection: shortcuts created before main.cpp connects register then.
   GlobalShortcutManager& GlobalShortcutManager::instance() {
     static GlobalShortcutManager instance;
+    static const bool following = [] {
+      platformChanged().connectForever([] { instance.updateConnection(waylandConnection()); });
+      instance.updateConnection(waylandConnection());
+      return true;
+    }();
+    (void)following;
     return instance;
   }
 

@@ -24,10 +24,12 @@ namespace ii {
       if (!m_factory) {
         return nullptr;
       }
+      CreationScope creation;
       T* object = (*m_factory)(parent);
       if (initialProperties) {
         initialProperties(*object);
       }
+      creation.finish();
       object->complete();
       return object;
     }
@@ -39,5 +41,14 @@ namespace ii {
   private:
     std::shared_ptr<Factory> m_factory;
   };
+
+  // A component instance with no parent (a root): constructed, its bindings evaluated, completed.
+  template <typename T> std::unique_ptr<T> createRoot() {
+    CreationScope creation;
+    auto object = std::make_unique<T>();
+    creation.finish();
+    object->complete();
+    return object;
+  }
 
 } // namespace ii

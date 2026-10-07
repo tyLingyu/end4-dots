@@ -18,8 +18,37 @@
 //     which is also how `Qt.binding(...)` / re-binding after an assignment is expressed.
 //  4. Storing a value equal to the current one notifies nobody.
 //  5. A binding re-entered while it evaluates is a binding loop: it is reported and cut.
+//  6. While a component is being created (a CreationScope is open), bindings are installed but
+//     first evaluated when the scope finishes, last installed first, as QQmlObjectCreator's
+//     finalize does: by then the whole tree exists and its handlers are connected, so an initial
+//     value reaches onFooChanged (literal values, assigned during creation, do not).
 
 namespace ii {
+
+  class Binding;
+
+  // The creation of one component instance: generated code opens one around constructing an
+  // object tree (Component::createObject, singletons, roots) and finishes it before complete().
+  // Scopes nest; a binding belongs to the innermost one open when it was installed.
+  class CreationScope {
+  public:
+    CreationScope();
+    ~CreationScope();
+    CreationScope(const CreationScope&) = delete;
+    CreationScope& operator=(const CreationScope&) = delete;
+
+    // Evaluates the deferred bindings and closes the scope (bindings installed from then on, by
+    // these evaluations too, evaluate at once). Idempotent; the destructor calls it.
+    void finish();
+
+  private:
+    friend class Binding;
+    friend class PropertyBase;
+
+    std::vector<Binding*> m_pending;
+    CreationScope* m_outer = nullptr;
+    bool m_open = true;
+  };
 
   class PropertyBase;
 
@@ -65,6 +94,7 @@ namespace ii {
 
   private:
     friend class PropertyBase;
+    friend class CreationScope;
 
     void addDependency(PropertyBase* property);
     void dependencyDestroyed(PropertyBase* property) noexcept;
@@ -74,6 +104,7 @@ namespace ii {
     std::vector<PropertyBase*> m_dependencies;
     bool m_evaluating = false;
     bool* m_destroyed = nullptr;
+    CreationScope* m_deferredIn = nullptr;  // waiting in this scope for its first evaluation
   };
 
   class PropertyBase {

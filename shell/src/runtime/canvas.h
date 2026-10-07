@@ -67,6 +67,18 @@ namespace ii {
     std::vector<State> m_saved;
   };
 
+  class Canvas;
+
+  // Where painted canvases become textures: the renderer, which uploads canvasPainted ones before
+  // the next frame and frees the texture of a destroyed one. Unset in tests (pixels stay on the CPU).
+  class CanvasTextureSink {
+  public:
+    virtual ~CanvasTextureSink() = default;
+    virtual void canvasPainted(Canvas& canvas) = 0;
+    virtual void canvasDestroyed(Canvas& canvas) = 0;
+  };
+  void setCanvasTextureSink(CanvasTextureSink* sink);
+
   // QML Canvas: requestPaint() schedules onPaint before the next frame; what it draws is kept as
   // device-pixel BGRA (premultiplied) for the renderer to upload.
   class Canvas : public Item {

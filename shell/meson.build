@@ -58,7 +58,7 @@ foreach _p : [
   ['xdg-shell', wayland_protos_dir / 'stable/xdg-shell/xdg-shell.xml'],
   ['viewporter', wayland_protos_dir / 'stable/viewporter/viewporter.xml'],
   ['idle-inhibit-unstable-v1', wayland_protos_dir / 'unstable/idle-inhibit/idle-inhibit-unstable-v1.xml'],
-  ['ext-workspace-v1', wayland_protos_dir / 'staging/ext-workspace/ext-workspace-v1.xml'],
+  # Not bound; ext-image-capture-source-v1's generated types reference its handle interface.
   ['ext-foreign-toplevel-list-v1', wayland_protos_dir / 'staging/ext-foreign-toplevel-list/ext-foreign-toplevel-list-v1.xml'],
   ['xdg-activation-v1', wayland_protos_dir / 'staging/xdg-activation/xdg-activation-v1.xml'],
   ['ext-session-lock-v1', wayland_protos_dir / 'staging/ext-session-lock/ext-session-lock-v1.xml'],
@@ -70,10 +70,8 @@ foreach _p : [
   ['cursor-shape-v1', 'protocols/cursor-shape-v1.xml'],
   ['hyprland-focus-grab-v1', 'protocols/hyprland-focus-grab-v1.xml'],
   ['hyprland-global-shortcuts-v1', 'protocols/hyprland-global-shortcuts-v1.xml'],
-  ['hyprland-toplevel-mapping-v1', 'protocols/hyprland-toplevel-mapping-v1.xml'],
   ['text-input-unstable-v3', 'protocols/text-input-unstable-v3.xml'],
   ['virtual-keyboard-unstable-v1', 'protocols/virtual-keyboard-unstable-v1.xml'],
-  ['wlr-foreign-toplevel-management-unstable-v1', 'protocols/wlr-foreign-toplevel-management-unstable-v1.xml'],
   ['wlr-gamma-control-unstable-v1', 'protocols/wlr-gamma-control-unstable-v1.xml'],
   ['wlr-output-management-unstable-v1', 'protocols/wlr-output-management-unstable-v1.xml'],
   ['wlr-screencopy-unstable-v1', 'protocols/wlr-screencopy-unstable-v1.xml'],
@@ -111,6 +109,7 @@ _protocol_sources += custom_target('wlr-layer-shell-unstable-v1-client-source',
 # ── ii-shell ──────────────────────────────────────────────────────────────────
 ii_sources = files(
   'src/app/main_loop.cpp',
+  'src/compat/canvas_textures.cpp',
   'src/compat/color_quantizer.cpp',
   'src/compat/file_view.cpp',
   'src/compat/global_shortcuts.cpp',
@@ -120,6 +119,7 @@ ii_sources = files(
   'src/compat/notifications.cpp',
   'src/compat/panel_window.cpp',
   'src/compat/pipewire.cpp',
+  'src/compat/platform.cpp',
   'src/compat/process.cpp',
   'src/compat/quickshell.cpp',
   'src/compat/system_clock.cpp',
@@ -211,7 +211,6 @@ ii_sources = files(
   'src/system/internal_app_metadata.cpp',
   'src/util/checksum.cpp',
   'src/util/clamp.cpp',
-  'src/wayland/ext_foreign_toplevels.cpp',
   'src/wayland/hyprland/focus_grab_service.cpp',
   'src/wayland/layer_surface.cpp',
   'src/wayland/output_probe.cpp',
@@ -223,7 +222,6 @@ ii_sources = files(
   'src/wayland/virtual_keyboard_service.cpp',
   'src/wayland/wayland_connection.cpp',
   'src/wayland/wayland_seat.cpp',
-  'src/wayland/wayland_toplevels.cpp',
 )
 
 ii_include = [
@@ -266,24 +264,26 @@ ii_core_dep = declare_dependency(
   dependencies: ii_dependencies,
 )
 
-# qml2cpp's output (tools/qml2cpp), when it has been generated: src/ii/meson.build lists it.
-if import('fs').exists('src/ii/meson.build')
-  subdir('src/ii')
-  ii_generated = static_library('ii-generated',
-    ii_generated_sources,
-    dependencies: ii_core_dep,
-    # QML scoping: a function's parameters may share names with the component's properties.
-    cpp_args: ii_cpp_args + ['-Wno-shadow'],
-  )
-  ii_generated_dep = declare_dependency(link_with: ii_generated, dependencies: ii_core_dep)
+# qml2cpp's output (tools/qml2cpp): src/ii/meson.build lists it. The shell is that code, so it is
+# required; generate it first (`python3 -m qml2cpp gen --deps ...`, see tools/qml2cpp/README.md).
+if not import('fs').exists('src/ii/meson.build')
+  error('src/ii is not generated: run tools/qml2cpp first (see shell/README.md)')
 endif
+subdir('src/ii')
+ii_generated = static_library('ii-generated',
+  ii_generated_sources,
+  dependencies: ii_core_dep,
+  # QML scoping: a function's parameters may share names with the component's properties.
+  cpp_args: ii_cpp_args + ['-Wno-shadow'],
+)
+ii_generated_dep = declare_dependency(link_with: ii_generated, dependencies: ii_core_dep)
 
 # LSan suppressions must be linked into each executable (see the file).
 ii_exe_sources = get_option('b_sanitize').contains('address') ? files('src/core/lsan_suppressions.cpp') : []
 
 executable('ii-shell',
   ['src/main.cpp'] + ii_exe_sources,
-  dependencies: ii_core_dep,
+  dependencies: ii_generated_dep,
   cpp_args: ii_cpp_args,
   install: true,
 )
@@ -311,10 +311,8 @@ foreach _t : [
   ))
 endforeach
 
-# The generated OSD, headless (only when qml2cpp's output is there).
-if is_variable('ii_generated_dep')
-  test('osd', executable('osd_test', ['tests/generated/osd_test.cpp'] + ii_exe_sources,
-    dependencies: ii_generated_dep,
-    cpp_args: ii_cpp_args + ['-Wno-shadow', '-DII_DIFF_EXPECTED_DIR="' + meson.current_source_dir() / 'tests/diff/expected' + '"'],
-  ))
-endif
+# The generated OSD, headless.
+test('osd', executable('osd_test', ['tests/generated/osd_test.cpp'] + ii_exe_sources,
+  dependencies: ii_generated_dep,
+  cpp_args: ii_cpp_args + ['-Wno-shadow', '-DII_DIFF_EXPECTED_DIR="' + meson.current_source_dir() / 'tests/diff/expected' + '"'],
+))

@@ -8,14 +8,16 @@ illogical-impulse（`dots/.config/quickshell/ii`）的原生 C++ 移植，目标
 - 阶段 2：[`tools/qml2cpp`](../tools/qml2cpp) 把 ii 的 QML 翻译成 C++。
 - 3a：OSD 及其依赖的生成代码能编译，并能无头运行。
 - 3b：系统集成——Hyprland IPC、GlobalShortcut、PipeWire、FileView 的 `watchChanges`、IPC 服务端与命令行、ColorQuantizer。
+- 3c：上屏——`ii-shell` 运行生成的 OSD（PanelWindow 走 wlr-layer-shell），可与 `qs -c ii` 同时运行。
 
-上屏（3c）还在进行中，进度见 [`COMPAT.md`](COMPAT.md)。
-`ii-shell` 目前仍在每个输出中央显示 `tests/visual/osd_demo.qml` 的 C++ 版本作为端到端检查，`ii-shell --animate` 让音量循环变化。
-它同时启动 IPC 服务端（`$XDG_RUNTIME_DIR/ii-shell/ipc.sock`）；`ii-shell ipc call <target> <function> [args...]`、`ii-shell ipc show` 的输出与退出码同 `qs ipc`。
+进度与验收数据见 [`COMPAT.md`](COMPAT.md)。
+`ii-shell` 同时启动 IPC 服务端（`$XDG_RUNTIME_DIR/ii-shell/ipc.sock`）；`ii-shell ipc call <target> <function> [args...]`、`ii-shell ipc show` 的输出与退出码同 `qs ipc`，例如 `ii-shell ipc call osdVolume trigger`。
 
 ## 构建
 
 依赖（Arch）：`meson wayland wayland-protocols mesa libxkbcommon cairo pango harfbuzz freetype2 fontconfig librsvg libwebp libjxl stb libpipewire`
+
+`src/ii/` 是 qml2cpp 的生成物，不进版本库，构建前先生成（命令见 [`tools/qml2cpp/README.md`](../tools/qml2cpp/README.md)），否则 `meson setup` 报错。
 
 ```sh
 meson setup build
@@ -38,11 +40,11 @@ meson test -C build
 | `tests/runtime/easing_test.cpp` | 缓动曲线与 Qt 的采样值比对（`tests/diff/easing_dump.qml` 经 AnimationController 导出） |
 | `tests/runtime/color_test.cpp` | QML 颜色字面量与 `Qt.hsva` / HSL 访问器（`tests/diff/color_dump.qml`） |
 | `tests/runtime/js_test.cpp` | `runtime/js.h` 的 JS 语义与 Qt 的 V4 引擎逐例比对（`tests/diff/js_dump.qml`，约 1800 例） |
-| `tests/generated/osd_test.cpp` | 生成的 OSD 无头运行。生成了 `src/ii/` 才构建。Config 写出的默认配置与 Quickshell 写出的比对（`tests/diff/qs_config_defaults.sh` 重新生成参照，需要 Wayland 会话），以及 Config 经文件监视变为 ready |
+| `tests/generated/osd_test.cpp` | 生成的 OSD 无头运行。Config 写出的默认配置与 Quickshell 写出的比对（`tests/diff/qs_config_defaults.sh` 重新生成参照，需要 Wayland 会话），以及 Config 经文件监视变为 ready |
 | `tests/compat/*_test.cpp` | 兼容层：FileView 的文件监视、Hyprland IPC（假的 Hyprland socket）、PipeWire 的音量换算与写回、IPC 服务端与命令行、GlobalShortcut（在 Hyprland 下额外向合成器注册）、ColorQuantizer（参照值取自真实 Quickshell） |
 | `tests/runtime/animation_test.cpp` | 动画、组合动画、Behavior（手动时钟） |
 | `tests/diff/` | **与 Qt 的差分测试**：`cases/*.qml` 由 Qt 运行并导出几何（`regen.py` → `expected/*.json`），`diff_test.cpp` 用运行时构建同样的场景比对 |
-| `tests/visual/compare.sh` | 视觉对比：Qt 渲染 `osd_demo.qml` 与 ii-shell 实机截图逐像素比较（需在 Hyprland 下运行） |
+| `tests/visual/compare.sh` | 视觉对比：qs 与 ii-shell 的音量 OSD 实机截图逐像素比较（需在 Hyprland 下运行 `qs -c ii`） |
 
 没有主循环的测试用 `tests/pump.h` 跑延迟调用、计时器与 FdWatch。
 `expected/` 生成于 KDE 应用字体为 Google Sans Flex 11pt、字重 500 的环境；新增或修改用例（含 `*_dump.qml`）后运行 `tests/diff/regen.py`（需要 `qml6`）。
@@ -55,9 +57,9 @@ meson test -C build
 | `src/app/main_loop.*` | 拷自 Noctalia，去掉了与其 Bar / Application 的耦合 |
 | `src/runtime` | QML 运行时：`property`（绑定）、`object` / `item`、`anchors`、`layout`（Row/ColumnLayout）、`positioner`（Row/Column）、`rectangle`、`text` / `text_layout`、`color`、`easing`、`animation`（驱动器、Number/Color/Rotation/SmoothedAnimation、Sequential/Parallel、Behavior）、`component`（Component 工厂）、`js`（生成代码用的 JS 语义） |
 | `src/compat` | Quickshell 兼容层（命名空间 `ii::qs`），见 `COMPAT.md` |
-| `src/ii` | qml2cpp 的生成物（不进版本库，见 `tools/qml2cpp`）；生成后由 meson 一并构建为 `libii-generated` |
+| `src/ii` | qml2cpp 的生成物（不进版本库，见 `tools/qml2cpp`），由 meson 构建为 `libii-generated` |
 | `src/core/lsan_suppressions.cpp` | ASan 构建下屏蔽 fontconfig / Pango 字体缓存的误报 |
-| `src/main.cpp` | ii-shell 入口（当前为阶段 1 演示，另起 IPC 服务端与 `ipc` 命令行） |
+| `src/main.cpp` | ii-shell 入口：连接 Wayland、创建 OnScreenDisplay，另起 IPC 服务端与 `ipc` 命令行 |
 | `protocols/` | 非 wayland-protocols 自带的协议 XML（拷自 Noctalia；`hyprland-global-shortcuts-v1.xml` 拷自 Quickshell，版权声明在文件内） |
 | `third_party/wuffs` | 图片解码，许可证见目录内 |
 
